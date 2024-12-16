@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+	<control namespace="DocumentManager" constructor="DocumentManagerControl" version="0.0.2" display-name-key="DocumentManagerControl" description-key="DocumentManagerControl description" control-type="virtual">
+		<external-service-usage enabled="false">
+		</external-service-usage>
+		<property name="attachmentField" display-name-key="This is an attachement field" description-key="Property_Desc_Key" of-type="Multiple" usage="bound" required="true" />
+		<resources>
+			<code path="index.ts" order="1" />
+			<css path="src/css/index.css" order="1" />
+			<css path="src/css/button.css" order="1" />
+			<platform-library name="React" version="16.14.0" />
+			<platform-library name="Fluent" version="9.46.2" />
+		</resources>
+		<feature-usage>
+			<uses-feature name="Utility" required="true" />
+			<uses-feature name="WebAPI" required="true" />
+		</feature-usage>
+	</control>
+</manifest>

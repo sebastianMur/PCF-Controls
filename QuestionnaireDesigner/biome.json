@@ -1,0 +1,16 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 5,
+    "lineWidth": 80,
+    "lineEnding": "lf"
+  },
+  "javascript": { "formatter": { "arrowParentheses": "asNeeded" } },
+  "organizeImports": { "enabled": true },
+  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "files": {
+    "include": ["QuestionnaireDesignerControl/**/*.ts*"],
+    "ignore": ["out/**/*", "obj/**/*", "node_modules/**/*"]
+  }
+}

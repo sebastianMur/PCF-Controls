@@ -1,0 +1,7 @@
+.ms-ScrollablePane {
+  background-color: green;
+}
+
+.ms-ScrollablePane--contentContainer {
+  position: static;
+}

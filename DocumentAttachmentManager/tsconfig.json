@@ -1,0 +1,16 @@
+{
+  "extends": "./node_modules/pcf-scripts/tsconfig_base.json",
+  "compilerOptions": {
+    "module": "commonjs", // Adjust as necessary
+    "esModuleInterop": true,
+    "baseUrl": "DocumentAttachmentManagerControl/src", // Set base URL to src
+    "typeRoots": ["node_modules/@types"],
+    "paths": {
+      "@/*": ["*"] // Allow usage of @ as alias for src
+    },
+    "jsx": "react" // Ensure this is set for React projects
+  },
+  "include": [
+    "./DocumentAttachmentManagerControl/src/**/*" // Ensure TypeScript includes all files in the src directory
+  ]
+}

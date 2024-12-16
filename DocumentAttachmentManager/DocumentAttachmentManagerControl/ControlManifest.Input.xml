@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+	<control namespace="DocumentAttachmentManager" constructor="DocumentAttachmentManagerControl" version="0.0.4" display-name-key="DocumentAttachmentManagerControl" description-key="DocumentAttachmentManagerControl description" control-type="virtual">
+		<external-service-usage enabled="false">
+		</external-service-usage>
+		<property name="DocumentManager" display-name-key="Document Manager" description-key="Document Manager" of-type="Multiple" usage="bound" required="true" />
+		<resources>
+			<css path="generated/styles.css" />
+			<code path="index.ts" order="1" />
+			<platform-library name="React" version="16.14.0" />
+			<platform-library name="Fluent" version="9.46.2" />
+		</resources>
+		<feature-usage>
+			<uses-feature name="Utility" required="true" />
+			<uses-feature name="WebAPI" required="true" />
+		</feature-usage>
+	</control>
+</manifest>

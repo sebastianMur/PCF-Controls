@@ -1,0 +1,13 @@
+{
+  "files": {
+    "ignore": ["node_modules"]
+  },
+  "formatter": {
+    "ignore": ["node_modules"]
+  },
+  "linter": {
+    "rules": {
+      "recommended": true
+    }
+  }
+}
