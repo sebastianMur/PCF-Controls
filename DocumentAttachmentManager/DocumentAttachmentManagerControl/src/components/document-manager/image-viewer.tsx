@@ -1,13 +1,13 @@
-import { Slider } from '../components/elements/slider';
+import { Slider } from '../../components/elements/slider';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Upload, Minimize, Download, Search, Eye } from 'lucide-react';
-import { Button } from '../components/elements/button';
+import { Button } from '../../components/elements/button';
 
 import React from 'react';
-import { useImageViewer } from '../hooks/image-viewer-hook';
-import type { Document } from './document-manager';
+import { useImageViewer } from '../../hooks/image-viewer-hook';
+import type { IDocument } from '../../types/document-manager'
 
 type ImageViewerProps = {
-  documents: Document[];
+  documents: IDocument[];
 };
 
 export const ImageViewer = ({ documents }: ImageViewerProps) => {

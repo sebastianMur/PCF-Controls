@@ -1,23 +1,23 @@
 import React from 'react';
-import { ScrollArea } from '../components/elements/scroll-area';
+import { ScrollArea } from '../elements/scroll-area';
 import { X, Download, Eye } from 'lucide-react';
-import { Button } from '../components/elements/button';
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../components/elements/dialog';
+import { Button } from '../elements/button';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
 import { ImageViewer } from './image-viewer';
-import type { Document } from './document-manager';
+import type { IDocument } from '../../types/document-manager';
 
 interface IDocumentListProps {
-  documents: Document[];
-  filteredDocuments: Document[];
+  documents: IDocument[];
+  filteredDocuments: IDocument[];
   removeDocument: (index: number) => void;
-  downloadDocument: (doc: Document) => void;
+  downloadDocument: (doc: IDocument) => void;
 }
 
 export const DocumentList = ({ documents, filteredDocuments, removeDocument, downloadDocument }: IDocumentListProps) => {
   return (
     <ScrollArea className='h-[400px] w-full rounded-md border p-4'>
       {filteredDocuments.map((doc, index) => (
-        <div key={index} className='flex items-center justify-between py-2 border-b last:border-b-0'>
+        <div key={doc.url} className='flex items-center justify-between py-2 border-b last:border-b-0'>
           <span className='truncate max-w-[40%]'>{doc.name}</span>
           <div className='flex space-x-2'>
             <Button variant='outline' size='sm' onClick={() => downloadDocument(doc)}>

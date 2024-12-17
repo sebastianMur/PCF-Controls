@@ -1,7 +1,7 @@
-import { Document } from '../components/document-manager';
+import type { IDocument } from '../types/document-manager';
 import { useEffect, useRef, useState } from 'react';
 
-export const useImageViewer = (documents: Document[]) => {
+export const useImageViewer = (documents: IDocument[]) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });

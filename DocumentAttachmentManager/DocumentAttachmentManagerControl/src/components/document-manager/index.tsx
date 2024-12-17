@@ -3,66 +3,39 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Eye } from 'lucide-react';
-import { Button } from './elements/button';
-import { Card, CardContent } from './elements/card';
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './elements/dialog';
-import { Input } from './elements/input';
+import { Button } from '../elements/button';
+import { Card, CardContent } from '../elements/card';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
+import { Input } from '../elements/input';
 import React from 'react';
 import { ImageViewer } from './image-viewer';
 import { DocumentList } from './document-list';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetNotesQuery } from '../store/api/notes-api-slice';
-import { setContext } from '../store/app/context-slice';
-import type { IInputs } from '../../generated/ManifestTypes';
-import type { AppDispatch, RootState } from '../store';
-
-export interface Document {
-  name: string;
-  type: string;
-  url: string;
-}
+import { useGetNotesQuery } from '../../store/api/notes-api-slice';
+import { setContext } from '../../store/app/context-slice';
+import type { IInputs } from '../../../generated/ManifestTypes';
+import type { AppDispatch, RootState } from '../../store';
+import type { IDocument } from '../../types/document-manager';
+import { useDocumentManager } from '@/hooks/document-manager-hook';
 
 interface IDocumentManagerProps {
   context: ComponentFramework.Context<IInputs>;
 }
 
 export default function DocumentManager({ context }: IDocumentManagerProps) {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [filter, setFilter] = useState('');
-
-  const dispatch = useDispatch<AppDispatch>();
-  const ctx = useSelector((state: RootState) => state.pcfApi.context);
-  const { data: notes, isLoading } = useGetNotesQuery();
-
-  useEffect(() => {
-    dispatch(setContext(context));
-  }, [dispatch, context]);
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newDocuments = acceptedFiles.map(file => ({
-      name: file.name,
-      type: file.type,
-      base64: file.arrayBuffer(),
-      url: URL.createObjectURL(file),
-    }));
-
-    setDocuments(prev => [...prev, ...newDocuments]);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
-  const removeDocument = (index: number) => {
-    setDocuments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const downloadDocument = (doc: Document) => {
-    const link = document.createElement('a');
-    link.href = doc.url;
-    link.download = doc.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const {
+    isLoading,
+    documents,
+    notes,
+    filter,
+    ctx,
+    isDragActive,
+    setFilter,
+    getRootProps,
+    getInputProps,
+    removeDocument,
+    downloadDocument,
+  } = useDocumentManager(context);
 
   if (!ctx || isLoading) {
     return <div>Loading...</div>;
