@@ -1,28 +1,53 @@
 import { useCallback, useState } from 'react';
 import type { IDocument } from '../types/document-manager';
-import { useGetNotesQuery } from '../store/api/notes-api-slice';
+import { useCreateNoteMutation, useDeleteNoteMutation, useGetNotesQuery } from '../store/api/notes-api-slice';
 import { useDropzone } from 'react-dropzone';
+import { fileToBase64 } from '../utils/functions';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store';
+import pluralize from 'pluralize';
 
 export const useDocumentManager = () => {
-  const [documents, setDocuments] = useState<IDocument[]>([]);
   const [filter, setFilter] = useState('');
-  const { data: notes, isLoading } = useGetNotesQuery();
+  const { data: notes, isLoading: isNoteListLoading, refetch } = useGetNotesQuery();
+  const { entityId, entityTypeName } = useSelector((state: RootState) => state.pcfApi);
+  const [createNote, { isLoading: isCreateLoading }] = useCreateNoteMutation();
+  const [deleteNote, { isLoading: isDeleteLoading }] = useDeleteNoteMutation();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newDocuments = acceptedFiles.map(file => ({
-      name: file.name,
-      type: file.type,
-      url: URL.createObjectURL(file),
-    }));
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      try {
+        const createNotePromises = acceptedFiles.map(async file => {
+          const base64String = (await fileToBase64(file)).split(',')[1];
+          const createdNote = await createNote({
+            filename: file.name,
+            documentbody: base64String,
+            mimetype: file.type,
+            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize(entityTypeName)}(${entityId})`,
+          }).unwrap();
+          console.log('🚀 ~ createdNote:', createdNote);
+          return createdNote;
+        });
 
-    setDocuments(prev => [...prev, ...newDocuments]);
-  }, []);
+        await Promise.all(createNotePromises);
+        await refetch();
+      } catch (error) {
+        console.error('Error creating notes:', error);
+      }
+    },
+    [createNote, refetch, entityId, entityTypeName],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  const removeDocument = useCallback((index: number) => {
-    setDocuments(prev => prev.filter((_, i) => i !== index));
-  }, []);
+  const removeDocument = useCallback(
+    async (annotationId: string) => {
+      const deletedNote = await deleteNote(annotationId).unwrap();
+      await refetch();
+      console.log('🚀 ~ useDocumentManager ~ deletedNote:', deletedNote);
+    },
+    [deleteNote, refetch],
+  );
 
   const downloadDocument = useCallback((doc: IDocument) => {
     const link = document.createElement('a');
@@ -34,7 +59,6 @@ export const useDocumentManager = () => {
   }, []);
 
   return {
-    documents,
     filter,
     setFilter,
     getRootProps,
@@ -43,6 +67,8 @@ export const useDocumentManager = () => {
     removeDocument,
     downloadDocument,
     notes,
-    isLoading,
+    isNoteListLoading,
+    isDeleteLoading,
+    isCreateLoading,
   };
 };

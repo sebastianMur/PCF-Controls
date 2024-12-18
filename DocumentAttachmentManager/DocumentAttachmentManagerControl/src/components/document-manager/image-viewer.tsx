@@ -1,17 +1,17 @@
 import { Slider } from '../../components/elements/slider';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Upload, Minimize, Download, Search, Eye } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Minimize } from 'lucide-react';
 import { Button } from '../../components/elements/button';
 
 import React from 'react';
 import { useImageViewer } from '../../hooks/image-viewer-hook';
-import type { IDocument } from '../../types/document-manager'
+import type { IDocument } from '../../types/document-manager';
 
 type ImageViewerProps = {
-  documents: IDocument[];
+  notes: IDocument[];
 };
 
-export const ImageViewer = ({ documents }: ImageViewerProps) => {
-  console.log('🚀 ~ ImageViewer ~ documents:', documents);
+export const ImageViewer = ({ notes }: ImageViewerProps) => {
+  console.log('🚀 ~ ImageViewer ~ documents:', notes);
   const {
     imageRef,
     scale,
@@ -26,7 +26,7 @@ export const ImageViewer = ({ documents }: ImageViewerProps) => {
     resetView,
     prevImage,
     nextImage,
-  } = useImageViewer(documents);
+  } = useImageViewer(notes);
 
   return (
     <div className='flex flex-col items-center space-y-4 h-[80vh]'>

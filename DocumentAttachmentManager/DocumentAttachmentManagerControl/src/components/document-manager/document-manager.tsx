@@ -9,15 +9,30 @@ import React from 'react';
 import { ImageViewer } from './image-viewer';
 import { DocumentList } from './document-list';
 import { useDocumentManager } from '../../hooks/document-manager-hook';
-import type { INote } from '../../types/note';
-
+import type { IDocument } from '../../types/document-manager';
+import { DocumentListSkeleton } from './document-list-skeleton';
+import { v4 as uuid } from 'uuid';
 export default function DocumentManager() {
-  const { isLoading, documents, notes, filter, isDragActive, setFilter, getRootProps, getInputProps, removeDocument, downloadDocument } =
-    useDocumentManager();
+  const {
+    isNoteListLoading,
+    isDeleteLoading,
+    isCreateLoading,
+    notes,
+    filter,
+    isDragActive,
+    removeDocument,
+    setFilter,
+    getRootProps,
+    getInputProps,
+    downloadDocument,
+  } = useDocumentManager();
 
   console.log('🚀 ~ DocumentManager ~ notes:', notes);
 
-  const filteredDocuments = documents.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
+  const filteredDocuments = notes?.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
+  const images = notes?.filter(doc => doc.type.startsWith('image/'));
+
+  const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading;
 
   return (
     <div className='w-full'>
@@ -45,7 +60,7 @@ export default function DocumentManager() {
                 className='w-48'
               />
 
-              {!isLoading && filteredDocuments.length > 0 && (
+              {images && images?.length > 0 && (
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant='outline'>
@@ -55,23 +70,29 @@ export default function DocumentManager() {
                   </DialogTrigger>
                   <DialogContent className='max-w-[90vw] w-full max-h-[90vh] p-6'>
                     <DialogTitle className='sr-only'>Image Viewer</DialogTitle>
-                    <ImageViewer documents={documents} />
+                    <ImageViewer notes={notes as IDocument[]} />
                   </DialogContent>
                 </Dialog>
               )}
             </div>
           </div>
 
-          {filteredDocuments.length > 0 ? (
+          {!isLoading && filteredDocuments && filteredDocuments?.length > 0 && (
             <DocumentList
-              documents={documents}
               filteredDocuments={filteredDocuments}
               removeDocument={removeDocument}
               downloadDocument={downloadDocument}
-              notes={notes as INote[]}
+              notes={notes as IDocument[]}
+              isLoading={isLoading}
             />
-          ) : (
-            <p className='text-center text-gray-500'>No documents uploaded yet.</p>
+          )}
+          {filteredDocuments && filteredDocuments?.length === 0 && <p className='text-center text-gray-500'>No documents uploaded yet.</p>}
+          {isLoading && (
+            <div className='space-y-4'>
+              {Array.from({ length: 5 }).map(_ => (
+                <DocumentListSkeleton key={uuid()} />
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

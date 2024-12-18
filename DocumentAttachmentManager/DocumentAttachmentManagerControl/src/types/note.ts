@@ -11,3 +11,10 @@ export interface INote {
   subject: string;
   '@odata.etag': string;
 }
+
+export interface IPostNote {
+  annotationId: string;
+  filename: string;
+  documentbody: string;
+  mimetype: string;
+}
