@@ -3,8 +3,6 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import type { RootState } from '../index';
 import type { INote } from '../../types/note';
 
-// const baseUrl = Xrm.Utility.getGlobalContext().getClientUrl() + '/api/data/v9.2';
-
 const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
   // Get the base URL from the Redux state
   const baseUrl = (api.getState() as RootState).pcfApi.baseUrl;
@@ -38,7 +36,8 @@ export const notes = createApi({
   baseQuery: dynamicBaseQuery,
   endpoints: builder => ({
     getNotes: builder.query<INote[], void>({
-      query: () => '/api/data/v9.2/annotations?=annotationid,documentbody,filename,filesize',
+      query: () =>
+        '/api/data/v9.2/annotations?$select=annotationid,notetext,filename,filesize,isdocument,mimetype,_objectid_value,subject&$filter=isdocument eq true',
     }),
 
     createBooking: builder.mutation<INote, Omit<INote, 'annotationId'>>({
@@ -52,4 +51,3 @@ export const notes = createApi({
 });
 
 export const { useGetNotesQuery } = notes;
-

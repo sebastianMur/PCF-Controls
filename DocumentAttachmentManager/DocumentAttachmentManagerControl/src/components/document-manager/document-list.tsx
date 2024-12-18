@@ -5,17 +5,20 @@ import { Button } from '../elements/button';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
 import { ImageViewer } from './image-viewer';
 import type { IDocument } from '../../types/document-manager';
+import type { INote } from '../../types/note';
 
 interface IDocumentListProps {
   documents: IDocument[];
   filteredDocuments: IDocument[];
   removeDocument: (index: number) => void;
   downloadDocument: (doc: IDocument) => void;
+  notes: INote[];
 }
 
-export const DocumentList = ({ documents, filteredDocuments, removeDocument, downloadDocument }: IDocumentListProps) => {
+export const DocumentList = ({ notes, documents, filteredDocuments, removeDocument, downloadDocument }: IDocumentListProps) => {
+  console.log('🚀 ~ DocumentList ~ notes:', notes);
   return (
-    <ScrollArea className='h-[400px] w-full rounded-md border p-4'>
+    <ScrollArea className='h-[fit-content] w-full rounded-md border p-4'>
       {filteredDocuments.map((doc, index) => (
         <div key={doc.url} className='flex items-center justify-between py-2 border-b last:border-b-0'>
           <span className='truncate max-w-[40%]'>{doc.name}</span>

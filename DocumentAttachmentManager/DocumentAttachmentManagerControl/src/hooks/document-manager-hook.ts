@@ -1,30 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { IDocument } from '../types/document-manager';
-import { useDispatch } from 'react-redux';
-import type { AppDispatch, RootState } from '../store';
 import { useGetNotesQuery } from '../store/api/notes-api-slice';
-import { useSelector } from 'react-redux';
-import { setContext } from '../store/app/context-slice';
 import { useDropzone } from 'react-dropzone';
-import type { IInputs } from '../../generated/ManifestTypes';
 
-export const useDocumentManager = (context: ComponentFramework.Context<IInputs>) => {
+export const useDocumentManager = () => {
   const [documents, setDocuments] = useState<IDocument[]>([]);
   const [filter, setFilter] = useState('');
   const { data: notes, isLoading } = useGetNotesQuery();
-
-  const dispatch = useDispatch<AppDispatch>();
-  const ctx = useSelector((state: RootState) => state.pcfApi.context);
-
-  useEffect(() => {
-    dispatch(setContext(context));
-  }, [dispatch, context]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newDocuments = acceptedFiles.map(file => ({
       name: file.name,
       type: file.type,
-      base64: file.arrayBuffer(),
       url: URL.createObjectURL(file),
     }));
 
@@ -48,7 +35,6 @@ export const useDocumentManager = (context: ComponentFramework.Context<IInputs>)
 
   return {
     documents,
-    ctx,
     filter,
     setFilter,
     getRootProps,
