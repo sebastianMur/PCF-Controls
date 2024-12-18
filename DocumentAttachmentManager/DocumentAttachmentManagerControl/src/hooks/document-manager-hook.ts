@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import type { IDocument } from '../types/document-manager';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch, RootState } from '../store';
-import { useGetNotesQuery } from '@/store/api/notes-api-slice';
+import { useGetNotesQuery } from '../store/api/notes-api-slice';
 import { useSelector } from 'react-redux';
-import { setContext } from '@/store/app/context-slice';
-import { useDropzone } from 'react-dropzone/.';
+import { setContext } from '../store/app/context-slice';
+import { useDropzone } from 'react-dropzone';
 import type { IInputs } from '../../generated/ManifestTypes';
 
 export const useDocumentManager = (context: ComponentFramework.Context<IInputs>) => {

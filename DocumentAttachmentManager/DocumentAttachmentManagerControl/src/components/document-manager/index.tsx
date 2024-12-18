@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
 import { Upload, Eye } from 'lucide-react';
 import { Button } from '../elements/button';
 import { Card, CardContent } from '../elements/card';
@@ -10,13 +8,8 @@ import { Input } from '../elements/input';
 import React from 'react';
 import { ImageViewer } from './image-viewer';
 import { DocumentList } from './document-list';
-import { useDispatch, useSelector } from 'react-redux';
-import { useGetNotesQuery } from '../../store/api/notes-api-slice';
-import { setContext } from '../../store/app/context-slice';
 import type { IInputs } from '../../../generated/ManifestTypes';
-import type { AppDispatch, RootState } from '../../store';
-import type { IDocument } from '../../types/document-manager';
-import { useDocumentManager } from '@/hooks/document-manager-hook';
+import { useDocumentManager } from '../../hooks/document-manager-hook';
 
 interface IDocumentManagerProps {
   context: ComponentFramework.Context<IInputs>;
