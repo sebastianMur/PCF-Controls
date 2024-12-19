@@ -28,7 +28,7 @@ export const useDocumentManager = () => {
             filename: file.name,
             documentbody: base64String,
             mimetype: file.type,
-            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize(entityTypeName)}(${entityId})`,
+            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(entityTypeName)}(${entityId})`,
           }).unwrap();
           console.log('🚀 ~ createdNote:', createdNote);
           return createdNote;
@@ -64,7 +64,7 @@ export const useDocumentManager = () => {
             filename: file.name,
             documentbody: base64String,
             mimetype: file.type,
-            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize(entityTypeName)}(${entityId})`,
+            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(entityTypeName)}(${entityId})`,
           };
 
           const updatedNote = await updateNote({ patchNote, id: oldDoc.annotationid }).unwrap();
