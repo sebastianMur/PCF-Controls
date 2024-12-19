@@ -37,9 +37,9 @@ const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
 export const notes = createApi({
   baseQuery: dynamicBaseQuery,
   endpoints: builder => ({
-    getNotes: builder.query<IDocument[], void>({
-      query: () =>
-        '/api/data/v9.2/annotations?$select=annotationid,notetext,filename,filesize,isdocument,documentbody,mimetype,_objectid_value,subject&$filter=isdocument eq true',
+    getNotes: builder.query<IDocument[], string>({
+      query: entityTypeName =>
+        `/api/data/v9.2/annotations?$select=annotationid,notetext,filename,filesize,isdocument,documentbody,mimetype,_objectid_value,subject&$filter=(isdocument eq true and objecttypecode eq '${entityTypeName}')`,
       transformResponse: (response: { value: INote[] }) => {
         console.log('🚀 ~ response:', response);
 
@@ -60,6 +60,14 @@ export const notes = createApi({
       }),
     }),
 
+    updateNote: builder.mutation<IPostNote, { patchNote: IPostNote; id: string }>({
+      query: ({ patchNote, id }: { patchNote: Omit<IPostNote, 'annotationId'>; id: string }) => ({
+        url: `/api/data/v9.2/annotations(${id})`,
+        method: 'PATCH',
+        body: patchNote,
+      }),
+    }),
+
     deleteNote: builder.mutation<string, string>({
       query: annotationId => ({
         url: `/api/data/v9.2/annotations(${annotationId})`,
@@ -69,4 +77,4 @@ export const notes = createApi({
   }),
 });
 
-export const { useGetNotesQuery, useCreateNoteMutation, useDeleteNoteMutation } = notes;
+export const { useGetNotesQuery, useCreateNoteMutation, useDeleteNoteMutation, useUpdateNoteMutation } = notes;

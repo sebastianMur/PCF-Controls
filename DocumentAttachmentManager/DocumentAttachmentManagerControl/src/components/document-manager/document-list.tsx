@@ -3,8 +3,9 @@ import { ScrollArea } from '../elements/scroll-area';
 import { Trash, Download, Eye } from 'lucide-react';
 import { Button } from '../elements/button';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
-import { ImageViewer } from './image-viewer';
+import { ImageCarousel } from './image-carousel';
 import type { IDocument } from '../../types/document-manager';
+import { ImageViewer } from './image-viewer';
 
 interface IDocumentListProps {
   filteredDocuments: IDocument[];
@@ -33,7 +34,7 @@ export const DocumentList = ({ notes, filteredDocuments, isLoading, removeDocume
                 </DialogTrigger>
                 <DialogContent className='max-w-[90vw] w-full max-h-[90vh] p-6'>
                   <DialogTitle className='sr-only'>Image Viewer</DialogTitle>
-                  <ImageViewer notes={notes} />
+                  <ImageViewer imageName={doc.name} imageUrl={doc.url} />
                 </DialogContent>
               </Dialog>
             )}

@@ -6,12 +6,13 @@ import { Card, CardContent } from '../elements/card';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
 import { Input } from '../elements/input';
 import React from 'react';
-import { ImageViewer } from './image-viewer';
+import { ImageCarousel } from './image-carousel';
 import { DocumentList } from './document-list';
 import { useDocumentManager } from '../../hooks/document-manager-hook';
 import type { IDocument } from '../../types/document-manager';
 import { DocumentListSkeleton } from './document-list-skeleton';
 import { v4 as uuid } from 'uuid';
+import { DuplicateDialog } from './duplicateDialog';
 export default function DocumentManager() {
   const {
     isNoteListLoading,
@@ -20,6 +21,12 @@ export default function DocumentManager() {
     notes,
     filter,
     isDragActive,
+    showDuplicateDialog,
+    duplicateFiles,
+    isUpdatedNoteLoading,
+    handleConfirmDuplicates,
+    setShowDuplicateDialog,
+    handleCancelDuplicates,
     removeDocument,
     setFilter,
     getRootProps,
@@ -32,7 +39,7 @@ export default function DocumentManager() {
   const filteredDocuments = notes?.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
   const images = notes?.filter(doc => doc.type.startsWith('image/'));
 
-  const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading;
+  const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading || isUpdatedNoteLoading;
 
   return (
     <div className='w-full'>
@@ -70,7 +77,7 @@ export default function DocumentManager() {
                   </DialogTrigger>
                   <DialogContent className='max-w-[90vw] w-full max-h-[90vh] p-6'>
                     <DialogTitle className='sr-only'>Image Viewer</DialogTitle>
-                    <ImageViewer notes={notes as IDocument[]} />
+                    <ImageCarousel notes={notes as IDocument[]} />
                   </DialogContent>
                 </Dialog>
               )}
@@ -96,6 +103,10 @@ export default function DocumentManager() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DuplicateDialog duplicates={duplicateFiles} onConfirm={handleConfirmDuplicates} onCancel={handleCancelDuplicates} />
+      </Dialog>
     </div>
   );
 }

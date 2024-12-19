@@ -1,7 +1,7 @@
 import type { IDocument } from '../types/document-manager';
 import { useEffect, useRef, useState } from 'react';
 
-export const useImageViewer = (documents: IDocument[]) => {
+export const useImageViewer = (documents?: IDocument[]) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -31,7 +31,7 @@ export const useImageViewer = (documents: IDocument[]) => {
     };
   }, []);
 
-  const images = documents.filter(doc => doc.type.startsWith('image/'));
+  const images = documents?.filter(doc => doc.type.startsWith('image/'));
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging && scale > 1) {
@@ -46,11 +46,13 @@ export const useImageViewer = (documents: IDocument[]) => {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex(prev => (prev + 1) % images.length);
+    if (!images) return;
+    setCurrentImageIndex(prev => (prev + 1) % images?.length);
     resetView();
   };
 
   const prevImage = () => {
+    if (!images) return;
     setCurrentImageIndex(prev => (prev - 1 + images.length) % images.length);
     resetView();
   };
