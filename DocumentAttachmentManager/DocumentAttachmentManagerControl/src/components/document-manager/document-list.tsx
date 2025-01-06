@@ -3,7 +3,6 @@ import { ScrollArea } from '../elements/scroll-area';
 import { Trash, Download, Eye } from 'lucide-react';
 import { Button } from '../elements/button';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
-import { ImageCarousel } from './image-carousel';
 import type { IDocument } from '../../types/document-manager';
 import { ImageViewer } from './image-viewer';
 
@@ -11,13 +10,10 @@ interface IDocumentListProps {
   filteredDocuments: IDocument[];
   removeDocument: (index: string) => void;
   downloadDocument: (doc: IDocument) => void;
-  notes: IDocument[];
-  isLoading: boolean;
 }
 
-export const DocumentList = ({ notes, filteredDocuments, isLoading, removeDocument, downloadDocument }: IDocumentListProps) => {
+export const DocumentList = ({ filteredDocuments, removeDocument, downloadDocument }: IDocumentListProps) => {
   console.log('🚀 ~ DocumentList ~ filteredDocuments:', filteredDocuments);
-  console.log('🚀 ~ DocumentList ~ notes:', notes);
   return (
     <ScrollArea className='h-[fit-content] w-full rounded-md border p-4'>
       {filteredDocuments.map(doc => (

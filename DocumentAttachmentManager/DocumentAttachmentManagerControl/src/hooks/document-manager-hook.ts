@@ -11,10 +11,18 @@ import type { IPostNote } from '../types/note';
 export const useDocumentManager = () => {
   const [filter, setFilter] = useState('');
   const { entityId, entityTypeName } = useSelector((state: RootState) => state.pcfApi);
+  console.log('🚀 ~ useDocumentManager ~ entityTypeName:', entityTypeName);
+  console.log('🚀 ~ useDocumentManager ~ entityId:', entityId);
   const [createNote, { isLoading: isCreateLoading }] = useCreateNoteMutation();
   const [updateNote, { isLoading: isUpdatedNoteLoading }] = useUpdateNoteMutation();
   const [deleteNote, { isLoading: isDeleteLoading }] = useDeleteNoteMutation();
-  const { data: notes, isLoading: isNoteListLoading, refetch } = useGetNotesQuery(entityTypeName);
+  const {
+    data: notes,
+    isLoading: isNoteListLoading,
+    refetch,
+    isError: isNoteListWithError,
+    error: NoteListError,
+  } = useGetNotesQuery(entityTypeName);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [duplicateFiles, setDuplicateFiles] = useState<Array<{ name: string; file: File }>>([]);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -145,6 +153,8 @@ export const useDocumentManager = () => {
     showDuplicateDialog,
     duplicateFiles,
     isUpdatedNoteLoading,
+    NoteListError,
+    isNoteListWithError,
     setShowDuplicateDialog,
     setFilter,
     getRootProps,

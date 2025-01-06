@@ -32,14 +32,26 @@ export default function DocumentManager() {
     getRootProps,
     getInputProps,
     downloadDocument,
+    isNoteListWithError,
+    NoteListError,
   } = useDocumentManager();
-
-  console.log('🚀 ~ DocumentManager ~ notes:', notes);
 
   const filteredDocuments = notes?.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
   const images = notes?.filter(doc => doc.type.startsWith('image/'));
 
   const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading || isUpdatedNoteLoading;
+
+  if (isNoteListWithError) {
+    return (
+      <div className='w-full'>
+        <Card>
+          <CardContent className='pt-6'>
+            <p className='text-center text-red-500'>{NoteListError}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className='w-full'>
@@ -85,13 +97,7 @@ export default function DocumentManager() {
           </div>
 
           {!isLoading && filteredDocuments && filteredDocuments?.length > 0 && (
-            <DocumentList
-              filteredDocuments={filteredDocuments}
-              removeDocument={removeDocument}
-              downloadDocument={downloadDocument}
-              notes={notes as IDocument[]}
-              isLoading={isLoading}
-            />
+            <DocumentList filteredDocuments={filteredDocuments} removeDocument={removeDocument} downloadDocument={downloadDocument} />
           )}
           {filteredDocuments && filteredDocuments?.length === 0 && <p className='text-center text-gray-500'>No documents uploaded yet.</p>}
           {isLoading && (
