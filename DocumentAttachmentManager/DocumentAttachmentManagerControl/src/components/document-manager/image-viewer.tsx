@@ -9,6 +9,7 @@ import ErrorBoundary from '../error-boundary';
 export const ImageViewer = ({ imageUrl, imageName }: { imageUrl: string; imageName: string }) => {
   const { imageRef, scale, position, containerRef, handleZoom, handleMouseDown, handleMouseMove, handleMouseUp, resetView } =
     useImageViewer();
+  console.log('🚀 ~ ImageViewer :');
 
   return (
     <ErrorBoundary fallback={<div>Failed to load image</div>}>

@@ -29,6 +29,8 @@ export const ImageCarousel = ({ notes }: ImageViewerProps) => {
     nextImage,
   } = useImageViewer(notes);
 
+  console.log('🚀 ~ ImageCarousel :');
+
   return (
     <ErrorBoundary fallback={<div>Failed to load images</div>}>
       <div className='flex flex-col items-center space-y-4 h-[80vh]'>

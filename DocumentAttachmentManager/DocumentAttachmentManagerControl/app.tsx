@@ -11,6 +11,8 @@ export interface IAppProps {
 }
 
 export const App = ({ context }: IAppProps) => {
+  console.log('🚀 ~ App :');
+
   return (
     <Provider store={store}>
       <ErrorBoundary fallback={<div>Failed to load Document Manager</div>}>

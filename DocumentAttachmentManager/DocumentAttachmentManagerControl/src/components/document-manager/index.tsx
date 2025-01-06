@@ -14,6 +14,8 @@ export default function AppContent({ context }: IAppContentProps) {
   const ctx = useSelector((state: RootState) => state.pcfApi.context);
   const dispatch = useDispatch<AppDispatch>();
 
+  console.log('🚀 ~ AppContent :');
+
   useEffect(() => {
     dispatch(setContext(context));
   }, [dispatch, context]);

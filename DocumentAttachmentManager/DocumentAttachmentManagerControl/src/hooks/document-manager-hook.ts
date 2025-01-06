@@ -27,6 +27,8 @@ export const useDocumentManager = () => {
   const [duplicateFiles, setDuplicateFiles] = useState<Array<{ name: string; file: File }>>([]);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
+  console.log('🚀 ~ useDocumentManager :');
+
   const addFiles = useCallback(
     async (files: File[]) => {
       try {

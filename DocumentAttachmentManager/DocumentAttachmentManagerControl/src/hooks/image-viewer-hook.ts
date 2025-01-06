@@ -32,6 +32,7 @@ export const useImageViewer = (documents?: IDocument[]) => {
   }, []);
 
   const images = documents?.filter(doc => doc.type.startsWith('image/'));
+  console.log('🚀 ~ App :');
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {

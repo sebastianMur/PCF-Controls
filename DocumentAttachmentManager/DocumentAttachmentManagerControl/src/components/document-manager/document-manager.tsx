@@ -39,6 +39,7 @@ export default function DocumentManager() {
 
   const filteredDocuments = notes?.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
   const images = notes?.filter(doc => doc.type.startsWith('image/'));
+  console.log('🚀 ~ DocumentManager :');
 
   const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading || isUpdatedNoteLoading;
 

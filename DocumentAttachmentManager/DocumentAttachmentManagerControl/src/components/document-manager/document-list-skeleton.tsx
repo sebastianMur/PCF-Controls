@@ -3,6 +3,8 @@ import { Skeleton } from '../elements/skeleton';
 import ErrorBoundary from '../error-boundary';
 
 export const DocumentListSkeleton = () => {
+  console.log('🚀 ~ DocumentListSkeleton :');
+
   return (
     <ErrorBoundary fallback={<div>Failed to load skeleton</div>}>
       <div className='flex items-center justify-between py-2 border-b last:border-b-0'>

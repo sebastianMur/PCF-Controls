@@ -12,6 +12,8 @@ interface DuplicateDialogProps {
   onCancel: () => void;
 }
 export const DuplicateDialog: FC<DuplicateDialogProps> = ({ duplicates, onCancel, onConfirm }) => {
+  console.log('🚀 ~ DuplicateDialog :');
+
   return (
     <ErrorBoundary fallback={<div>Failed to load duplicate dialog</div>}>
       <DialogContent>

@@ -14,7 +14,7 @@ interface IDocumentListProps {
 }
 
 export const DocumentList = ({ filteredDocuments, removeDocument, downloadDocument }: IDocumentListProps) => {
-  console.log('🚀 ~ DocumentList ~ filteredDocuments:', filteredDocuments);
+  console.log('🚀 ~ DocumentList ~ filteredDocuments:');
   return (
     <ErrorBoundary fallback={<div>Failed to load documents</div>}>
       <ScrollArea className='h-[fit-content] w-full rounded-md border p-4'>
