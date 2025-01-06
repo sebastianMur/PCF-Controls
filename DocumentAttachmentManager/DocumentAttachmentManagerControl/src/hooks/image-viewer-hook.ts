@@ -1,5 +1,5 @@
 import type { IDocument } from '../types/document-manager';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const useImageViewer = (documents?: IDocument[]) => {
   const imageRef = useRef<HTMLImageElement>(null);
@@ -33,48 +33,58 @@ export const useImageViewer = (documents?: IDocument[]) => {
 
   const images = documents?.filter(doc => doc.type.startsWith('image/'));
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging && scale > 1) {
-      const newX = e.clientX - dragStart.x;
-      const newY = e.clientY - dragStart.y;
-      setPosition({ x: newX, y: newY });
-    }
-  };
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isDragging && scale > 1) {
+        const newX = e.clientX - dragStart.x;
+        const newY = e.clientY - dragStart.y;
+        setPosition({ x: newX, y: newY });
+      }
+    },
+    [isDragging, dragStart, scale],
+  );
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
+    console.log('🚀 ~ handleMouseUp ~ isDragging:');
     setIsDragging(false);
-  };
+  }, []);
 
-  const nextImage = () => {
+  const resetView = useCallback(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  const nextImage = useCallback(() => {
     if (!images) return;
     setCurrentImageIndex(prev => (prev + 1) % images?.length);
     resetView();
-  };
+  }, [images, resetView]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (!images) return;
     setCurrentImageIndex(prev => (prev - 1 + images.length) % images.length);
     resetView();
-  };
+  }, [images, resetView]);
 
-  const handleZoom = (newScale: number[]) => {
+  const handleZoom = useCallback((newScale: number[]) => {
+    console.log('🚀 ~ handleZoom ~ newScale:', newScale);
+
     setScale(newScale[0]);
     if (newScale[0] === 1) {
       setPosition({ x: 0, y: 0 });
     }
-  };
+  }, []);
 
-  const resetView = () => {
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
-  };
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (scale > 1) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    }
-  };
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      console.log('🚀 ~ handleMouseDown ~ e:', e);
+      if (scale > 1) {
+        setIsDragging(true);
+        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+      }
+    },
+    [scale, position],
+  );
 
   return {
     imageRef,
