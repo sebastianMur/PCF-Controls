@@ -38,8 +38,8 @@ export const notes = createApi({
   baseQuery: dynamicBaseQuery,
   endpoints: builder => ({
     getNotes: builder.query<IDocument[], string>({
-      query: entityTypeName =>
-        `/api/data/v9.2/annotations?$select=annotationid,notetext,filename,filesize,isdocument,documentbody,mimetype,_objectid_value,subject&$filter=(isdocument eq true and objecttypecode eq '${entityTypeName}')`,
+      query: entityId =>
+        `/api/data/v9.2/annotations?$select=annotationid,notetext,documentbody,filename,filesize,isdocument,mimetype,_objectid_value,subject&$filter=(isdocument eq true and _objectid_value eq ${entityId})`,
       transformResponse: (response: { value: INote[] }) => {
         console.log('🚀 ~ response:', response);
 

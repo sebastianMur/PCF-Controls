@@ -22,7 +22,7 @@ export const useDocumentManager = () => {
     refetch,
     isError: isNoteListWithError,
     error: NoteListError,
-  } = useGetNotesQuery(entityTypeName);
+  } = useGetNotesQuery(entityId);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [duplicateFiles, setDuplicateFiles] = useState<Array<{ name: string; file: File }>>([]);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
