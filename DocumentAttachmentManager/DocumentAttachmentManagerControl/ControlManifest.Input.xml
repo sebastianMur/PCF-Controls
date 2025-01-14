@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
-	<control namespace="DocumentAttachmentManager" constructor="DocumentAttachmentManagerControl" version="0.0.48" display-name-key="DocumentAttachmentManagerControl" description-key="DocumentAttachmentManagerControl description" control-type="virtual">
+	<control namespace="DocumentAttachmentManager" constructor="DocumentAttachmentManagerControl" version="0.1.0" display-name-key="DocumentAttachmentManagerControl" description-key="DocumentAttachmentManagerControl description" control-type="virtual">
 		<external-service-usage enabled="false">
 		</external-service-usage>
 		<property name="DocumentManager" display-name-key="Document Manager" description-key="Document Manager" of-type="Multiple" usage="bound" required="true" />

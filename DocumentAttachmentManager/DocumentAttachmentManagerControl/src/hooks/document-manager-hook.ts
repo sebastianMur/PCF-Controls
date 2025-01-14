@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import type { IDocument } from '../types/document-manager';
 import { useCreateNoteMutation, useDeleteNoteMutation, useGetNotesQuery, useUpdateNoteMutation } from '../store/api/notes-api-slice';
 import { useDropzone } from 'react-dropzone';
@@ -7,8 +7,13 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import pluralize from 'pluralize';
 import type { IPostNote } from '../types/note';
+import { useErrorHandler } from '../hooks/use-error-handler';
+import { useLoadingState } from '../hooks/use-loading-state';
 
 export const useDocumentManager = () => {
+  const { error, handleError, clearError } = useErrorHandler();
+  const { setLoading, isLoading, isAnyLoading } = useLoadingState();
+
   const [filter, setFilter] = useState('');
   const { entityId, entityTypeName } = useSelector((state: RootState) => state.pcfApi);
   console.log('🚀 ~ useDocumentManager ~ entityTypeName:', entityTypeName);
@@ -28,29 +33,55 @@ export const useDocumentManager = () => {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   console.log('🚀 ~ useDocumentManager :');
+  // Validate PCF context
+  useEffect(() => {
+    if (!entityId || !entityTypeName) {
+      handleError(new Error('Required PCF context values are missing'), 'Initialization');
+    }
+  }, [entityId, entityTypeName, handleError]);
+  // Handle API loading states
+  useEffect(() => {
+    setLoading('notes', isNoteListLoading);
+    setLoading('create', isCreateLoading);
+    setLoading('update', isUpdatedNoteLoading);
+    setLoading('delete', isDeleteLoading);
+  }, [isNoteListLoading, isCreateLoading, isUpdatedNoteLoading, isDeleteLoading, setLoading]);
+  // Handle API errors
+  useEffect(() => {
+    if (isNoteListWithError) {
+      handleError(NoteListError, 'Loading Notes');
+    }
+  }, [isNoteListWithError, NoteListError, handleError]);
 
   const addFiles = useCallback(
     async (files: File[]) => {
       try {
+        setLoading('upload', true);
         const createNotePromises = files.map(async file => {
-          const base64String = (await fileToBase64(file)).split(',')[1];
-          const createdNote = await createNote({
-            filename: file.name,
-            documentbody: base64String,
-            mimetype: file.type,
-            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(entityTypeName)}(${entityId})`,
-          }).unwrap();
-          console.log('🚀 ~ createdNote:', createdNote);
-          return createdNote;
+          try {
+            const base64String = (await fileToBase64(file)).split(',')[1];
+            return await createNote({
+              filename: file.name,
+              documentbody: base64String,
+              mimetype: file.type,
+              [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(entityTypeName)}(${entityId})`,
+            }).unwrap();
+          } catch (error) {
+            handleError(error, `Uploading file: ${file.name}`);
+            throw error;
+          }
         });
 
         await Promise.all(createNotePromises);
         await refetch();
+        clearError();
       } catch (error) {
-        console.error('Error creating notes:', error);
+        handleError(error, 'File Upload');
+      } finally {
+        setLoading('upload', false);
       }
     },
-    [refetch, createNote, entityId, entityTypeName],
+    [refetch, createNote, entityId, entityTypeName, clearError, handleError, setLoading],
   );
 
   const handleCancelDuplicates = () => {
@@ -165,5 +196,14 @@ export const useDocumentManager = () => {
     downloadDocument,
     handleConfirmDuplicates,
     handleCancelDuplicates,
+    error,
+    clearError,
+    isLoading: isAnyLoading(),
+    loadingStates: {
+      notes: isLoading('notes'),
+      upload: isLoading('upload'),
+      delete: isLoading('delete'),
+      update: isLoading('update'),
+    },
   };
 };
