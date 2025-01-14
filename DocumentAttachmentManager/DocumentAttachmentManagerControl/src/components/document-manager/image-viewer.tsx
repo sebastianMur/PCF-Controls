@@ -7,8 +7,21 @@ import { useImageViewer } from '../../hooks/image-viewer-hook';
 import ErrorBoundary from '../error-boundary';
 
 export const ImageViewer = ({ imageUrl, imageName }: { imageUrl: string; imageName: string }) => {
-  const { imageRef, scale, position, containerRef, handleZoom, handleMouseDown, handleMouseMove, handleMouseUp, resetView } =
-    useImageViewer();
+  const {
+    imageRef,
+    scale,
+    position,
+    containerRef,
+    handleZoom,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    resetView,
+    isImageLoading,
+    imageError,
+    handleImageLoad,
+    handleImageError,
+  } = useImageViewer();
   console.log('🚀 ~ ImageViewer :');
 
   return (
@@ -32,8 +45,22 @@ export const ImageViewer = ({ imageUrl, imageName }: { imageUrl: string; imageNa
                 transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
                 cursor: scale > 1 ? 'move' : 'default',
               }}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
             />
           </div>
+
+          {isImageLoading && (
+            <div className='absolute inset-0 flex items-center justify-center'>
+              <span>Loading...</span>
+            </div>
+          )}
+
+          {imageError && (
+            <div className='absolute inset-0 flex items-center justify-center'>
+              <span className='text-red-500'>{imageError}</span>
+            </div>
+          )}
         </div>
         <div className='flex items-center space-x-2 w-full max-w-md'>
           <ZoomOut className='h-4 w-4' />

@@ -9,6 +9,8 @@ export const useImageViewer = (documents?: IDocument[]) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -37,9 +39,9 @@ export const useImageViewer = (documents?: IDocument[]) => {
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (isDragging && scale > 1) {
-        const newX = e.clientX - dragStart.x;
-        const newY = e.clientY - dragStart.y;
-        setPosition({ x: newX, y: newY });
+        const deltaX = e.clientX - dragStart.x;
+        const deltaY = e.clientY - dragStart.y;
+        setPosition({ x: deltaX, y: deltaY });
       }
     },
     [isDragging, dragStart, scale],
@@ -78,14 +80,32 @@ export const useImageViewer = (documents?: IDocument[]) => {
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      console.log('🚀 ~ handleMouseDown ~ e:', e);
       if (scale > 1) {
         setIsDragging(true);
-        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+        setDragStart({
+          x: e.clientX - position.x,
+          y: e.clientY - position.y,
+        });
       }
     },
     [scale, position],
   );
+
+  const handleImageLoad = useCallback(() => {
+    setIsImageLoading(false);
+    setImageError(null);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setIsImageLoading(false);
+    setImageError('Failed to load image');
+  }, []);
+  useEffect(() => {
+    if (images?.[currentImageIndex]) {
+      setIsImageLoading(true);
+      setImageError(null);
+    }
+  }, [currentImageIndex, images]);
 
   return {
     imageRef,
@@ -102,5 +122,9 @@ export const useImageViewer = (documents?: IDocument[]) => {
     handleZoom,
     resetView,
     handleMouseDown,
+    isImageLoading,
+    imageError,
+    handleImageLoad,
+    handleImageError,
   };
 };
