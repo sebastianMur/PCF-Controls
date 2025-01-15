@@ -24,7 +24,7 @@ const createApiClient = (baseUrl: string) => ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(note),
     });
-    return await response.json();
+    return response.ok;
   },
 
   updateNote: async ({ patchNote, id }: { patchNote: Omit<IPostNote, 'annotationId'>; id: string }) => {
@@ -54,6 +54,7 @@ export const useNotes = () => {
     isLoading: isNoteListLoading,
     error,
     refetch: refetchNotes,
+    isRefetching,
   } = useQuery<IDocument[]>({
     queryKey: ['notes', entityId],
     queryFn: () => api.getNotes(entityId),
@@ -64,6 +65,7 @@ export const useNotes = () => {
     mutationFn: api.createNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', entityId] });
+      refetchNotes();
     },
   });
 
@@ -71,6 +73,7 @@ export const useNotes = () => {
     mutationFn: api.updateNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', entityId] });
+      refetchNotes();
     },
   });
 
@@ -78,19 +81,21 @@ export const useNotes = () => {
     mutationFn: api.deleteNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', entityId] });
+      refetchNotes();
     },
   });
 
   return {
     notes,
-    isNoteListLoading,
     error,
     refetchNotes,
     createNote: createNoteMutation.mutate,
     updateNote: updateNoteMutation.mutate,
     deleteNote: deleteNoteMutation.mutate,
+    isNoteListLoading,
     isCreateLoading: createNoteMutation.isLoading,
     isUpdateLoading: updateNoteMutation.isLoading,
     isDeleteLoading: deleteNoteMutation.isLoading,
+    isRefetching,
   };
 };

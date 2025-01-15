@@ -5,23 +5,22 @@ import { fileToBase64 } from '../utils/functions';
 import pluralize from 'pluralize';
 import type { IPostNote } from '../types/note';
 import { useErrorHandler } from './use-error-handler';
-import { useLoadingState } from './use-loading-state';
 import { usePCFStore } from '../store/context-store';
 import { useNotes } from '../services/notes-api-slice';
 
 export const useDocumentManager = () => {
   const { error, handleError, clearError } = useErrorHandler();
-  const { setLoading, isLoading, isAnyLoading } = useLoadingState();
   const { entityId, entityTypeName } = usePCFStore();
   const {
     notes,
-    isNoteListLoading,
     error: noteListError,
     refetchNotes,
     createNote,
     updateNote,
     deleteNote,
+    isNoteListLoading,
     isCreateLoading,
+    isRefetching,
     isUpdateLoading,
     isDeleteLoading,
   } = useNotes();
@@ -39,13 +38,7 @@ export const useDocumentManager = () => {
       handleError(new Error('Required PCF context values are missing'), 'Initialization');
     }
   }, [entityId, entityTypeName, handleError]);
-  // Handle API loading states
-  useEffect(() => {
-    setLoading('notes', isNoteListLoading);
-    setLoading('create', isCreateLoading);
-    setLoading('update', isUpdateLoading);
-    setLoading('delete', isDeleteLoading);
-  }, [isNoteListLoading, isCreateLoading, isUpdateLoading, isDeleteLoading, setLoading]);
+
   // Handle API errors
   useEffect(() => {
     if (noteListError) {
@@ -56,28 +49,28 @@ export const useDocumentManager = () => {
   const addFiles = useCallback(
     async (files: File[]) => {
       try {
-        setLoading('upload', true);
-        const createNotePromises = files.map(async file => {
+        const promises = files.map(async file => {
           const base64String = (await fileToBase64(file)).split(',')[1];
+
           return createNote({
             filename: file.name,
             documentbody: base64String,
             mimetype: file.type,
-            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(entityTypeName)}(${entityId})`,
+            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(
+              pluralize.isPlural(entityTypeName) ? `${entityTypeName}es` : `${entityTypeName}`,
+            )}(${entityId})`,
           });
         });
 
-        await Promise.all(createNotePromises);
-        refetchNotes();
+        await Promise.all(promises);
 
+        await refetchNotes();
         clearError();
       } catch (error) {
         handleError(error, 'File Upload');
-      } finally {
-        setLoading('upload', false);
       }
     },
-    [createNote, entityId, entityTypeName, clearError, handleError, setLoading, refetchNotes],
+    [createNote, entityId, entityTypeName, clearError, handleError, refetchNotes],
   );
 
   const handleCancelDuplicates = () => {
@@ -101,16 +94,19 @@ export const useDocumentManager = () => {
             filename: file.name,
             documentbody: base64String,
             mimetype: file.type,
-            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(entityTypeName)}(${entityId})`,
+            [`objectid_${entityTypeName}@odata.bind`]: `/${pluralize.plural(
+              pluralize.isPlural(entityTypeName) ? `${entityTypeName}es` : `${entityTypeName}`,
+            )}(${entityId})`,
           };
 
           const updatedNote = await updateNote({ patchNote, id: oldDoc.annotationid });
+
           console.log('🚀 ~ updatedNote:', updatedNote);
           return updatedNote;
         });
 
         await Promise.all(updateNotePromises);
-        refetchNotes();
+        await refetchNotes();
       } catch (error) {
         console.error('Error creating notes:', error);
       }
@@ -157,7 +153,7 @@ export const useDocumentManager = () => {
   const removeDocument = useCallback(
     async (annotationId: string) => {
       const deletedNote = await deleteNote(annotationId);
-      refetchNotes();
+      await refetchNotes();
       console.log('🚀 ~ useDocumentManager ~ deletedNote:', deletedNote);
     },
     [deleteNote, refetchNotes],
@@ -176,12 +172,8 @@ export const useDocumentManager = () => {
     filter,
     isDragActive,
     notes,
-    isNoteListLoading,
-    isDeleteLoading,
-    isCreateLoading,
     showDuplicateDialog,
     duplicateFiles,
-    isUpdateLoading,
     noteListError,
     setShowDuplicateDialog,
     setFilter,
@@ -193,12 +185,6 @@ export const useDocumentManager = () => {
     handleCancelDuplicates,
     error,
     clearError,
-    isLoading: isAnyLoading(),
-    loadingStates: {
-      notes: isLoading('notes'),
-      upload: isLoading('upload'),
-      delete: isLoading('delete'),
-      update: isLoading('update'),
-    },
+    isLoading: isNoteListLoading || isCreateLoading || isUpdateLoading || isDeleteLoading || isRefetching,
   };
 };
