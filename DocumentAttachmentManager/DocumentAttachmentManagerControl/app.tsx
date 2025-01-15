@@ -1,24 +1,25 @@
 import * as React from 'react';
 import type { IInputs } from './generated/ManifestTypes';
-import { Provider } from 'react-redux';
-import { store } from './src/store';
 import DocumentManager from './src/components/document-manager';
 import ErrorBoundary from './src/components/error-boundary';
 import { useEffect } from 'react';
-import { setContext } from './src/store/app/context-slice';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { usePCFStore } from './src/store/context-store';
 
 export interface IAppProps {
   context: ComponentFramework.Context<IInputs>;
 }
 
+const queryClient = new QueryClient();
+
 export const App = ({ context }: IAppProps) => {
+  const { setContext } = usePCFStore();
   useEffect(() => {
-    // Initialize context in Redux store
-    store.dispatch(setContext(context));
-  }, [context]);
+    setContext(context);
+  }, [context, setContext]);
 
   return (
-    <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
       <ErrorBoundary
         fallback={
           <div className='error-container'>
@@ -29,6 +30,6 @@ export const App = ({ context }: IAppProps) => {
       >
         <DocumentManager />
       </ErrorBoundary>
-    </Provider>
+    </QueryClientProvider>
   );
 };

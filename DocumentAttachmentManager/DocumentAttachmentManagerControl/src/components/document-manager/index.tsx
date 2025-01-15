@@ -24,7 +24,6 @@ export default function DocumentManager() {
     isDragActive,
     showDuplicateDialog,
     duplicateFiles,
-    isUpdatedNoteLoading,
     handleConfirmDuplicates,
     setShowDuplicateDialog,
     handleCancelDuplicates,
@@ -33,27 +32,13 @@ export default function DocumentManager() {
     getRootProps,
     getInputProps,
     downloadDocument,
-    isNoteListWithError,
-    NoteListError,
   } = useDocumentManager();
 
   const filteredDocuments = notes?.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
   const images = notes?.filter(doc => doc.type.startsWith('image/'));
   console.log('🚀 ~ DocumentManager :');
 
-  const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading || isUpdatedNoteLoading;
-
-  if (isNoteListWithError) {
-    return (
-      <div className='w-full'>
-        <Card>
-          <CardContent className='pt-6'>
-            <p className='text-center text-red-500'>{NoteListError}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const isLoading = isNoteListLoading || isCreateLoading || isDeleteLoading;
 
   return (
     <div className='w-full'>
