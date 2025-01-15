@@ -38,7 +38,6 @@ export const ImageCarousel = ({ notes }: ImageViewerProps) => {
           ref={containerRef}
           className='relative bg-gray-100 rounded-lg overflow-hidden w-full aspect-video'
           onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
@@ -53,6 +52,7 @@ export const ImageCarousel = ({ notes }: ImageViewerProps) => {
                 cursor: scale > 1 ? 'move' : 'default',
               }}
             />
+            <div className='z-50 absolute bottom-3 font-extrabold text-gray-900'>{images ? images[currentImageIndex]?.name : ''}</div>
           </div>
           <Button variant='secondary' size='icon' className='absolute top-1/2 left-2 transform -translate-y-1/2' onClick={prevImage}>
             <ChevronLeft className='h-4 w-4' />

@@ -16,7 +16,7 @@ export const DuplicateDialog: FC<DuplicateDialogProps> = ({ duplicates, onCancel
 
   return (
     <ErrorBoundary fallback={<div>Failed to load duplicate dialog</div>}>
-      <DialogContent>
+      <DialogContent className='font-sans'>
         <DialogHeader>
           <DialogTitle>Duplicate Files Detected</DialogTitle>
           <DialogDescription>The following files already exist and will be replaced:</DialogDescription>

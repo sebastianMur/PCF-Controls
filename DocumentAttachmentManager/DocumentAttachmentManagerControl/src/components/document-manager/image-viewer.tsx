@@ -48,6 +48,7 @@ export const ImageViewer = ({ imageUrl, imageName }: { imageUrl: string; imageNa
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
+            <div className='z-50 absolute bottom-3 font-extrabold text-gray-900'>{imageName}</div>
           </div>
 
           {isImageLoading && (

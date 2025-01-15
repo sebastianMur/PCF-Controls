@@ -38,6 +38,8 @@ export const useImageViewer = (documents?: IDocument[]) => {
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      console.log('🚀 ~ handleMouseMove ~ down:');
+
       if (isDragging && scale > 1) {
         const deltaX = e.clientX - dragStart.x;
         const deltaY = e.clientY - dragStart.y;
@@ -80,6 +82,8 @@ export const useImageViewer = (documents?: IDocument[]) => {
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      console.log('🚀 ~ handleMouseDown ~ down:');
+
       if (scale > 1) {
         setIsDragging(true);
         setDragStart({

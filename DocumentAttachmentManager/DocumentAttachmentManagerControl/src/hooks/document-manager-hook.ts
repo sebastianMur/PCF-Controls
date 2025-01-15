@@ -14,7 +14,6 @@ export const useDocumentManager = () => {
   const {
     notes,
     error: noteListError,
-    refetchNotes,
     createNote,
     updateNote,
     deleteNote,
@@ -64,13 +63,12 @@ export const useDocumentManager = () => {
 
         await Promise.all(promises);
 
-        await refetchNotes();
         clearError();
       } catch (error) {
         handleError(error, 'File Upload');
       }
     },
-    [createNote, entityId, entityTypeName, clearError, handleError, refetchNotes],
+    [createNote, entityId, entityTypeName, clearError, handleError],
   );
 
   const handleCancelDuplicates = () => {
@@ -89,8 +87,7 @@ export const useDocumentManager = () => {
           if (!oldDoc?.annotationid) {
             throw new Error('Annotation ID is undefined');
           }
-          const patchNote: IPostNote = {
-            annotationId: oldDoc?.annotationid,
+          const patchNote: Omit<IPostNote, 'annotationId'> = {
             filename: file.name,
             documentbody: base64String,
             mimetype: file.type,
@@ -106,12 +103,11 @@ export const useDocumentManager = () => {
         });
 
         await Promise.all(updateNotePromises);
-        await refetchNotes();
       } catch (error) {
         console.error('Error creating notes:', error);
       }
     },
-    [updateNote, notes, entityId, entityTypeName, refetchNotes],
+    [updateNote, notes, entityId, entityTypeName],
   );
 
   const handleConfirmDuplicates = () => {
@@ -153,10 +149,9 @@ export const useDocumentManager = () => {
   const removeDocument = useCallback(
     async (annotationId: string) => {
       const deletedNote = await deleteNote(annotationId);
-      await refetchNotes();
       console.log('🚀 ~ useDocumentManager ~ deletedNote:', deletedNote);
     },
-    [deleteNote, refetchNotes],
+    [deleteNote],
   );
 
   const downloadDocument = useCallback((doc: IDocument) => {
