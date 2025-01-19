@@ -13,34 +13,15 @@ type ImageViewerProps = {
 
 export const ImageCarousel = ({ notes }: ImageViewerProps) => {
   console.log('🚀 ~ ImageViewer ~ documents:', notes);
-  const {
-    imageRef,
-    scale,
-    position,
-    currentImageIndex,
-    images,
-    containerRef,
-    handleZoom,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    resetView,
-    prevImage,
-    nextImage,
-  } = useImageViewer(notes);
+  const { imageRef, scale, position, currentImageIndex, images, containerRef, handleZoom, resetView, prevImage, nextImage } =
+    useImageViewer(notes);
 
   console.log('🚀 ~ ImageCarousel :');
 
   return (
     <ErrorBoundary fallback={<div>Failed to load images</div>}>
       <div className='flex flex-col items-center space-y-4 h-[80vh]'>
-        <div
-          ref={containerRef}
-          className='relative bg-gray-100 rounded-lg overflow-hidden w-full aspect-video'
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
+        <div ref={containerRef} className='relative bg-gray-100 rounded-lg overflow-hidden w-full aspect-video'>
           <div className='absolute inset-0 flex items-center justify-center'>
             <img
               ref={imageRef}
@@ -51,6 +32,7 @@ export const ImageCarousel = ({ notes }: ImageViewerProps) => {
                 transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
                 cursor: scale > 1 ? 'move' : 'default',
               }}
+              draggable={false}
             />
             <div className='z-50 absolute bottom-3 font-extrabold text-gray-900'>{images ? images[currentImageIndex]?.name : ''}</div>
           </div>

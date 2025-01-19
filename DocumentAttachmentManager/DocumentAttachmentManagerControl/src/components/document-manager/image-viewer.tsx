@@ -7,34 +7,14 @@ import { useImageViewer } from '../../hooks/image-viewer-hook';
 import ErrorBoundary from '../error-boundary';
 
 export const ImageViewer = ({ imageUrl, imageName }: { imageUrl: string; imageName: string }) => {
-  const {
-    imageRef,
-    scale,
-    position,
-    containerRef,
-    handleZoom,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    resetView,
-    isImageLoading,
-    imageError,
-    handleImageLoad,
-    handleImageError,
-  } = useImageViewer();
+  const { imageRef, scale, position, containerRef, handleZoom, resetView, isImageLoading, imageError, handleImageLoad, handleImageError } =
+    useImageViewer();
   console.log('🚀 ~ ImageViewer :');
 
   return (
     <ErrorBoundary fallback={<div>Failed to load image</div>}>
       <div className='flex flex-col items-center space-y-4 h-[80vh]'>
-        <div
-          ref={containerRef}
-          className='relative bg-gray-100 rounded-lg overflow-hidden w-full aspect-video'
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
+        <div ref={containerRef} className='relative bg-gray-100 rounded-lg overflow-hidden w-full aspect-video'>
           <div className='absolute inset-0 flex items-center justify-center'>
             <img
               ref={imageRef}
@@ -45,6 +25,7 @@ export const ImageViewer = ({ imageUrl, imageName }: { imageUrl: string; imageNa
                 transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
                 cursor: scale > 1 ? 'move' : 'default',
               }}
+              draggable={false}
               onLoad={handleImageLoad}
               onError={handleImageError}
             />

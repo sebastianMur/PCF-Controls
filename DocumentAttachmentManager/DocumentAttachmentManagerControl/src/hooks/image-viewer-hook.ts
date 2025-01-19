@@ -5,8 +5,6 @@ export const useImageViewer = (documents?: IDocument[]) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isImageLoading, setIsImageLoading] = useState(true);
@@ -33,26 +31,41 @@ export const useImageViewer = (documents?: IDocument[]) => {
     };
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const image = imageRef.current;
+    let isDragging = false;
+    let prevPosition = { x: 0, y: 0 };
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging = true;
+      prevPosition = { x: e.clientX, y: e.clientY };
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && scale > 1) {
+        const dx = e.clientX - prevPosition.x;
+        const dy = e.clientY - prevPosition.y;
+        prevPosition = { x: e.clientX, y: e.clientY };
+        setPosition(position => ({ x: position.x + dx, y: position.y + dy }));
+      }
+    };
+
+    const handleMouseUp = () => {
+      isDragging = false;
+    };
+
+    image?.addEventListener('mousedown', handleMouseDown);
+    image?.addEventListener('mousemove', handleMouseMove);
+    image?.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      image?.removeEventListener('mousedown', handleMouseDown);
+      image?.removeEventListener('mousemove', handleMouseMove);
+      image?.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [imageRef, scale]);
+
   const images = documents?.filter(doc => doc.type.startsWith('image/'));
   console.log('🚀 ~ App :');
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      console.log('🚀 ~ handleMouseMove ~ down:');
-
-      if (isDragging && scale > 1) {
-        const deltaX = e.clientX - dragStart.x;
-        const deltaY = e.clientY - dragStart.y;
-        setPosition({ x: deltaX, y: deltaY });
-      }
-    },
-    [isDragging, dragStart, scale],
-  );
-
-  const handleMouseUp = useCallback(() => {
-    console.log('🚀 ~ handleMouseUp ~ isDragging:');
-    setIsDragging(false);
-  }, []);
 
   const resetView = useCallback(() => {
     setScale(1);
@@ -80,21 +93,6 @@ export const useImageViewer = (documents?: IDocument[]) => {
     }
   }, []);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      console.log('🚀 ~ handleMouseDown ~ down:');
-
-      if (scale > 1) {
-        setIsDragging(true);
-        setDragStart({
-          x: e.clientX - position.x,
-          y: e.clientY - position.y,
-        });
-      }
-    },
-    [scale, position],
-  );
-
   const handleImageLoad = useCallback(() => {
     setIsImageLoading(false);
     setImageError(null);
@@ -115,17 +113,13 @@ export const useImageViewer = (documents?: IDocument[]) => {
     imageRef,
     currentImageIndex,
     position,
-    isDragging,
     scale,
     containerRef,
     images,
-    handleMouseMove,
-    handleMouseUp,
     nextImage,
     prevImage,
     handleZoom,
     resetView,
-    handleMouseDown,
     isImageLoading,
     imageError,
     handleImageLoad,
