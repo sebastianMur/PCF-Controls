@@ -53,8 +53,8 @@ cat <<EOL > package.json
   "scripts": {
     "build": "pcf-scripts build",
     "clean": "pcf-scripts clean",
-    "lint": "biome check $CONTROL_NAME",
-    "format": "biome check --write $CONTROL_NAME",
+    "lint": "pcf-scripts lint",
+    "lint:fix": "pcf-scripts lint fix",
     "rebuild": "pcf-scripts rebuild",
     "start": "pcf-scripts start",
     "start:watch": "pcf-scripts start watch",
@@ -66,19 +66,23 @@ cat <<EOL > package.json
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@eslint/js": "^9.17.0",
     "@fluentui/react-components": "9.46.2",
+    "@microsoft/eslint-plugin-power-apps": "^0.2.51",
     "@types/powerapps-component-framework": "^1.3.15",
     "@types/react": "^16.14.60",
     "@types/react-dom": "^16.9.24",
-    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-promise": "^7.1.0",
+    "eslint-plugin-react": "^7.37.2",
     "globals": "^15.13.0",
     "pcf-scripts": "^1",
     "pcf-start": "^1",
+    "prettier": "^3.4.2",
     "react": "^16.14.0",
     "react-dom": "16.14.0",
     "typescript": "^5.7.3",
-    "ajv": "^7.2.4"
-
+    "typescript-eslint": "^8.18.1"
   }
 }
 EOL
@@ -93,14 +97,11 @@ npx @biomejs/biome init
 
 # Update biome.json
 cat <<EOL > biome.json
+# Update biome.json
+cat <<EOL > biome.json
 {
 	"files": { "ignore": ["node_modules"] },
-  "formatter": {
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 80,
-    "lineEnding": "lf"
-  },
+	"formatter": { "ignore": ["node_modules"] },
 	"linter": {
 		"rules": {
 			"recommended": false,
@@ -389,15 +390,7 @@ cat <<EOL > biome.json
 }
 
 EOL
-
 EOL
-
-# Update eslint.config.mjs
-cat <<EOL > eslint.config.mjs
-/** @type {import('eslint').Linter.Config[]} */
-export default [];
-EOL
-
 
 # Update webpack.config.js
 cat <<EOL > webpack.config.js
@@ -450,29 +443,19 @@ cat <<EOL > featureconfig.json
 }
 EOL
 
-
-
-EOL
-mkdir -p .vscode
-
-# Create settings.json in the .vscode folder
-cat <<EOL > ./.vscode/settings.json
+# Update prettierrc.json
+cat <<EOL > prettierrc.json
 {
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.biome": "always",
-    "source.organizeImports.biome": "explicit",
-    "quickFix.biome": "always"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  }
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 80,
+  "arrowParens": "avoid"
 }
 
 EOL
+
 
 # Navigate to the project directory
 cd "$CONTROL_NAME" || exit
@@ -483,60 +466,30 @@ cd "$CONTROL_NAME" || exit
 # Create recommended folder structure
 mkdir -p components utils/hooks utils/store utils/types
 
-# Create manifest 
-cat <<EOL > ./components/app.tsx
-<?xml version="1.0" encoding="utf-8" ?>
-<manifest>
-  <control namespace="$NAMESPACE" constructor="$CONTROL_NAME" version="0.0.1" display-name-key="$CONTROL_NAME" description-key="$CONTROL_NAME" description" control-type="virtual" >
-    <external-service-usage enabled="false">
-    </external-service-usage>
-    <property name="sampleProperty" display-name-key="Property_Display_Key" description-key="Property_Desc_Key" of-type="SingleLine.Text" usage="bound" required="true" />
-    <resources>
-      <code path="index.ts" order="1"/>
-      <platform-library name="React" version="16.14.0" />
-      <platform-library name="Fluent" version="9.46.2" />
-    </resources>
-    <!-- UNCOMMENT TO ENABLE THE SPECIFIED API
-    <feature-usage>
-      <uses-feature name="Device.captureAudio" required="true" />
-      <uses-feature name="Device.captureImage" required="true" />
-      <uses-feature name="Device.captureVideo" required="true" />
-      <uses-feature name="Device.getBarcodeValue" required="true" />
-      <uses-feature name="Device.getCurrentPosition" required="true" />
-      <uses-feature name="Device.pickFile" required="true" />
-      <uses-feature name="Utility" required="true" />
-      <uses-feature name="WebAPI" required="true" />
-    </feature-usage>
-    -->
-  </control>
-</manifest>
-
-EOL
-
-
 # Create app.tsx in the component folder
 cat <<EOL > ./components/app.tsx
-import { Text } from "@fluentui/react-components";
+import { Text } from '@fluentui/react-components';
 
-import { useGetDataQuery } from "@utils/store/api";
-import { ErrorMessage } from "./error";
-import { Loading } from "./loading";
+import { useGetDataQuery } from '@utils/store/api';
+import { Loading } from './loading';
+import { Error } from './error';
 
 export const App = () => {
-     const { isLoading, isError } = useGetDataQuery("1");
+  const {  isLoading, isError } = useGetDataQuery('1');
 
-     if (isLoading) return <Loading />;
-     if (isError) return <ErrorMessage />;
-     return <Text>App</Text>;
+  if (isLoading) return <Loading />
+  if (isError) return <Error />
+  return <Text>App</Text>
 };
+
 EOL
 
 # Create Error.tsx in the component folder
 cat <<EOL > components/error.tsx
-import { Text } from "@fluentui/react-components";
+import { Text } from '@fluentui/react-components';
 
-export const ErrorMessage = () => {
-     return <Text>There was an error</Text>;
+export const Error = () => {
+  return <Text>There was an error</Text>;
 };
 EOL
 
@@ -665,7 +618,7 @@ EOL
 rm ./helloWorld.tsx
 
 
-# Update main index.ts
+# Update references to the HelloWorld component in index.ts
 cat <<EOL > index.ts
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
@@ -679,8 +632,7 @@ import { App } from '@components/app';
 
 
 export class ${CONTROL_NAME} implements ComponentFramework.ReactControl<IInputs, IOutputs> {
-
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
   public init(context: ComponentFramework.Context<IInputs>): void {
@@ -703,7 +655,6 @@ export class ${CONTROL_NAME} implements ComponentFramework.ReactControl<IInputs,
     return {};
   }
 
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public destroy(): void {}
-  }
 EOL

@@ -5,3 +5,4 @@ export interface IPage {
   isPageReadOnly: boolean;
   getClientUrl: () => string;
 }
+

@@ -1,8 +1,8 @@
 import * as React from 'react';
+import { IInputs } from './generated/ManifestTypes';
 import { Provider } from 'react-redux';
-import { store } from './store';
-import type { IInputs } from './generated/ManifestTypes';
-import QuestionnaireDesigner from './components/questionnaire-designer';
+import { store } from './src/store';
+import CustomComponent from './src/components/CustomComponent';
 
 export interface IAppProps {
   context: ComponentFramework.Context<IInputs>;
@@ -12,7 +12,7 @@ export const App = ({ context }: IAppProps) => {
   console.log('🚀 ~ context:', context);
   return (
     <Provider store={store}>
-      <QuestionnaireDesigner context={context} />
+      <CustomComponent context={context} />
     </Provider>
   );
 };

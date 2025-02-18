@@ -8,8 +8,8 @@
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Pcf.props" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Pcf.props')" />
 
   <PropertyGroup>
-    <Name>QuestionnaireDesigner</Name>
-    <ProjectGuid>19c17e61-428c-48af-bc8d-42b418857be5</ProjectGuid>
+    <Name>test</Name>
+    <ProjectGuid>d4150223-8ead-4d23-8ded-360d1fc2cb6c</ProjectGuid>
     <OutputPath>$(MSBuildThisFileDirectory)out\controls</OutputPath>
   </PropertyGroup>
 
