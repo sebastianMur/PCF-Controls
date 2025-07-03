@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="0.0.1" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
+		<external-service-usage enabled="false">
+		</external-service-usage>
+		<property name="templateSettings" display-name-key="ExecuteAFETemplateConfiguration" description-key="ExecuteAFETemplateConfiguration" of-type="Multiple" usage="bound" required="true" />
+		<property name="WPNId" display-name-key="DO NOT USE" description-key="Only used for development" of-type="SingleLine.Text" usage="input" required="false" />
+		<property name="TemplateMode" display-name-key="TemplateMode" description-key="Template Mode" of-type="Enum" usage="input" default-value="design">
+			<value display-name-key="design" name="Design">design</value>
+			<value display-name-key="completion" name="Completion">completion</value>
+		</property>
+		<resources>
+			<code path="index.ts" order="1" />
+			<platform-library name="React" version="16.14.0" />
+			<platform-library name="Fluent" version="9.46.2" />
+		</resources>
+		<feature-usage>
+			<uses-feature name="Utility" required="true" />
+			<uses-feature name="WebAPI" required="true" />
+		</feature-usage>
+	</control>
+</manifest>

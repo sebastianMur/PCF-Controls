@@ -37,12 +37,53 @@ fi
 
 # Initialize the PCF control
 # Initialize the PCF control
-echo "Running command: pac pcf init -ns \"$NAMESPACE\" -n \"$CONTROL_NAME\" -t \"$TEMPLATE\" -npm -fw react"
-if ! pac pcf init -ns "$NAMESPACE" -n "$CONTROL_NAME" -t "$TEMPLATE" -npm -fw react 2>&1 | tee init.log; then
+echo "Running command: pac pcf init -ns \"$NAMESPACE\" -n \"$CONTROL_NAME\" -t \"$TEMPLATE\" -fw react"
+if ! pac pcf init -ns "$NAMESPACE" -n "$CONTROL_NAME" -t "$TEMPLATE" -fw react 2>&1 | tee init.log; then
   echo "Failed to initialize the PCF control. Please check the logs for more details."
   cat init.log
   exit 1
 fi
+
+# Create package.json
+cat <<EOL > package.json
+{
+  "name": "pcf-project",
+  "version": "1.0.0",
+  "description": "Project containing your PowerApps Component Framework (PCF) control.",
+  "scripts": {
+    "build": "pcf-scripts build",
+    "clean": "pcf-scripts clean",
+    "lint": "biome check $CONTROL_NAME",
+    "format": "biome check --write $CONTROL_NAME",
+    "rebuild": "pcf-scripts rebuild",
+    "start": "pcf-scripts start",
+    "start:watch": "pcf-scripts start watch",
+    "refreshTypes": "pcf-scripts refreshTypes"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.5.0",
+    "react-redux": "^8.1.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@fluentui/react-components": "9.46.2",
+    "@types/powerapps-component-framework": "^1.3.15",
+    "@types/react": "^16.14.60",
+    "@types/react-dom": "^16.9.24",
+    "eslint": "^9.20.1",
+    "globals": "^15.13.0",
+    "pcf-scripts": "^1",
+    "pcf-start": "^1",
+    "react": "^16.14.0",
+    "react-dom": "16.14.0",
+    "typescript": "^5.7.3",
+  }
+}
+EOL
+
+# Install necessary dependencies
+npm install
+
 
 
 # Configure Biome
@@ -51,306 +92,345 @@ npx @biomejs/biome init
 # Update biome.json
 cat <<EOL > biome.json
 {
-  "files": {
-    "ignore": ["node_modules"]
+  " \`\$schema\`": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 80, "lineEnding": "lf" },
+  "javascript": { "formatter": { "arrowParentheses": "asNeeded" } },
+  "organizeImports": { "enabled": true },
+  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "files": { "include": ["$CONTROL_NAME/**/*.ts*"], "ignore": ["out/**/*", "obj/**/*", "node_modules/**/*"] }
+}
+EOL
+
+# Update eslint.config.mjs
+cat <<EOL > eslint.config.mjs
+/** @type {import('eslint').Linter.Config[]} */
+export default [];
+EOL
+
+
+# Update webpack.config.js
+cat <<EOL > webpack.config.js
+const path = require('path');
+module.exports = {
+  resolve: {
+    alias: {
+      '@components': path.resolve(__dirname, '${CONTROL_NAME}/components'),
+      '@generated': path.resolve(__dirname, '${CONTROL_NAME}/generated'),
+      '@utils': path.resolve(__dirname, '${CONTROL_NAME}/utils'),
+    },
   },
-  "formatter": {
-    "ignore": ["node_modules"]
-  },
-  "linter": {
-    "rules": {
-      "recommended": true
-    }
-  }
+};
+
+EOL
+# Update tsconfig.json
+cat <<EOL > tsconfig.json
+{
+    "extends": "./node_modules/pcf-scripts/tsconfig_base.json",
+    "compilerOptions": {
+        "typeRoots": ["node_modules/@types"],
+        "strict": true,
+        "target": "ES2022",
+        "jsx": "react-jsx",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "lib": ["ES2022", "DOM"],
+        "strictPropertyInitialization": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "baseUrl": "./${CONTROL_NAME}",
+        "paths": {
+            "@components/*": ["./components/*"],
+            "@generated/*": ["./generated/*"],
+            "@utils/*": ["./utils/*"]
+        }
+    },
+    "exclude": ["./node_modules"]
+}
+EOL
+
+
+# Update featureconfig.json
+cat <<EOL > featureconfig.json
+{
+  "pcfAllowCustomWebpack": "on"
 }
 EOL
 
 
 
+EOL
+mkdir -p .vscode
 
+# Create settings.json in the .vscode folder
+cat <<EOL > ./.vscode/settings.json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "always",
+    "source.organizeImports.biome": "explicit",
+    "quickFix.biome": "always"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
+}
+
+EOL
 
 # Navigate to the project directory
 cd "$CONTROL_NAME" || exit
 
-# Install necessary dependencies
-npm install @fluentui/react@^8.68.2 @fluentui/react-components@^9.46.2 @reduxjs/toolkit@^2.5.0 react-redux@^8.0.1 uuid@^8.3.2
-npm install --save-dev tailwindcss ajv @biomejs/biome @types/lodash @types/react-redux @types/redux @types/redux-immutable-state-invariant @types/redux-thunk @types/uuid @types/xrm globals pcf-scripts pcf-start redux-devtools-extension 
 
 
 
 # Create recommended folder structure
-mkdir -p src/components/elements src/components/layout src/hooks src/store/api src/store/app src/utils src/css src/types
+mkdir -p components utils/hooks utils/store utils/types
+
+# Create manifest 
+cat <<EOL > ./ControlManifest.Input.xml
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="$NAMESPACE" constructor="$CONTROL_NAME" version="0.0.1" display-name-key="$CONTROL_NAME" description-key="$CONTROL_NAME description" control-type="virtual" >
+    <external-service-usage enabled="false">
+    </external-service-usage>
+    <property name="sampleProperty" display-name-key="Property_Display_Key" description-key="Property_Desc_Key" of-type="SingleLine.Text" usage="bound" required="true" />
+    <property name="DevelopmentEntityId" display-name-key="DO NOT USE" description-key="Only used for development" of-type="SingleLine.Text" usage="input" required="false" />
+    <resources>
+      <code path="index.ts" order="1"/>
+      <platform-library name="React" version="16.14.0" />
+      <platform-library name="Fluent" version="9.46.2" />
+    </resources>
+    <!-- UNCOMMENT TO ENABLE THE SPECIFIED API
+    <feature-usage>
+      <uses-feature name="Device.captureAudio" required="true" />
+      <uses-feature name="Device.captureImage" required="true" />
+      <uses-feature name="Device.captureVideo" required="true" />
+      <uses-feature name="Device.getBarcodeValue" required="true" />
+      <uses-feature name="Device.getCurrentPosition" required="true" />
+      <uses-feature name="Device.pickFile" required="true" />
+      <uses-feature name="Utility" required="true" />
+      <uses-feature name="WebAPI" required="true" />
+    </feature-usage>
+    -->
+  </control>
+</manifest>
+
+EOL
 
 
+# Create app.tsx in the component folder
+cat <<EOL > ./components/app.tsx
+import { Text } from "@fluentui/react-components";
 
-# Create index.ts in the store folder
-cat <<EOL > src/store/index.ts
+import { useGetDataQuery } from "@utils/store/api";
+import { ErrorMessage } from "./error";
+import { Loading } from "./loading";
+
+export const App = () => {
+     const { isLoading, isError } = useGetDataQuery("1");
+
+     if (isLoading) return <Loading />;
+     if (isError) return <ErrorMessage />;
+     return <Text>App</Text>;
+};
+EOL
+
+# Create Error.tsx in the component folder
+cat <<EOL > components/error.tsx
+import { Text } from "@fluentui/react-components";
+
+export const ErrorMessage = () => {
+     return <Text>There was an error</Text>;
+};
+EOL
+
+# Create Loading.tsx in the component folder
+cat <<EOL > components/loading.tsx
+import { Text } from '@fluentui/react-components';
+
+export const Loading = () => {
+  return <Text>Loading...</Text>;
+};
+EOL
+
+# Create index.tsx in the utils/hooks folder
+cat <<EOL > utils/hooks/index.ts
+export * from './useAppHooks';
+EOL
+
+# Create useAppHooks.tsx in the utils/hooks folder
+cat <<EOL > utils/hooks/useAppHooks.tsx
+import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
+
+import { AppDispatch } from '../store';
+import type { RootState } from '../store';
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+EOL
+
+# Create index.ts in the utils/store folder
+cat <<EOL > utils/store/index.ts
 import { configureStore } from '@reduxjs/toolkit';
-import pcfContextReducer from './app/context-slice';
-import { notes } from './api/notes-api-slice';
+
+import { api } from './api';
+import { contextSlice } from './context-slice';
+
 export const store = configureStore({
   reducer: {
-    pcfApi: pcfContextReducer,
-    [notes.reducerPath]: notes.reducer,
+    context: contextSlice.reducer,
+    [api.reducerPath]: api.reducer,
   },
-
-  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(notes.middleware),
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware().concat(api.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
+export * from './context-slice';
 
 EOL
 
-# Create a basic context slice
-cat <<EOL > src/store/app/context-slice.ts
+# Create api.ts in the utils/store folder
+cat <<EOL > utils/store/api.ts
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 
+import { selectBaseUrl } from '.';
+import type { RootState } from '.';
+
+export const api = createApi({
+  reducerPath: 'api',
+  baseQuery: ((args, store, extraOptions) =>
+    fetchBaseQuery({
+      baseUrl: \`\${selectBaseUrl(store.getState() as RootState)}/api/data/v9.2\`,
+    })(args, store, extraOptions)) as BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>,
+  endpoints: builder => ({
+    getData: builder.query<string, string>({
+      query: id => \`/entity(\${id})\`,
+    }),
+  }),
+});
+
+export const { useGetDataQuery } = api;
+
+EOL
+
+# Create context-slice.ts in the utils/store folder
+cat <<EOL > utils/store/context-slice.ts
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { IInputs } from '../../../generated/ManifestTypes';
-import type { IPage } from '../../types/page';
 
-interface IPCFContext {
-  context: ComponentFramework.Context<IInputs> | undefined;
-  baseUrl: string;
-}
+import type { RootState } from '.';
 
-const initialState: IPCFContext = {
-  context: undefined,
-  baseUrl: '',
-};
-
-const pcfContextSlice = createSlice({
-  name: 'pcfContext',
-  initialState,
+export const contextSlice = createSlice({
+  name: 'context',
+  initialState: { baseUrl: '', entityId: ''  },
   reducers: {
-    setContext: (state, action: PayloadAction<ComponentFramework.Context<IInputs>>) => {
-      const { payload } = action;
-      const { page } = payload as unknown as { page: IPage };
-
-      state.context = payload;
-      try {
-      state.baseUrl = (page as IPage).getClientUrl();
-      } catch (error) {
-        console.error('Error getting base URL', error);
-      }
-
-
+    setEntityId: (state, { payload }: PayloadAction<string>) => {
+      state.entityId = payload;
+    },
+    setBaseUrl: (state, { payload }: PayloadAction<string>) => {
+      state.baseUrl = payload;
     },
 
   },
 });
 
-export const { setContext } = pcfContextSlice.actions;
+export const selectEntityId = (state: RootState) => state.context.entityId;
+export const selectBaseUrl = (state: RootState) => state.context.baseUrl;
 
-export default pcfContextSlice.reducer;
-
-
-EOL
-
-# Create a basic API slice
-cat <<EOL > src/store/api/notes-api-slice.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../index';
-import type { INote } from '../../types/note';
-
-// const baseUrl = Xrm.Utility.getGlobalContext().getClientUrl() + '/api/data/v9.2';
-
-const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
-  // Get the base URL from the Redux state
-  const baseUrl = (api.getState() as RootState).pcfApi.baseUrl;
-
-  console.log('🚀 ~ dynamicBaseQuery ~ baseUrl:', api.getState());
-
-  if (!baseUrl) {
-    // Return an error if the base URL is not set
-    return {
-      error: {
-        status: 400,
-        statusText: 'Bad Request',
-        data: 'Base URL is not set in the state.',
-      },
-    };
-  }
-
-  // Adjust the args to include the base URL
-  const adjustedArgs =
-    typeof args === 'string'
-      ? { url: baseUrl + args } // If `args` is a string, prepend the base URL
-      : { ...args, url: baseUrl + args.url }; // If `args` is an object, adjust the `url` field
-
-  console.log('🚀 ~ constdynamicBaseQuery ~ adjustedArgs:', adjustedArgs);
-  // Use  with the adjusted arguments
-  const baseQuery = fetchBaseQuery({ baseUrl });
-  return baseQuery(adjustedArgs, api, extraOptions);
-};
-
-export const notes = createApi({
-  baseQuery: dynamicBaseQuery,
-  endpoints: builder => ({
-    getNotes: builder.query<INote[], void>({
-      query: () => '/api/data/v9.2/annotations?=annotationid,documentbody,filename,filesize',
-    }),
-
-    createBooking: builder.mutation<INote, Omit<INote, 'annotationId'>>({
-      query: post => ({
-        url: '/api/data/v9.2/annotations',
-        method: 'POST',
-        body: post,
-      }),
-    }),
-  }),
-});
-
-export const { useGetNotesQuery } = notes;
+export const { setEntityId, setBaseUrl } = contextSlice.actions;
 
 EOL
 
-# Create the main App component
-cat <<EOL > ./app.tsx
-import * as React from 'react';
-import { IInputs } from './generated/ManifestTypes';
-import { Provider } from 'react-redux';
-import { store } from './src/store';
-import CustomComponent from './src/components/CustomComponent';
+# Create index.ts in the utils/types folder
+cat <<EOL > utils/types/index.ts
 
-export interface IAppProps {
-  context: ComponentFramework.Context<IInputs>;
-}
-
-export const App = ({ context }: IAppProps) => {
-  console.log('🚀 ~ context:', context);
-  return (
-    <Provider store={store}>
-      <CustomComponent context={context} />
-    </Provider>
-  );
-};
-EOL
-
-# Create a custom component
-cat <<EOL > src/components/CustomComponent.tsx
-import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setContext } from '../store/app/context-slice';
-import { useGetNotesQuery } from '../store/api/notes-api-slice';
-import type { AppDispatch, RootState } from '../store';
-import { IInputs } from '../../generated/ManifestTypes';
-
-interface ICustomComponent {
-  context: ComponentFramework.Context<IInputs>;
-}
-
-const CustomComponent = ({ context }: ICustomComponent) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const ctx = useSelector((state: RootState) => state.pcfApi.context);
-  const { data: notes, isLoading } = useGetNotesQuery();
-
-  React.useEffect(() => {
-    dispatch(setContext(context));
-  }, [dispatch, context]);
-
-  if (!ctx || isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div>
-      <h1>Notes</h1>
-      <ul>
-        {notes?.map(note => (
-          <li key={note.annotationid}>{note.filename}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default CustomComponent;
+export * from './PCFContext';
 
 EOL
 
+# Create index.ts in the utils/types folder
+cat <<EOL > utils/types/PCFContext.ts
 
-
-# Create types
-cat <<EOL > src/types/note.ts
-export interface INote {
-  annotationid: string;
-  documentbody: string;
-  filename: string;
-  filesize: number;
-}
-EOL
-
-cat <<EOL > src/types/page.ts
-export interface IPage {
-  appId: string;
-  entityTypeName: string;
-  entityId: string;
-  isPageReadOnly: boolean;
-  getClientUrl: () => string;
-}
+export type ContextPage = { page: { getClientUrl: () => string } };
 
 EOL
 
-# Create a basic CSS file
-
-cat <<EOL > src/css/index.css
-/* Add your styles here */
-EOL
-
-# Update the manifest file to include the CSS
-sed -i '/<resources>/a \ \ <css path="src/css/index.css" />' ControlManifest.Input.xml
 
 # remove the helloWorld file
 rm ./helloWorld.tsx
 
 
-# Update references to the HelloWorld component in index.ts
+# Update main index.ts
 cat <<EOL > index.ts
-import { IInputs, IOutputs } from './generated/ManifestTypes';
-import { App, IAppProps } from './app';
-import * as React from 'react';
+import { createElement } from 'react';
+import type { ReactElement } from 'react';
+import { Provider } from 'react-redux';
+import type { ProviderProps } from 'react-redux';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+
+import type { IInputs, IOutputs } from '@generated/ManifestTypes';
+import type { ContextPage } from '@utils/types';
+import {  setBaseUrl, setEntityId, createStore } from '@utils/store';
+import { App } from '@components/app';
 
 
 export class ${CONTROL_NAME} implements ComponentFramework.ReactControl<IInputs, IOutputs> {
-  private notifyOutputChanged: () => void;
-  private context: ComponentFramework.Context<IInputs>;
- 
+  private store: ReturnType<typeof createStore>;
+
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
   constructor() {}
 
+  private initializeStore(context: ComponentFramework.Context<IInputs>): void {
+    const store = createStore();
 
-  public init(context: ComponentFramework.Context<IInputs>, notifyOutputChanged: () => void, state: ComponentFramework.Dictionary): void {
-    this.notifyOutputChanged = notifyOutputChanged;
-    this.context = context;
+    this.store = store;
+
+    const { page } = context as unknown as ContextPage;
+
+    if (context.parameters.DevelopmentEntityId.raw) {
+      store.dispatch(setEntityId(context.parameters.DevelopmentEntityId.raw));
+      store.dispatch(setBaseUrl('http://localhost:3030'));
+    } else {
+      store.dispatch(setEntityId(page.entityId));
+      store.dispatch(setBaseUrl(page.getClientUrl()));
+    }
+
   }
 
-  public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
-    this.context = context;
-    const props: IAppProps = {
-      context: this.context,
-    };
 
-    return React.createElement(App, props);
+  public init(context: ComponentFramework.Context<IInputs>): void {
+    this.initializeStore(context);
+  }
+
+  public updateView(): ReactElement {
+    return createElement(
+      Provider,
+      { store: this.store } as ProviderProps,
+      createElement(
+        FluentProvider,
+        { theme: webLightTheme, style: { width: '100%' } },
+        createElement(App)
+      )
+    );
   }
 
   public getOutputs(): IOutputs {
     return {};
   }
 
-  public destroy(): void {
-    // Add code to cleanup control if necessary
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+  public destroy(): void {}
   }
-}
 EOL
-
-
-
-
-
-# Update references to the HelloWorld component in index.ts
-sed -i "s/import { HelloWorld, IHelloWorldProps } from '.\/HelloWorld';/import { App, IAppProps } from '.\/App';/" index.ts
-
-echo "PCF control '$CONTROL_NAME' created successfully with the specified structure."

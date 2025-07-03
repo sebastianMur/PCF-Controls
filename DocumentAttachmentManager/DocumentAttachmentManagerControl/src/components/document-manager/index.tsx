@@ -1,19 +1,17 @@
-'use client';
-
-import { Upload, Eye } from 'lucide-react';
-import { Button } from '../elements/button';
-import { Card, CardContent } from '../elements/card';
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '../elements/dialog';
-import { Input } from '../elements/input';
+import { Eye, Upload } from 'lucide-react';
 import React from 'react';
-import { ImageCarousel } from './image-carousel';
-import { DocumentList } from './document-list';
+import { v4 as uuid } from 'uuid';
 import { useDocumentManager } from '../../hooks/document-manager-hook';
 import type { IDocument } from '../../types/document-manager';
+import { Button } from '../elements/button';
+import { Card, CardContent } from '../elements/card';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../elements/dialog';
+import { Input } from '../elements/input';
+import { DocumentList } from './document-list';
 import { DocumentListSkeleton } from './document-list-skeleton';
-import { v4 as uuid } from 'uuid';
 import { DuplicateDialog } from './duplicateDialog';
-// import ErrorBoundary from '../error-boundary';
+import { ImageCarousel } from './image-carousel';
+
 export default function DocumentManager() {
   const {
     isLoading,
