@@ -1,0 +1,9 @@
+{
+  "webApiProxy": {
+    "clientid": "Service Principal Client ID",
+    "secret": "App registration KEY",
+    "tenantid": "service principal tenantid",
+    "resource": "environtmenturl",
+    "target": "environtmenturl"
+  }
+}
