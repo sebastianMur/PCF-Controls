@@ -77,8 +77,6 @@ cat <<EOL > package.json
     "react": "^16.14.0",
     "react-dom": "16.14.0",
     "typescript": "^5.7.3",
-    "ajv": "^7.2.4"
-
   }
 }
 EOL
@@ -94,7 +92,7 @@ npx @biomejs/biome init
 # Update biome.json
 cat <<EOL > biome.json
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  " \`\$schema\`": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 80, "lineEnding": "lf" },
   "javascript": { "formatter": { "arrowParentheses": "asNeeded" } },
   "organizeImports": { "enabled": true },
@@ -195,13 +193,14 @@ cd "$CONTROL_NAME" || exit
 mkdir -p components utils/hooks utils/store utils/types
 
 # Create manifest 
-cat <<EOL > ./components/app.tsx
+cat <<EOL > ./ControlManifest.Input.xml
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="$NAMESPACE" constructor="$CONTROL_NAME" version="0.0.1" display-name-key="$CONTROL_NAME" description-key="$CONTROL_NAME" description" control-type="virtual" >
+  <control namespace="$NAMESPACE" constructor="$CONTROL_NAME" version="0.0.1" display-name-key="$CONTROL_NAME" description-key="$CONTROL_NAME description" control-type="virtual" >
     <external-service-usage enabled="false">
     </external-service-usage>
     <property name="sampleProperty" display-name-key="Property_Display_Key" description-key="Property_Desc_Key" of-type="SingleLine.Text" usage="bound" required="true" />
+    <property name="DevelopmentEntityId" display-name-key="DO NOT USE" description-key="Only used for development" of-type="SingleLine.Text" usage="input" required="false" />
     <resources>
       <code path="index.ts" order="1"/>
       <platform-library name="React" version="16.14.0" />
@@ -328,32 +327,29 @@ EOL
 
 # Create context-slice.ts in the utils/store folder
 cat <<EOL > utils/store/context-slice.ts
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { IInputs } from '@generated/ManifestTypes';
-import type { ContextPage } from '../types';
 import type { RootState } from '.';
 
 export const contextSlice = createSlice({
   name: 'context',
-  initialState: { baseUrl: '' },
+  initialState: { baseUrl: '', entityId: ''  },
   reducers: {
-    initContext: (
-      state,
-      { payload }: PayloadAction<ComponentFramework.Context<IInputs>>
-    ) => {
-      try {
-        state.baseUrl = (payload as unknown as ContextPage).page.getClientUrl();
-      } catch (error) {
-        state.baseUrl = 'http://localhost:3030'; // for development
-      }
+    setEntityId: (state, { payload }: PayloadAction<string>) => {
+      state.entityId = payload;
     },
+    setBaseUrl: (state, { payload }: PayloadAction<string>) => {
+      state.baseUrl = payload;
+    },
+
   },
 });
 
+export const selectEntityId = (state: RootState) => state.context.entityId;
 export const selectBaseUrl = (state: RootState) => state.context.baseUrl;
 
-export const { initContext } = contextSlice.actions;
+export const { setEntityId, setBaseUrl } = contextSlice.actions;
 
 EOL
 
@@ -385,23 +381,43 @@ import type { ProviderProps } from 'react-redux';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 
 import type { IInputs, IOutputs } from '@generated/ManifestTypes';
-import { initContext, store } from '@utils/store';
+import type { ContextPage } from '@utils/types';
+import {  setBaseUrl, setEntityId, createStore } from '@utils/store';
 import { App } from '@components/app';
 
 
 export class ${CONTROL_NAME} implements ComponentFramework.ReactControl<IInputs, IOutputs> {
+  private store: ReturnType<typeof createStore>;
 
   // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
   constructor() {}
 
+  private initializeStore(context: ComponentFramework.Context<IInputs>): void {
+    const store = createStore();
+
+    this.store = store;
+
+    const { page } = context as unknown as ContextPage;
+
+    if (context.parameters.DevelopmentEntityId.raw) {
+      store.dispatch(setEntityId(context.parameters.DevelopmentEntityId.raw));
+      store.dispatch(setBaseUrl('http://localhost:3030'));
+    } else {
+      store.dispatch(setEntityId(page.entityId));
+      store.dispatch(setBaseUrl(page.getClientUrl()));
+    }
+
+  }
+
+
   public init(context: ComponentFramework.Context<IInputs>): void {
-    store.dispatch(initContext(context));
+    this.initializeStore(context);
   }
 
   public updateView(): ReactElement {
     return createElement(
       Provider,
-      { store } as ProviderProps,
+      { store: this.store } as ProviderProps,
       createElement(
         FluentProvider,
         { theme: webLightTheme, style: { width: '100%' } },

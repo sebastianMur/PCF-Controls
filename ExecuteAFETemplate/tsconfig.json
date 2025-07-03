@@ -1,0 +1,25 @@
+{
+    "extends": "./node_modules/pcf-scripts/tsconfig_base.json",
+    "compilerOptions": {
+        "typeRoots": ["node_modules/@types"],
+        "strict": true,
+        "target": "ES2022",
+        "jsx": "react-jsx",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "lib": ["ES2022", "DOM"],
+        "strictPropertyInitialization": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "baseUrl": "./ExecuteAFETemplateControl",
+        "paths": {
+            "@components/*": ["./components/*"],
+            "@generated/*": ["./generated/*"],
+            "@utils/*": ["./utils/*"]
+        }
+    },
+    "exclude": ["./node_modules"]
+}

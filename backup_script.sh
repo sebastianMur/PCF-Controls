@@ -53,8 +53,8 @@ cat <<EOL > package.json
   "scripts": {
     "build": "pcf-scripts build",
     "clean": "pcf-scripts clean",
-    "lint": "biome check $CONTROL_NAME",
-    "format": "biome check --write $CONTROL_NAME",
+    "lint": "pcf-scripts lint",
+    "lint:fix": "pcf-scripts lint fix",
     "rebuild": "pcf-scripts rebuild",
     "start": "pcf-scripts start",
     "start:watch": "pcf-scripts start watch",
@@ -66,19 +66,23 @@ cat <<EOL > package.json
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@eslint/js": "^9.17.0",
     "@fluentui/react-components": "9.46.2",
+    "@microsoft/eslint-plugin-power-apps": "^0.2.51",
     "@types/powerapps-component-framework": "^1.3.15",
     "@types/react": "^16.14.60",
     "@types/react-dom": "^16.9.24",
-    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-promise": "^7.1.0",
+    "eslint-plugin-react": "^7.37.2",
     "globals": "^15.13.0",
     "pcf-scripts": "^1",
     "pcf-start": "^1",
+    "prettier": "^3.4.2",
     "react": "^16.14.0",
     "react-dom": "16.14.0",
     "typescript": "^5.7.3",
-    "ajv": "^7.2.4"
-
+    "typescript-eslint": "^8.18.1"
   }
 }
 EOL
@@ -93,22 +97,300 @@ npx @biomejs/biome init
 
 # Update biome.json
 cat <<EOL > biome.json
+# Update biome.json
+cat <<EOL > biome.json
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 80, "lineEnding": "lf" },
-  "javascript": { "formatter": { "arrowParentheses": "asNeeded" } },
-  "organizeImports": { "enabled": true },
-  "linter": { "enabled": true, "rules": { "recommended": true } },
-  "files": { "include": ["$CONTROL_NAME/**/*.ts*"], "ignore": ["out/**/*", "obj/**/*", "node_modules/**/*"] }
+	"files": { "ignore": ["node_modules"] },
+	"formatter": { "ignore": ["node_modules"] },
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"a11y": { "noBlankTarget": "error" },
+			"complexity": {
+				"noExtraBooleanCast": "error",
+				"noMultipleSpacesInRegularExpressionLiterals": "error",
+				"noUselessCatch": "error",
+				"noUselessTypeConstraint": "error",
+				"noWith": "error",
+				"useLiteralKeys": "error",
+				"useOptionalChain": "error"
+			},
+			"correctness": {
+				"noChildrenProp": "error",
+				"noConstAssign": "error",
+				"noConstantCondition": "error",
+				"noEmptyCharacterClassInRegex": "error",
+				"noEmptyPattern": "error",
+				"noGlobalObjectCalls": "error",
+				"noInvalidBuiltinInstantiation": "error",
+				"noInvalidConstructorSuper": "error",
+				"noNonoctalDecimalEscape": "error",
+				"noPrecisionLoss": "error",
+				"noSelfAssign": "error",
+				"noSetterReturn": "error",
+				"noSwitchDeclarations": "error",
+				"noUndeclaredVariables": "error",
+				"noUnreachable": "error",
+				"noUnreachableSuper": "error",
+				"noUnsafeFinally": "error",
+				"noUnsafeOptionalChaining": "error",
+				"noUnusedLabels": "error",
+				"noUnusedPrivateClassMembers": "error",
+				"noUnusedVariables": "error",
+				"useArrayLiterals": "off",
+				"useIsNan": "error",
+				"useJsxKeyInIterable": "error",
+				"useValidForDirection": "error",
+				"useYield": "error"
+			},
+			"security": { "noDangerouslySetInnerHtmlWithChildren": "error" },
+			"style": {
+				"noInferrableTypes": "error",
+				"noNamespace": "error",
+				"useAsConstAssertion": "error",
+				"useConsistentArrayType": "error",
+				"useForOf": "error",
+				"useShorthandFunctionType": "error"
+			},
+			"suspicious": {
+				"noAsyncPromiseExecutor": "error",
+				"noCatchAssign": "error",
+				"noClassAssign": "error",
+				"noCommentText": "error",
+				"noCompareNegZero": "error",
+				"noControlCharactersInRegex": "error",
+				"noDebugger": "error",
+				"noDuplicateCase": "error",
+				"noDuplicateClassMembers": "error",
+				"noDuplicateJsxProps": "error",
+				"noDuplicateObjectKeys": "error",
+				"noDuplicateParameters": "error",
+				"noEmptyBlockStatements": "error",
+				"noExplicitAny": "error",
+				"noExtraNonNullAssertion": "error",
+				"noFallthroughSwitchClause": "error",
+				"noFunctionAssign": "error",
+				"noGlobalAssign": "error",
+				"noImportAssign": "error",
+				"noMisleadingCharacterClass": "error",
+				"noMisleadingInstantiator": "error",
+				"noPrototypeBuiltins": "error",
+				"noRedeclare": "error",
+				"noShadowRestrictedNames": "error",
+				"noSparseArray": "error",
+				"noUnsafeDeclarationMerging": "error",
+				"noUnsafeNegation": "error",
+				"useAwait": "error",
+				"useGetterReturn": "error",
+				"useNamespaceKeyword": "error",
+				"useValidTypeof": "error"
+			}
+		},
+		"ignore": ["**/generated"]
+	},
+	"javascript": {
+		"globals": [
+			"onscrollend",
+			"onpointerleave",
+			"oncontextrestored",
+			"onemptied",
+			"ongamepaddisconnected",
+			"onkeypress",
+			"onloadeddata",
+			"onmouseup",
+			"onvolumechange",
+			"onpaste",
+			"onstorage",
+			"onkeyup",
+			"onabort",
+			"oncut",
+			"ontransitionrun",
+			"onafterprint",
+			"onblur",
+			"ondurationchange",
+			"ontransitionstart",
+			"oncanplaythrough",
+			"onanimationend",
+			"onmouseleave",
+			"ondragleave",
+			"onplay",
+			"onunhandledrejection",
+			"onbeforeprint",
+			"onpointercancel",
+			"onsubmit",
+			"ondragstart",
+			"onmessage",
+			"location",
+			"onoffline",
+			"onappinstalled",
+			"onwheel",
+			"onended",
+			"onkeydown",
+			"onclick",
+			"onfocus",
+			"onscroll",
+			"ongamepadconnected",
+			"oncanplay",
+			"ComponentFramework",
+			"onpointerdown",
+			"ondeviceorientationabsolute",
+			"onauxclick",
+			"ondevicemotion",
+			"onratechange",
+			"ontransitionend",
+			"onscrollsnapchanging",
+			"onchange",
+			"onselect",
+			"onbeforeinstallprompt",
+			"onbeforetoggle",
+			"onmouseout",
+			"ontimeupdate",
+			"ondragover",
+			"oncuechange",
+			"ontransitioncancel",
+			"onprogress",
+			"onbeforeinput",
+			"onpointerenter",
+			"onmouseenter",
+			"oninvalid",
+			"onpointerout",
+			"onpagereveal",
+			"onpause",
+			"onanimationstart",
+			"onwaiting",
+			"onscrollsnapchange",
+			"ondeviceorientation",
+			"onclose",
+			"onbeforeunload",
+			"oncancel",
+			"onseeked",
+			"onpointerover",
+			"ongotpointercapture",
+			"onloadedmetadata",
+			"onpageshow",
+			"onstalled",
+			"oncontextmenu",
+			"onreset",
+			"ondrag",
+			"onbeforematch",
+			"onload",
+			"onlostpointercapture",
+			"onsuspend",
+			"onselectionchange",
+			"onpagehide",
+			"onrejectionhandled",
+			"onunload",
+			"onanimationcancel",
+			"onmousedown",
+			"onpointerup",
+			"onmouseover",
+			"onformdata",
+			"oncontentvisibilityautostatechange",
+			"onresize",
+			"onsearch",
+			"ontoggle",
+			"onpageswap",
+			"onbeforexrselect",
+			"onlanguagechange",
+			"ondragenter",
+			"onerror",
+			"onpointermove",
+			"onmousemove",
+			"ondrop",
+			"onhashchange",
+			"onsecuritypolicyviolation",
+			"onslotchange",
+			"oncopy",
+			"onanimationiteration",
+			"ondblclick",
+			"ondragend",
+			"onpointerrawupdate",
+			"onpopstate",
+			"onplaying",
+			"oncontextlost",
+			"onloadstart",
+			"onseeking",
+			"oninput",
+			"onmessageerror",
+			"onselectstart",
+			"onmousewheel",
+			"ononline"
+		]
+	},
+	"overrides": [
+		{
+			"include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noConstAssign": "off",
+						"noGlobalObjectCalls": "off",
+						"noInvalidBuiltinInstantiation": "off",
+						"noInvalidConstructorSuper": "off",
+						"noNewSymbol": "off",
+						"noSetterReturn": "off",
+						"noUndeclaredVariables": "off",
+						"noUnreachable": "off",
+						"noUnreachableSuper": "off"
+					},
+					"style": {
+						"noArguments": "error",
+						"noVar": "error",
+						"useConst": "error"
+					},
+					"suspicious": {
+						"noClassAssign": "off",
+						"noDuplicateClassMembers": "off",
+						"noDuplicateObjectKeys": "off",
+						"noDuplicateParameters": "off",
+						"noFunctionAssign": "off",
+						"noImportAssign": "off",
+						"noRedeclare": "off",
+						"noUnsafeNegation": "off",
+						"useGetterReturn": "off"
+					}
+				}
+			}
+		},
+		{
+			"include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noConstAssign": "off",
+						"noGlobalObjectCalls": "off",
+						"noInvalidBuiltinInstantiation": "off",
+						"noInvalidConstructorSuper": "off",
+						"noNewSymbol": "off",
+						"noSetterReturn": "off",
+						"noUndeclaredVariables": "off",
+						"noUnreachable": "off",
+						"noUnreachableSuper": "off"
+					},
+					"style": {
+						"noArguments": "error",
+						"noVar": "error",
+						"useConst": "error"
+					},
+					"suspicious": {
+						"noClassAssign": "off",
+						"noDuplicateClassMembers": "off",
+						"noDuplicateObjectKeys": "off",
+						"noDuplicateParameters": "off",
+						"noFunctionAssign": "off",
+						"noImportAssign": "off",
+						"noRedeclare": "off",
+						"noUnsafeNegation": "off",
+						"useGetterReturn": "off"
+					}
+				}
+			}
+		}
+	]
 }
-EOL
 
-# Update eslint.config.mjs
-cat <<EOL > eslint.config.mjs
-/** @type {import('eslint').Linter.Config[]} */
-export default [];
 EOL
-
+EOL
 
 # Update webpack.config.js
 cat <<EOL > webpack.config.js
@@ -161,29 +443,19 @@ cat <<EOL > featureconfig.json
 }
 EOL
 
-
-
-EOL
-mkdir -p .vscode
-
-# Create settings.json in the .vscode folder
-cat <<EOL > ./.vscode/settings.json
+# Update prettierrc.json
+cat <<EOL > prettierrc.json
 {
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.biome": "always",
-    "source.organizeImports.biome": "explicit",
-    "quickFix.biome": "always"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  }
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 80,
+  "arrowParens": "avoid"
 }
 
 EOL
+
 
 # Navigate to the project directory
 cd "$CONTROL_NAME" || exit
@@ -194,60 +466,30 @@ cd "$CONTROL_NAME" || exit
 # Create recommended folder structure
 mkdir -p components utils/hooks utils/store utils/types
 
-# Create manifest 
-cat <<EOL > ./components/app.tsx
-<?xml version="1.0" encoding="utf-8" ?>
-<manifest>
-  <control namespace="$NAMESPACE" constructor="$CONTROL_NAME" version="0.0.1" display-name-key="$CONTROL_NAME" description-key="$CONTROL_NAME" description" control-type="virtual" >
-    <external-service-usage enabled="false">
-    </external-service-usage>
-    <property name="sampleProperty" display-name-key="Property_Display_Key" description-key="Property_Desc_Key" of-type="SingleLine.Text" usage="bound" required="true" />
-    <resources>
-      <code path="index.ts" order="1"/>
-      <platform-library name="React" version="16.14.0" />
-      <platform-library name="Fluent" version="9.46.2" />
-    </resources>
-    <!-- UNCOMMENT TO ENABLE THE SPECIFIED API
-    <feature-usage>
-      <uses-feature name="Device.captureAudio" required="true" />
-      <uses-feature name="Device.captureImage" required="true" />
-      <uses-feature name="Device.captureVideo" required="true" />
-      <uses-feature name="Device.getBarcodeValue" required="true" />
-      <uses-feature name="Device.getCurrentPosition" required="true" />
-      <uses-feature name="Device.pickFile" required="true" />
-      <uses-feature name="Utility" required="true" />
-      <uses-feature name="WebAPI" required="true" />
-    </feature-usage>
-    -->
-  </control>
-</manifest>
-
-EOL
-
-
 # Create app.tsx in the component folder
 cat <<EOL > ./components/app.tsx
-import { Text } from "@fluentui/react-components";
+import { Text } from '@fluentui/react-components';
 
-import { useGetDataQuery } from "@utils/store/api";
-import { ErrorMessage } from "./error";
-import { Loading } from "./loading";
+import { useGetDataQuery } from '@utils/store/api';
+import { Loading } from './loading';
+import { Error } from './error';
 
 export const App = () => {
-     const { isLoading, isError } = useGetDataQuery("1");
+  const {  isLoading, isError } = useGetDataQuery('1');
 
-     if (isLoading) return <Loading />;
-     if (isError) return <ErrorMessage />;
-     return <Text>App</Text>;
+  if (isLoading) return <Loading />
+  if (isError) return <Error />
+  return <Text>App</Text>
 };
+
 EOL
 
 # Create Error.tsx in the component folder
 cat <<EOL > components/error.tsx
-import { Text } from "@fluentui/react-components";
+import { Text } from '@fluentui/react-components';
 
-export const ErrorMessage = () => {
-     return <Text>There was an error</Text>;
+export const Error = () => {
+  return <Text>There was an error</Text>;
 };
 EOL
 
@@ -376,7 +618,7 @@ EOL
 rm ./helloWorld.tsx
 
 
-# Update main index.ts
+# Update references to the HelloWorld component in index.ts
 cat <<EOL > index.ts
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
@@ -390,8 +632,7 @@ import { App } from '@components/app';
 
 
 export class ${CONTROL_NAME} implements ComponentFramework.ReactControl<IInputs, IOutputs> {
-
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
   public init(context: ComponentFramework.Context<IInputs>): void {
@@ -414,7 +655,6 @@ export class ${CONTROL_NAME} implements ComponentFramework.ReactControl<IInputs,
     return {};
   }
 
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public destroy(): void {}
-  }
 EOL
