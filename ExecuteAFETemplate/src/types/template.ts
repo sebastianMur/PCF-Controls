@@ -3,11 +3,24 @@ export interface LineItem {
   gfcmId: string;
   name: string;
 }
-
+export interface D365LineItem {
+  "@odata.etag": string;
+  new_name: string;
+  new_lineitemid: string;
+  _new_gfcmid_value: string;
+}
 export interface GFCM {
   GFCMID: string;
   name: string;
   templateId: string;
+  gfcmCode: string;
+}
+export interface D365GFCM {
+  "@odata.etag": string;
+  new_gfcmid: string;
+  _new_templateid_value: string;
+  new_gfcmcode: string;
+  new_name: string;
 }
 
 export interface Unit {
@@ -21,8 +34,17 @@ export interface LineItemDetails {
   gfcmSummaryId: string;
   quantity: number;
   unitPrice: number;
-  unit: Unit;
+  unit: number;
   total: number;
+}
+export interface D365LineItemDetails {
+  new_lineitemdetailid: string;
+  _new_lineitem_value: string;
+  _new_gfcmsummaryid_value: string;
+  new_quantity: number;
+  new_unitprice: number;
+  new_unit: number;
+  new_total: number;
 }
 
 export interface GFCMSummary {
@@ -32,17 +54,36 @@ export interface GFCMSummary {
   total: 0;
 }
 
+export interface D365GFCMSummary {
+  new_gfcmsummaryid: string;
+  _new_gfcmid_value: string;
+  _new_templatesummaryid_value: string;
+  new_total: 0;
+}
+
 export interface TemplateSummary {
   templateSummaryId: string;
   templateId: string;
-  wpnId: string;
   grandTotal: number;
   name: string;
+}
+export interface D365TemplateSummary {
+  new_templatesummaryid: string;
+  new_name: string;
+  _new_templateid_value: string;
+  new_grandtotal: number;
 }
 
 export interface Template {
   templateId: string;
   name: string;
+}
+
+export interface D365Template {
+  "@odata.context": string;
+  "@odata.etag": string;
+  new_name: string;
+  new_templateid: string;
 }
 
 export interface WPN {
@@ -60,9 +101,13 @@ export interface Attachment {
   fileUrl: string;
 }
 
+// export interface D365Attachment {
+//   annotationid: string;
+//   notetext:
+// }
+
 // Template completion data structure
 export interface TemplateCompletionData {
-  wpns: WPN[];
   template: Template;
   templateSummary: TemplateSummary;
   gfcms: GFCM[];

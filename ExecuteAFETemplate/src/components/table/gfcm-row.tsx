@@ -33,11 +33,10 @@ export const GFCMRow: React.FC<{
           onClick={onToggle}
           style={{ color: tokens.colorNeutralForeground1 }}
         />
-        <Text weight="semibold">{gfcm?.GFCMID}</Text>
-      </TableCell>
-      <TableCell>
+        <Text weight="semibold">{gfcm?.gfcmCode}</Text>-
         <Text weight="semibold">{gfcm?.name ?? "-"}</Text>
       </TableCell>
+
       <TableCell>
         <Text>-</Text>
       </TableCell>

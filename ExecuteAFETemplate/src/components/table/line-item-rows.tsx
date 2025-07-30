@@ -40,9 +40,7 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
         <TableCell className={`${styles.lineItemCell} ${styles.itemColumn}`}>
           <Text className={styles.cellContent}>{item.name}</Text>
         </TableCell>
-        <TableCell>
-          <Text className={styles.readonlyCell}>-</Text>
-        </TableCell>
+
         <TableCell>
           <Input
             type="number"
@@ -61,7 +59,7 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
         </TableCell>
         <TableCell>
           <Dropdown
-            value={detail.unit.value}
+            value={unitOptions.find(u => u.key === detail.unit)?.value ?? ""}
             disabled={isLocked}
             onOptionSelect={(
               _event: SelectionEvents,

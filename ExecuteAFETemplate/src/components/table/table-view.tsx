@@ -48,21 +48,16 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
             >
               <TableHeader>
                 <TableRow>
-                  {[
-                    "Item",
-                    "GFCM Name",
-                    "Unit Price",
-                    "Unit",
-                    "Quantity",
-                    "Total",
-                  ].map(header => (
-                    <TableHeaderCell
-                      key={header}
-                      // className={styles.headerCell}
-                    >
-                      {header}
-                    </TableHeaderCell>
-                  ))}
+                  {["Item", "Unit Price", "Unit", "Quantity", "Total"].map(
+                    header => (
+                      <TableHeaderCell
+                        key={header}
+                        // className={styles.headerCell}
+                      >
+                        {header}
+                      </TableHeaderCell>
+                    ),
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>

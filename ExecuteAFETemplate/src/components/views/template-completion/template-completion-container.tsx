@@ -18,7 +18,7 @@ export default function TemplateCompletionContainer() {
     data: templateData,
     error,
     isLoading,
-  } = useGetTemplateCompletionDataQuery(templateId);
+  } = useGetTemplateCompletionDataQuery({ templateId });
 
   // Initialize local data when API data is loaded
   if (templateData && !localData) {

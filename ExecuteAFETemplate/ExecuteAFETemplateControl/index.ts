@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { Provider } from 'react-redux';
 import type { ProviderProps } from 'react-redux';
 import type { ContextPage } from '../src/types';
-import { createStore, setBaseUrl, setTemplateId, setTemplateMode, setWPNId } from '@/store';
+import { createStore, setBaseUrl, setTemplateId,  setTemplateSummaryId, } from '@/store';
 import { IInputs, IOutputs } from './generated/ManifestTypes';
 import { AppProviders } from '@/app/provider';
 import TemplateCompletionContainer from '@/components/views/template-completion/template-completion-container';
@@ -28,15 +28,33 @@ export class ExecuteAFETemplateControl implements ComponentFramework.ReactContro
 
   public updateView(context: ComponentFramework.Context<IInputs>): // context: ComponentFramework.Context<IInputs>,
   ReactElement {
-    const templateMode = context.parameters.TemplateMode.raw;
-    const templateId = context.parameters.templateId.raw;
-    const wpnId = context.parameters.WPNId.raw;
-    if(wpnId && wpnId !== "val" && templateId && templateId !== "val" ){
-      this.store.dispatch(setWPNId(wpnId));
+       const templateLookup = context.parameters.templateId.raw;
+    const templateSummaryLookup = context.parameters.templateSummaryId.raw;
+
+    const getLookupId = (lookup: any): string | undefined => {
+      if (Array.isArray(lookup) && lookup.length > 0 && lookup[0]?.id) {
+        return lookup[0].id;
+      }
+
+      if (typeof lookup === "string") {
+        return lookup;
+      }
+
+      return undefined;
+    };
+
+    const templateId = getLookupId(templateLookup);
+    const templateSummaryId = getLookupId(templateSummaryLookup);
+
+    if (templateId) {
       this.store.dispatch(setTemplateId(templateId));
     }
-    this.store.dispatch(setTemplateMode(templateMode));
 
+    if (templateSummaryId) {
+      this.store.dispatch(setTemplateSummaryId(templateSummaryId));
+    }
+    
+    
     return createElement(
       Provider,
       { store: this.store } as ProviderProps,

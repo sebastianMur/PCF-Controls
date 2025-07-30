@@ -62,7 +62,7 @@ export const adjustUnitPricesProportionally = (
   data: TemplateCompletionData,
   newGrandTotal: number,
 ): TemplateCompletionData => {
-  const currentGrandTotal = data.templateSummary.grandTotal;
+  const currentGrandTotal = data.templateSummary?.grandTotal;
 
   if (currentGrandTotal === 0 || newGrandTotal === currentGrandTotal) {
     return data;
@@ -142,10 +142,7 @@ export const updateLineItemUnit = (
     item.lineItemDetailId === lineItemDetailId
       ? {
           ...item,
-          unit: {
-            key: newUnit.key,
-            value: newUnit.value,
-          },
+          unit: newUnit.key,
         }
       : item,
   );

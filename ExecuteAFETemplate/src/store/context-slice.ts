@@ -6,13 +6,12 @@ export const contextSlice = createSlice({
   name: "context",
   initialState: {
     baseUrl: "",
-    WPNId: "",
+    templateSummaryId: "",
     templateId: "",
-    templateMode: "completion",
   },
   reducers: {
-    setWPNId: (state, { payload }: PayloadAction<string>) => {
-      state.WPNId = payload;
+    setTemplateSummaryId: (state, { payload }: PayloadAction<string>) => {
+      state.templateSummaryId = payload;
     },
     setTemplateId: (state, { payload }: PayloadAction<string>) => {
       state.templateId = payload;
@@ -20,17 +19,13 @@ export const contextSlice = createSlice({
     setBaseUrl: (state, { payload }: PayloadAction<string>) => {
       state.baseUrl = payload;
     },
-    setTemplateMode: (state, { payload }: PayloadAction<string>) => {
-      state.templateMode = payload;
-    },
   },
 });
 
-export const selectWPNId = (state: RootState) => state.context.WPNId;
+export const selectWPNId = (state: RootState) =>
+  state.context.templateSummaryId;
 export const selectTemplateId = (state: RootState) => state.context.templateId;
 export const selectBaseUrl = (state: RootState) => state.context.baseUrl;
-export const selectTemplateMode = (state: RootState) =>
-  state.context.templateMode;
 
-export const { setWPNId, setTemplateId, setBaseUrl, setTemplateMode } =
+export const { setTemplateSummaryId, setTemplateId, setBaseUrl } =
   contextSlice.actions;
