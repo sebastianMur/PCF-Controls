@@ -14,11 +14,11 @@
         "strictPropertyInitialization": false,
         "skipLibCheck": true,
         "resolveJsonModule": true,
-        "baseUrl": "./ExecuteAFETemplateControl",
+        "baseUrl": ".",
         "paths": {
-            "@components/*": ["./components/*"],
-            "@generated/*": ["./generated/*"],
-            "@utils/*": ["./utils/*"]
+           "@/*": [
+            "./src/*"
+           ]
         }
     },
     "exclude": ["./node_modules"]

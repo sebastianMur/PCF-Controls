@@ -1,11 +1,13 @@
 const path = require('path');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+
 module.exports = {
   resolve: {
-    alias: {
-      '@components': path.resolve(__dirname, 'ExecuteAFETemplateControl/components'),
-      '@generated': path.resolve(__dirname, 'ExecuteAFETemplateControl/generated'),
-      '@utils': path.resolve(__dirname, 'ExecuteAFETemplateControl/utils'),
-    },
-  },
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    plugins: [
+      new TsconfigPathsPlugin({
+        configFile: path.resolve(__dirname, 'tsconfig.json')
+      })
+    ]
+  }
 };
-
