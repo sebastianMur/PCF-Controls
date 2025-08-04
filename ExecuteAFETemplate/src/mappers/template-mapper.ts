@@ -1,87 +1,63 @@
+import type { TemplateSummaryFormData } from "@/forms/form-schemas";
 import type {
-  D365GFCM,
-  D365GFCMSummary,
-  D365LineItem,
-  D365LineItemDetails,
   D365Template,
   D365TemplateSummary,
-  GFCM,
-  GFCMSummary,
-  LineItem,
-  LineItemDetails,
+  SendTemplate,
   Template,
   TemplateSummary,
-} from "../types/template";
+} from "@/types/template";
+import { v4 as uuidv4 } from "uuid";
 
-//
-// 🔄 TEMPLATE
-//
 export const fromApiTemplate = (record: D365Template): Template => ({
-  templateId: record.new_templateid,
-  name: record.new_name,
+  xomuog_templateid: record.xomuog_templateid,
+  xomuog_name: record.xomuog_name,
 });
 
-export const toApiTemplate = (model: Template) => ({
-  new_name: model.name,
+export const toApiTemplate = (model: Template): SendTemplate => ({
+  xomuog_name: model.xomuog_name,
 });
 
-//
-// 🔄 TEMPLATE SUMMARY
-//
 export const fromApiTemplateSummary = (
   record: D365TemplateSummary,
-): TemplateSummary => ({
-  templateSummaryId: record.new_templatesummaryid,
-  name: record.new_name,
-  templateId: record._new_templateid_value,
-  grandTotal: record.new_grandtotal ?? 0,
+): TemplateSummary =>
+  ({
+    xomuog_templatesummaryid: record.xomuog_templatesummaryid,
+    xomuog_name: record.xomuog_name,
+    xomuog_templateid: record._xomuog_templateid_value,
+    xomuog_grandtotal: record.xomuog_grandtotal ?? 0,
+    xomuog_capexopex: record.xomuog_capexopex,
+    xomuog_costcenter: record.xomuog_costcenter,
+    xomuog_companycode: record.xomuog_companycode,
+    xomuog_descriptionscopeofwork: record.xomuog_descriptionscopeofwork,
+    xomuog_engineer: record.xomuog_engineer,
+    xomuog_landman: record.xomuog_landman,
+    xomuog_operator: record._xomuog_operator_value,
+    xomuog_projectnumber: record.xomuog_projectnumber,
+    xomuog_specialinstruction: record.xomuog_specialinstruction,
+    xomuog_subprojecttype: record.xomuog_subprojecttype,
+    xomuog_mainprojecttype: record.xomuog_mainprojecttype,
+    xomuog_projectdescription: record.xomuog_projectdescription,
+    xomuog_wpnid: record._xomuog_wpnid_value,
+  }) as TemplateSummary;
+
+export const fromApiTemplateFormSummary = (
+  record: D365TemplateSummary,
+): TemplateSummaryFormData => ({
+  xomuog_templatesummaryid: record.xomuog_templatesummaryid,
+  xomuog_name: record.xomuog_name ?? "",
+  xomuog_templateid: record._xomuog_templateid_value ?? "",
+  xomuog_grandtotal: record.xomuog_grandtotal ?? 0,
 });
 
-//
-// 🔄 GFCM
-//
-export const fromApiGFCM = (record: D365GFCM): GFCM => ({
-  GFCMID: record.new_gfcmid,
-  name: record.new_name,
-  templateId: record._new_templateid_value,
-  gfcmCode: record.new_gfcmcode,
+export const fromTemplateToTemplateSummary = (
+  record: Template,
+): TemplateSummaryFormData => ({
+  xomuog_templatesummaryid: uuidv4(),
+  xomuog_name: record.xomuog_name,
+  xomuog_templateid: record.xomuog_templateid,
+  xomuog_grandtotal: 0,
 });
 
-//
-// 🔄 GFCM SUMMARY
-//
-export const fromApiGFCMSummary = (record: D365GFCMSummary): GFCMSummary => ({
-  gfcmSummaryId: record.new_gfcmsummaryid,
-  gfcmId: record._new_gfcmid_value,
-  templateSummaryId: record._new_templatesummaryid_value,
-  total: record.new_total,
-});
-
-//
-// 🔄 LINE ITEM
-//
-export const fromApiLineItem = (record: D365LineItem): LineItem => ({
-  lineItemId: record.new_lineitemid,
-  name: record.new_name,
-  gfcmId: record._new_gfcmid_value,
-});
-
-//
-// 🔄 LINE ITEM DETAIL
-//
-export const fromApiLineItemDetail = (
-  record: D365LineItemDetails,
-): LineItemDetails => ({
-  lineItemDetailId: record.new_lineitemdetailid,
-  lineItemId: record._new_lineitem_value,
-  gfcmSummaryId: record._new_gfcmsummaryid_value,
-  quantity: record.new_quantity ?? 0,
-  unitPrice: record.new_unitprice ?? 0,
-  total: record.new_total ?? 0,
-  unit: record.new_unit ?? 0,
-});
-
-// 🔄 ATTACHMENT
 //
 // export const fromApiAttachment = (record: any): Attachment => ({
 //   id: record.annotationid,

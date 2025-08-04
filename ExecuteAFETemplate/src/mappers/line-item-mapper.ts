@@ -1,0 +1,59 @@
+import type { LineItemDetailsFormData } from "@/forms/form-schemas";
+import { mockUnits } from "@/store/template-completion-api";
+import type {
+  D365LineItem,
+  D365LineItemDetails,
+  GFCMSummary,
+  LineItem,
+  LineItemDetails,
+} from "@/types/template";
+import { v4 as uuidv4 } from "uuid";
+export const fromApiLineItem = (record: D365LineItem): LineItem => ({
+  xomuog_lineitemid: record.xomuog_lineitemid,
+  xomuog_name: record.xomuog_name,
+  xomuog_gfcmid: record._xomuog_gfcmid_value,
+});
+
+export const fromLineItemToLineItemDetails = (
+  lineItem: LineItem,
+  gfcmSummaries: GFCMSummary[],
+): LineItemDetailsFormData => {
+  const matchGFCM = gfcmSummaries?.find(
+    gfcmSummary => gfcmSummary.xomuog_gfcmid === lineItem.xomuog_gfcmid,
+  );
+
+  return {
+    xomuog_gfcmsummaryid: matchGFCM?.xomuog_gfcmsummaryid ?? "",
+    xomuog_lineitem: lineItem.xomuog_lineitemid,
+    xomuog_lineitemdetailid: uuidv4(),
+    xomuog_quantity: 0,
+    xomuog_total: 0,
+    xomuog_unit: mockUnits[0].key,
+    xomuog_unitprice: 0,
+    xomuog_name: lineItem.xomuog_name,
+  };
+};
+
+export const fromApiLineItemDetail = (
+  record: D365LineItemDetails,
+): LineItemDetails => ({
+  xomuog_lineitemdetailid: record.xomuog_lineitemdetailid,
+  xomuog_lineitem: record._xomuog_lineitem_value,
+  xomuog_gfcmsummaryid: record._xomuog_gfcmsummaryid_value,
+  xomuog_quantity: record.xomuog_quantity ?? 0,
+  xomuog_unitprice: record.xomuog_unitprice ?? 0,
+  xomuog_total: record.xomuog_total ?? 0,
+  xomuog_unit: record.xomuog_unit,
+});
+export const fromApiLineItemFormDetail = (
+  record: D365LineItemDetails,
+): LineItemDetailsFormData => ({
+  xomuog_lineitemdetailid: record.xomuog_lineitemdetailid,
+  xomuog_lineitem: record._xomuog_lineitem_value ?? "",
+  xomuog_gfcmsummaryid: record._xomuog_gfcmsummaryid_value ?? "",
+  xomuog_quantity: record.xomuog_quantity ?? 0,
+  xomuog_unitprice: record.xomuog_unitprice ?? 0,
+  xomuog_total: record.xomuog_total ?? 0,
+  xomuog_unit: record.xomuog_unit ?? 0,
+  xomuog_name: record.xomuog_name ?? "",
+});

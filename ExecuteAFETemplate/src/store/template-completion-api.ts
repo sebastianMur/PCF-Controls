@@ -1,235 +1,25 @@
-// import type {
-//   FetchBaseQueryError,
-//   FetchBaseQueryMeta,
-//   QueryReturnValue,
-// } from "@reduxjs/toolkit/query/react";
-// import type {
-//   Attachment,
-//   GFCM,
-//   GFCMSummary,
-//   LineItem,
-//   LineItemDetails,
-//   Template,
-//   TemplateCompletionData,
-//   TemplateSummary,
-//   Unit,
-//   WPN,
-// } from "../types/template";
-// import { baseApi } from "./base-api";
-
-// // Mock data
-// const mockUnits: Unit[] = [
-//   { key: 1, value: "Per day" },
-//   { key: 2, value: "Per hour" },
-//   { key: 3, value: "Per foot" },
-//   { key: 5, value: "Each" },
-// ];
-
-// const mockWPNs: WPN[] = [
-//   { wpnId: "WPN001", name: "Project Alpha" },
-//   { wpnId: "WPN002", name: "Project Beta" },
-// ];
-
-// const mockGFCMs: GFCM[] = [
-//   { GFCMID: "GFCM001", name: "Construction Materials", templateId: "TMPL001" },
-//   { GFCMID: "GFCM002", name: "Labor Services", templateId: "TMPL001" },
-//   { GFCMID: "GFCM003", name: "Equipment Rental", templateId: "TMPL001" },
-// ];
-
-// const mockTemplates: Template[] = [
-//   { templateId: "TMPL001", name: "Standard Construction Template" },
-// ];
-
-// const mockLineItems: LineItem[] = [
-//   { lineItemId: "LI001", gfcmId: "GFCM001", name: "Site Clearing" },
-//   { lineItemId: "LI002", gfcmId: "GFCM001", name: "Soil Excavation" },
-//   { lineItemId: "LI003", gfcmId: "GFCM002", name: "Foundation Pour" },
-//   { lineItemId: "LI004", gfcmId: "GFCM003", name: "Steel Beams" },
-// ];
-
-// const mockTemplateSummary: TemplateSummary = {
-//   templateSummaryId: "TS001",
-//   templateId: "TMPL001",
-//   wpnId: "WPN001",
-//   grandTotal: 0,
-//   name: "Project Alpha - Construction Template",
-// };
-
-// const mockGFCMSummaries: GFCMSummary[] = [
-//   {
-//     templateSummaryId: "TMPL001",
-//     gfcmSummaryId: "SS001",
-//     gfcmId: "GFCM001",
-//     total: 0,
-//   },
-//   {
-//     templateSummaryId: "TMPL001",
-
-//     gfcmSummaryId: "SS002",
-//     gfcmId: "GFCM002",
-//     total: 0,
-//   },
-//   {
-//     templateSummaryId: "TMPL001",
-//     gfcmSummaryId: "SS003",
-//     gfcmId: "GFCM003",
-//     total: 0,
-//   },
-// ];
-
-// const mockLineItemDetails: LineItemDetails[] = [
-//   {
-//     lineItemDetailId: "LID001",
-//     lineItemId: "LI001",
-//     gfcmSummaryId: "SS001",
-//     quantity: 0,
-//     unitPrice: 150.0,
-//     unit: mockUnits[0],
-//     total: 0,
-//   },
-//   {
-//     lineItemDetailId: "LID002",
-//     lineItemId: "LI002",
-//     gfcmSummaryId: "SS001",
-//     quantity: 0,
-//     unitPrice: 200.0,
-//     unit: mockUnits[2],
-//     total: 0,
-//   },
-//   {
-//     lineItemDetailId: "LID003",
-//     lineItemId: "LI003",
-//     gfcmSummaryId: "SS002",
-//     quantity: 0,
-//     unitPrice: 500.0,
-//     unit: mockUnits[3],
-//     total: 0,
-//   },
-//   {
-//     lineItemDetailId: "LID004",
-//     lineItemId: "LI004",
-//     gfcmSummaryId: "SS003",
-//     quantity: 0,
-//     unitPrice: 800.0,
-//     unit: mockUnits[3],
-//     total: 0,
-//   },
-// ];
-
-// // In-memory storage for attachments (in a real app, this would be in a database)
-// const mockAttachments: Attachment[] = [];
-
-// interface SaveTemplateCompletionResponse {
-//   success: boolean;
-// }
-
-// export const templateCompletionApi = baseApi.injectEndpoints({
-//   endpoints: builder => ({
-//     getTemplateCompletionData: builder.query<
-//       TemplateCompletionData | undefined,
-//       string
-//     >({
-//       queryFn: async (
-//         templateId,
-//         _api,
-//         _extraOptions,
-//         _baseQuery,
-//       ): Promise<
-//         QueryReturnValue<
-//           TemplateCompletionData,
-//           FetchBaseQueryError,
-//           FetchBaseQueryMeta
-//         >
-//       > => {
-//         await new Promise(resolve => setTimeout(resolve, 1000));
-//         const template = mockTemplates.find(t => t.templateId === templateId);
-
-//         if (!template) {
-//           return {
-//             error: {
-//               status: 404,
-//               data: { message: "Template not found" }, // mock error structure
-//             },
-//           };
-//         }
-
-//         const data: TemplateCompletionData = {
-//           template,
-//           templateSummary: mockTemplateSummary,
-//           lineItems: mockLineItems,
-//           gfcms: mockGFCMs,
-//           wpns: mockWPNs,
-//           gfcmSummaries: mockGFCMSummaries,
-//           lineItemDetails: mockLineItemDetails,
-//           attachments: mockAttachments.filter(
-//             att =>
-//               att.templateSummaryId === mockTemplateSummary.templateSummaryId,
-//           ),
-//           units: mockUnits,
-//         };
-
-//         return { data };
-//       },
-//       providesTags: ["TemplateCompletion", "Attachment"],
-//     }),
-
-//     updateTemplateSummary: builder.mutation<
-//       TemplateSummary,
-//       Partial<TemplateSummary> & { templateSummaryId: string }
-//     >({
-//       queryFn: async updates => {
-//         await new Promise(resolve => setTimeout(resolve, 500));
-//         const updatedSummary = { ...mockTemplateSummary, ...updates };
-//         return { data: updatedSummary };
-//       },
-//       invalidatesTags: ["TemplateCompletion"],
-//     }),
-
-//     updateLineItemDetails: builder.mutation<
-//       LineItemDetails[],
-//       LineItemDetails[]
-//     >({
-//       queryFn: async lineItemDetails => {
-//         await new Promise(resolve => setTimeout(resolve, 500));
-//         return { data: lineItemDetails };
-//       },
-//       invalidatesTags: ["TemplateCompletion"],
-//     }),
-
-//     saveTemplateCompletion: builder.mutation<
-//       SaveTemplateCompletionResponse,
-//       TemplateCompletionData
-//     >({
-//       queryFn: async data => {
-//         await new Promise(resolve => setTimeout(resolve, 1500));
-//         console.log("Saving template completion data:", data);
-//         return { data: { success: true } };
-//       },
-//       invalidatesTags: ["TemplateCompletion"],
-//     }),
-//   }),
-// });
-
-// export const {
-//   useGetTemplateCompletionDataQuery,
-//   useLazyGetTemplateCompletionDataQuery,
-//   useUpdateTemplateSummaryMutation,
-//   useUpdateLineItemDetailsMutation,
-//   useSaveTemplateCompletionMutation,
-// } = templateCompletionApi;
-
+import { fromApiGFCM, fromApiGFCMSummary } from "@/mappers/gfcm-mapper";
 import {
-  fromApiGFCM,
   fromApiLineItem,
+  fromApiLineItemDetail,
+} from "@/mappers/line-item-mapper";
+import {
   fromApiTemplate,
+  fromApiTemplateSummary,
 } from "@/mappers/template-mapper";
 import { v4 as uuidv4 } from "uuid";
 import type {
+  D365Attachment,
   D365GFCM,
+  D365GFCMSummary,
   D365LineItem,
+  D365LineItemDetails,
   D365Template,
+  D365TemplateSummary,
   GFCMSummary,
   LineItemDetails,
+  ODataEntityResponse,
+  ODataMultipleResponse,
   TemplateCompletionData,
   TemplateSummary,
   Unit,
@@ -239,7 +29,7 @@ interface SaveTemplateCompletionResponse {
   success: boolean;
 }
 
-const mockUnits: Unit[] = [
+export const mockUnits: Unit[] = [
   { key: 529510000, value: "Per day" },
   { key: 529510001, value: "Per hour" },
   { key: 529510002, value: "Per foot" },
@@ -262,110 +52,111 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           // Required fetches based only on templateId
           const [templateRes, gfcmsRes, lineItemsRes] = await Promise.all([
             fetchWithBQ(
-              `new_templates(${templateId})?$select=new_templateid,new_name`,
-            ),
+              `xomuog_templates?$select=xomuog_templateid,xomuog_name&$filter=xomuog_templateid eq ${templateId}`,
+            ) as ODataEntityResponse<D365Template>,
             fetchWithBQ(
-              `new_gfcms?$select=new_gfcmid,new_gfcmcode,new_name,_new_templateid_value&$filter=_new_templateid_value eq ${templateId}`,
-            ),
+              `xomuog_gfcms?$select=xomuog_gfcmid,xomuog_gfcmcode,xomuog_name,_xomuog_templateid_value&$filter=_xomuog_templateid_value eq ${templateId}`,
+            ) as ODataMultipleResponse<D365GFCM>,
             fetchWithBQ(
-              `/new_lineitems?$select=new_lineitemid,_new_gfcmid_value,new_name&$filter=new_gfcmid/_new_templateid_value eq ${templateId}`,
-            ),
+              `xomuog_lineitems?$select=xomuog_lineitemid,_xomuog_gfcmid_value,xomuog_name&$filter=xomuog_gfcmid/_xomuog_templateid_value eq ${templateId}`,
+            ) as ODataMultipleResponse<D365LineItem>,
           ]);
 
           const requiredResponses = [templateRes, gfcmsRes, lineItemsRes];
-          if (requiredResponses.some(r => r.error)) {
-            return {
-              // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-              error: requiredResponses.find(r => r.error)?.error as any,
-            };
+          const firstError = requiredResponses.find(r => r.error)?.error;
+          if (firstError) {
+            return { error: firstError }; // ✅ only return if defined
           }
-
           // Optional fetches: templateSummary and downstream
           let templateSummary: TemplateSummary | undefined = undefined;
           let gfcmSummaries: GFCMSummary[] = [];
-          let lineItemDetails = [];
+          let lineItemDetails: LineItemDetails[] = [];
           let attachments = [];
 
           if (templateSummaryId) {
             const [summaryRes, gfcmSummariesRes, detailsRes, attachmentsRes] =
               await Promise.all([
                 fetchWithBQ(
-                  `new_templatesummaries(${templateSummaryId})?$select=new_templatesummaryid,new_grandtotal,new_name,_new_templateid_value,_new_wpnid_value`,
-                ),
+                  `xomuog_templatesummaries(${templateSummaryId})?$select=xomuog_templatesummaryid,xomuog_capexopex,xomuog_companycode,xomuog_costcenter,xomuog_descriptionscopeofwork,xomuog_engineer,exchangerate,xomuog_grandtotal,xomuog_grandtotal_base,xomuog_landman,xomuog_mainprojecttype,_xomuog_operator_value,xomuog_projectdescription,xomuog_name,xomuog_projectnumber,xomuog_specialinstruction,xomuog_subprojecttype,_xomuog_templateid_value,_xomuog_wpnid_value`,
+                ) as ODataEntityResponse<D365TemplateSummary>,
                 fetchWithBQ(
-                  `new_gfcmsummaries?$select=new_gfcmsummaryid,_new_gfcmid_value,new_name,_new_templatesummaryid_value,new_total&$filter=_new_templatesummaryid_value eq ${templateSummaryId}`,
-                ),
+                  `xomuog_gfcmsummaries?$select=xomuog_gfcmsummaryid,_xomuog_gfcmid_value,xomuog_name,xomuog_total&$filter=_xomuog_templatesummaryid_value eq ${templateSummaryId}`,
+                ) as ODataMultipleResponse<D365GFCMSummary>,
                 fetchWithBQ(
-                  `new_lineitemdetails?$select=new_lineitemdetailid,_new_gfcmsummaryid_value,_new_lineitem_value,new_name,new_quantity,new_total,new_unit,new_unitprice&$filter=_new_templatesummaryid_value eq ${templateSummaryId}`,
-                ),
+                  `xomuog_lineitemdetails?$select=xomuog_lineitemdetailid,_xomuog_gfcmsummaryid_value,_xomuog_lineitem_value,xomuog_name,xomuog_quantity,xomuog_total,xomuog_unit,xomuog_unitprice&$filter=xomuog_gfcmsummaryid/_xomuog_templatesummaryid_value eq ${templateSummaryId}`,
+                ) as ODataMultipleResponse<D365LineItemDetails>,
                 fetchWithBQ(
                   `annotations?$select=annotationid,notetext,documentbody,filename,filesize,mimetype,objecttypecode,_objectid_value,subject&$filter=_objectid_value eq ${templateSummaryId} and objecttypecode eq 'new_templatesummary'`,
-                ),
+                ) as ODataMultipleResponse<D365Attachment>,
               ]);
 
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            if (!summaryRes.error) templateSummary = summaryRes.data as any;
-            if (!gfcmSummariesRes.error)
-              // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-              gfcmSummaries = (gfcmSummariesRes.data ?? []) as any;
-            if (!detailsRes.error)
-              // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-              lineItemDetails = (detailsRes.data ?? []) as any;
-            if (!attachmentsRes.error)
+            if (!summaryRes.error && summaryRes.data)
+              templateSummary = fromApiTemplateSummary(summaryRes.data);
+
+            if (!gfcmSummariesRes.error && gfcmSummariesRes.data)
+              gfcmSummaries = gfcmSummariesRes?.data?.value?.map(g =>
+                fromApiGFCMSummary(g),
+              );
+            if (!detailsRes.error && detailsRes.data)
+              lineItemDetails = detailsRes?.data?.value?.map(d =>
+                fromApiLineItemDetail(d),
+              );
+
+            if (!attachmentsRes.error && attachmentsRes.data)
               // biome-ignore lint/suspicious/noExplicitAny: <explanation>
               attachments = (attachmentsRes.data ?? []) as any;
           } else {
             templateSummary = {
-              grandTotal: 0,
-              name: fromApiTemplate(templateRes.data as D365Template).name,
-              templateId: fromApiTemplate(templateRes.data as D365Template)
-                .templateId,
-              templateSummaryId: uuidv4(),
+              xomuog_grandtotal: 0,
+              xomuog_name: fromApiTemplate(templateRes.data as D365Template)
+                .xomuog_name,
+              xomuog_templateid: fromApiTemplate(
+                templateRes.data as D365Template,
+              ).xomuog_templateid,
+              xomuog_templatesummaryid: uuidv4(),
             } as TemplateSummary;
 
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            gfcmSummaries = ((gfcmsRes.data as any).value as D365GFCM[]).map(
-              gfcm => {
-                return {
-                  gfcmId: gfcm.new_gfcmid,
-                  gfcmSummaryId: uuidv4(),
-                  templateSummaryId: templateSummary?.templateSummaryId,
-                  total: 0,
-                } as GFCMSummary;
-              },
-            );
+            gfcmSummaries =
+              gfcmsRes?.data?.value && gfcmsRes?.data?.value?.length > 0
+                ? gfcmsRes?.data?.value.map(gfcm => {
+                    return {
+                      xomuog_gfcmid: gfcm.xomuog_gfcmid,
+                      xomuog_gfcmsummaryid: uuidv4(),
+                      xomuog_templatesummaryid:
+                        templateSummary?.xomuog_templatesummaryid,
+                      xomuog_total: 0,
+                    } as GFCMSummary;
+                  })
+                : [];
             lineItemDetails =
-              // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-              ((lineItemsRes.data as any).value as D365LineItem[]).map(
-                lineItem => {
-                  const matchGFCM = (
-                    (gfcmSummaries ?? []) as GFCMSummary[]
-                  )?.find(
-                    gfcmSummary =>
-                      gfcmSummary.gfcmId === lineItem._new_gfcmid_value,
-                  );
+              lineItemsRes?.data?.value && lineItemsRes?.data?.value?.length > 0
+                ? lineItemsRes.data.value.map(lineItem => {
+                    const matchGFCM = (
+                      (gfcmSummaries ?? []) as GFCMSummary[]
+                    )?.find(
+                      gfcmSummary =>
+                        gfcmSummary.xomuog_gfcmid ===
+                        lineItem._xomuog_gfcmid_value,
+                    );
 
-                  return {
-                    gfcmSummaryId: matchGFCM?.gfcmSummaryId,
-                    lineItemId: lineItem.new_lineitemid,
-                    lineItemDetailId: uuidv4(),
-                    quantity: 0,
-                    total: 0,
-                    unit: mockUnits[0].key,
-                    unitPrice: 0,
-                  } as LineItemDetails;
-                },
-              );
+                    return {
+                      xomuog_gfcmsummaryid: matchGFCM?.xomuog_gfcmsummaryid,
+                      xomuog_lineitem: lineItem.xomuog_lineitemid,
+                      xomuog_lineitemdetailid: uuidv4(),
+                      xomuog_quantity: 0,
+                      xomuog_total: 0,
+                      xomuog_unit: mockUnits[0].key,
+                      xomuog_unitprice: 0,
+                    };
+                  })
+                : [];
           }
 
           const data: TemplateCompletionData = {
             template: fromApiTemplate(templateRes.data as D365Template),
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            gfcms: (gfcmsRes?.data as any).value.map(fromApiGFCM),
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            lineItems: (lineItemsRes?.data as any).value.map(fromApiLineItem),
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            templateSummary: templateSummary as any,
+            gfcms: gfcmsRes?.data?.value.map(fromApiGFCM) ?? [],
+            lineItems: lineItemsRes?.data?.value?.map(fromApiLineItem) ?? [],
+            templateSummary: templateSummary as TemplateSummary,
             gfcmSummaries,
             lineItemDetails,
             attachments,
@@ -382,7 +173,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           };
         }
       },
-      providesTags: ["TemplateCompletion", "Attachment"],
+      providesTags: ["attachments"],
     }),
 
     updateTemplateSummary: builder.mutation<
@@ -394,7 +185,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: updates,
       }),
-      invalidatesTags: ["TemplateCompletion"],
+      invalidatesTags: [],
     }),
 
     updateLineItemDetails: builder.mutation<
@@ -406,7 +197,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           await Promise.all(
             details.map(d =>
               fetchWithBQ({
-                url: `new_lineitemdetails(${d.lineItemDetailId})`,
+                url: `new_lineitemdetails(${d.xomuog_lineitemdetailid})`,
                 method: "PATCH",
                 body: d,
               }),
@@ -422,7 +213,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           };
         }
       },
-      invalidatesTags: ["TemplateCompletion"],
+      invalidatesTags: [],
     }),
 
     saveTemplateCompletion: builder.mutation<
@@ -433,7 +224,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
         try {
           console.log(
             "Saving template completion for:",
-            data.template.templateId,
+            data.template.xomuog_templateid,
           );
           // Stub implementation
           return { data: { success: true } };
@@ -446,7 +237,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           };
         }
       },
-      invalidatesTags: ["TemplateCompletion"],
+      invalidatesTags: [],
     }),
   }),
 });

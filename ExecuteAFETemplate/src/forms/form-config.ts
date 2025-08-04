@@ -1,39 +1,86 @@
+import { useAppSelector } from "@/hooks";
+import { fromGFCMtoGFCMSummary } from "@/mappers/gfcm-mapper";
+import { fromLineItemToLineItemDetails } from "@/mappers/line-item-mapper";
+import { fromTemplateToTemplateSummary } from "@/mappers/template-mapper";
+import { useLazyGetGFCMsQuery } from "@/services/gfcm";
+import { useLazyGetGFCMSummarysQuery } from "@/services/gfcm-summary";
+import { useLazyGetLineItemsDetailsQuery } from "@/services/line-item-detail";
+import { useLazyGetLineItemQuery } from "@/services/line-items";
+import { useLazyGetTemplateQuery } from "@/services/template";
+import { useLazyGetTemplateSummaryQuery } from "@/services/templateSummary";
+import { selectTemplateId, selectTemplateSummaryId } from "@/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { type TemplateFormData, templateFormSchema } from "./form-schemas";
 
 const useGetDefaultValues = () => {
   //* ───── RTK Query ─────
-  // const templateId = useAppSelector(selectTemplateId);
-  // const wpnId = useAppSelector(selectWPNId);
+  const templateId = useAppSelector(selectTemplateId);
+  const templateSummaryId = useAppSelector(selectTemplateSummaryId);
 
   // get template summary with template information
-  // const [
-  //   getTemplateFormData,
-  //   { data: questionnaires, isLoading: isLoadingQuestionnaires },
-  // ] = useLazyGetTemplateCompletionDataQuery();
+  const [getTemplateFormData] = useLazyGetTemplateQuery();
+  const [getTemplateSummaryFormData] = useLazyGetTemplateSummaryQuery();
 
-  // Get Cateogory summary with Category information
+  const [getGFCMs] = useLazyGetGFCMsQuery();
+  const [getGFCMsSummary] = useLazyGetGFCMSummarysQuery();
 
-  // Get Subcategoy summary with subcateogory information
-
-  // Get Line Item Details with line item information
-
+  const [getLineItems] = useLazyGetLineItemQuery();
+  const [getLineItemsDetails] = useLazyGetLineItemsDetailsQuery();
   const getInitialTemplateValues = async (): Promise<TemplateFormData> => {
-    const defaultValues: Partial<TemplateFormData> = {};
+    // Provide an initial object with safe defaults
+    const defaultValues: TemplateFormData = {
+      templateSummary: undefined,
+      gfcms: [],
+      lineItemsDetails: [],
+      isNew: false,
+    };
 
-    // defaultValue = {
-    //   templateSummary: {
-    //     templateId: "",
-    //     grandTotal: 0,
-    //   },
-    //   categories: [{}],
-    //   subcategories: [{}],
-    //   lineItems: [{}],
-    //   attachment: {},
-    // } as TemplateFormData;
+    if (!templateId) return defaultValues;
 
-    return defaultValues as TemplateFormData;
+    try {
+      const [template, lineItems, gfcms] = await Promise.all([
+        getTemplateFormData(templateId).unwrap(),
+        getLineItems(templateId).unwrap(),
+        getGFCMs(templateId).unwrap(),
+      ]);
+
+      if (templateSummaryId) {
+        const [templateSummary, gfcmSummaries, lineItemDetails] =
+          await Promise.all([
+            getTemplateSummaryFormData(templateSummaryId).unwrap(),
+            getGFCMsSummary(templateSummaryId).unwrap(),
+            getLineItemsDetails(templateSummaryId).unwrap(),
+          ]);
+
+        return {
+          templateSummary,
+          gfcms: gfcmSummaries,
+          lineItemsDetails: lineItemDetails,
+          isNew: false,
+        };
+      }
+
+      // If no templateSummaryId, build default values based on template
+      const templateSummary = fromTemplateToTemplateSummary(template);
+      const gfcmSummaries = gfcms.map(gfcm =>
+        fromGFCMtoGFCMSummary(gfcm, templateSummary.xomuog_templatesummaryid),
+      );
+      const lineItemDetails = lineItems.map(lineItem =>
+        fromLineItemToLineItemDetails(lineItem, gfcmSummaries),
+      );
+
+      return {
+        templateSummary,
+        gfcms: gfcmSummaries,
+        lineItemsDetails: lineItemDetails,
+        isNew: true,
+      };
+    } catch (error) {
+      // Handle or log errors as needed
+      console.error("Failed to load initial template values", error);
+      return defaultValues;
+    }
   };
 
   return {

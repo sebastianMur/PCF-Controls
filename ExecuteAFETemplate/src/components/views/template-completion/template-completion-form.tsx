@@ -54,7 +54,7 @@ export const TemplateCompletionForm = ({
   } = useForm<GrandTotalFormData>({
     resolver: zodResolver(grandTotalSchema),
     defaultValues: {
-      grandTotal: data.templateSummary?.grandTotal,
+      grandTotal: data.templateSummary?.xomuog_grandtotal,
     },
   });
 
@@ -72,7 +72,7 @@ export const TemplateCompletionForm = ({
       newQuantity,
     );
     onDataChange(updatedData);
-    setValue("grandTotal", updatedData.templateSummary?.grandTotal);
+    setValue("grandTotal", updatedData.templateSummary?.xomuog_grandtotal);
     setHasChanges(true);
   };
 
@@ -88,7 +88,7 @@ export const TemplateCompletionForm = ({
       newUnitPrice,
     );
     onDataChange(updatedData);
-    setValue("grandTotal", updatedData.templateSummary?.grandTotal);
+    setValue("grandTotal", updatedData.templateSummary?.xomuog_grandtotal);
     setHasChanges(true);
   };
 
@@ -174,11 +174,12 @@ export const TemplateCompletionForm = ({
                 )}
               />
             </Field>
-            ?{" "}
             <Button
               appearance="secondary"
               type="submit"
-              disabled={watchedGrandTotal === data.templateSummary?.grandTotal}
+              disabled={
+                watchedGrandTotal === data.templateSummary?.xomuog_grandtotal
+              }
             >
               Adjust Proportionally
             </Button>
@@ -192,7 +193,7 @@ export const TemplateCompletionForm = ({
           isLocked={isLocked}
         />
         <AttachmentManager
-          templateSummaryId={data.templateSummary?.templateSummaryId}
+          templateSummaryId={data.templateSummary?.xomuog_templatesummaryid}
           isLocked={isLocked}
         />
       </div>
@@ -221,7 +222,9 @@ const PageHeader: FC<PageHeaderProps> = ({
   return (
     <div className={styles.header}>
       <div className={styles.headerContent}>
-        <Text className={styles.title}>{data.templateSummary?.name}</Text>
+        <Text className={styles.title}>
+          {data.templateSummary?.xomuog_name}
+        </Text>
         <Text className={styles.subtitle}>
           Template Completion - Fill in quantities and adjust totals as needed
         </Text>

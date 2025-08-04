@@ -21,11 +21,11 @@ export const calculateGFCMSummaryTotal = (
     lineItemDetails,
     gfcmSummaryId,
   );
-  return relatedLineItems.reduce((sum, item) => sum + item.total, 0);
+  return relatedLineItems.reduce((sum, item) => sum + item.xomuog_total, 0);
 };
 
 export const calculateGrandTotal = (gfcmSummaries: GFCMSummary[]): number => {
-  return gfcmSummaries.reduce((sum, cat) => sum + cat.total, 0);
+  return gfcmSummaries.reduce((sum, cat) => sum + cat.xomuog_total, 0);
 };
 
 export const recalculateAllTotals = (
@@ -34,13 +34,16 @@ export const recalculateAllTotals = (
   // Step 1: Calculate line item totals
   const updatedLineItemDetails = data.lineItemDetails.map(item => ({
     ...item,
-    total: calculateLineItemTotal(item.quantity, item.unitPrice),
+    total: calculateLineItemTotal(item.xomuog_quantity, item.xomuog_unitprice),
   }));
 
   // Step 2: Calculate GFCM summary totals
   const updatedGFCMSummaries = data.gfcmSummaries.map(sub => ({
     ...sub,
-    total: calculateGFCMSummaryTotal(updatedLineItemDetails, sub.gfcmSummaryId),
+    total: calculateGFCMSummaryTotal(
+      updatedLineItemDetails,
+      sub.xomuog_gfcmsummaryid,
+    ),
   })) as GFCMSummary[];
 
   // Step 4: Calculate grand total
@@ -62,7 +65,7 @@ export const adjustUnitPricesProportionally = (
   data: TemplateCompletionData,
   newGrandTotal: number,
 ): TemplateCompletionData => {
-  const currentGrandTotal = data.templateSummary?.grandTotal;
+  const currentGrandTotal = data.templateSummary?.xomuog_grandtotal;
 
   if (currentGrandTotal === 0 || newGrandTotal === currentGrandTotal) {
     return data;
@@ -73,10 +76,10 @@ export const adjustUnitPricesProportionally = (
   // Adjust unit prices proportionally
   const adjustedLineItemDetails = data.lineItemDetails.map(item => ({
     ...item,
-    unitPrice: Math.round(item.unitPrice * adjustmentRatio * 100) / 100, // Round to 2 decimal places
+    unitPrice: Math.round(item.xomuog_unitprice * adjustmentRatio * 100) / 100, // Round to 2 decimal places
     total: calculateLineItemTotal(
-      item.quantity,
-      item.unitPrice * adjustmentRatio,
+      item.xomuog_quantity,
+      item.xomuog_unitprice * adjustmentRatio,
     ),
   }));
 
@@ -86,7 +89,7 @@ export const adjustUnitPricesProportionally = (
     lineItemDetails: adjustedLineItemDetails,
     templateSummary: {
       ...data.templateSummary,
-      grandTotal: newGrandTotal,
+      xomuog_grandtotal: newGrandTotal,
     },
   });
 };
@@ -97,11 +100,11 @@ export const updateLineItemQuantity = (
   newQuantity: number,
 ): TemplateCompletionData => {
   const updatedLineItemDetails = data.lineItemDetails.map(item =>
-    item.lineItemDetailId === lineItemDetailId
+    item.xomuog_lineitemdetailid === lineItemDetailId
       ? {
           ...item,
           quantity: newQuantity,
-          total: calculateLineItemTotal(newQuantity, item.unitPrice),
+          total: calculateLineItemTotal(newQuantity, item.xomuog_unitprice),
         }
       : item,
   );
@@ -118,11 +121,11 @@ export const updateLineItemUnitPrice = (
   newUnitPrice: number,
 ): TemplateCompletionData => {
   const updatedLineItemDetails = data.lineItemDetails.map(item =>
-    item.lineItemDetailId === lineItemDetailId
+    item.xomuog_lineitemdetailid === lineItemDetailId
       ? {
           ...item,
           unitPrice: newUnitPrice,
-          total: calculateLineItemTotal(item.quantity, newUnitPrice),
+          total: calculateLineItemTotal(item.xomuog_quantity, newUnitPrice),
         }
       : item,
   );
@@ -139,7 +142,7 @@ export const updateLineItemUnit = (
   newUnit: Unit,
 ): TemplateCompletionData => {
   const updatedLineItemDetails = data.lineItemDetails.map(item =>
-    item.lineItemDetailId === lineItemDetailId
+    item.xomuog_lineitemdetailid === lineItemDetailId
       ? {
           ...item,
           unit: newUnit.key,

@@ -17,13 +17,12 @@ export const notesApi = baseApi.injectEndpoints({
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const attachment: Attachment = {
-          attachmentId: `ATT${Date.now()}`,
-          templateSummaryId,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-          uploadDate: new Date().toISOString(),
-          fileUrl: `https://mock-storage.com/${file.name}`,
+          annotationid: `ATT${Date.now()}`,
+          objectid: templateSummaryId,
+          filename: file.name,
+          filesize: file.size,
+          mimetype: file.type,
+          createdon: new Date().toISOString(),
         };
 
         // Add to mock storage
@@ -31,7 +30,7 @@ export const notesApi = baseApi.injectEndpoints({
 
         return { data: attachment };
       },
-      invalidatesTags: ["Attachment", "TemplateCompletion"],
+      invalidatesTags: ["attachments"],
     }),
 
     deleteAttachment: builder.mutation<DeleteAttachmentResponse, string>({
@@ -40,23 +39,23 @@ export const notesApi = baseApi.injectEndpoints({
 
         // Remove from mock storage
         mockAttachments = mockAttachments.filter(
-          att => att.attachmentId !== attachmentId,
+          att => att.annotationid !== attachmentId,
         );
 
         return { data: { success: true } };
       },
-      invalidatesTags: ["Attachment", "TemplateCompletion"],
+      invalidatesTags: ["attachments"],
     }),
 
     getAttachments: builder.query<Attachment[], string>({
       queryFn: async templateSummaryId => {
         await new Promise(resolve => setTimeout(resolve, 500));
         const filteredAttachments = mockAttachments.filter(
-          att => att.templateSummaryId === templateSummaryId,
+          att => att.objectid === templateSummaryId,
         );
         return { data: filteredAttachments };
       },
-      providesTags: ["Attachment"],
+      providesTags: ["attachments"],
     }),
   }),
 });

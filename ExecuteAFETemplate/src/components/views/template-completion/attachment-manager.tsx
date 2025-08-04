@@ -179,7 +179,7 @@ export default function AttachmentManager({
     if (currentAttachment) {
       // Delete current attachment first, then allow new upload
       try {
-        await deleteAttachment(currentAttachment.attachmentId).unwrap();
+        await deleteAttachment(currentAttachment.annotationid).unwrap();
         await refetchAttachments();
         // Trigger file selection after deletion
         setTimeout(() => {
@@ -195,12 +195,12 @@ export default function AttachmentManager({
     try {
       // In a real application, you would fetch the file from the server
       // For now, we'll simulate the download process
-      console.log("Downloading attachment:", currentAttachment.fileName);
+      console.log("Downloading attachment:", currentAttachment.filename);
 
       // Create a temporary link element for download
       const link = document.createElement("a");
-      link.href = currentAttachment.fileUrl;
-      link.download = currentAttachment.fileName;
+      // link.href = currentAttachment.fileUrl;
+      // link.download = currentAttachment.filename;
       link.target = "_blank";
 
       // Append to body, click, and remove
@@ -210,7 +210,7 @@ export default function AttachmentManager({
 
       // Show success message
       setUploadSuccess(
-        `File "${currentAttachment.fileName}" download started!`,
+        `File "${currentAttachment.filename}" download started!`,
       );
 
       // Clear success message after 3 seconds
@@ -356,15 +356,15 @@ export default function AttachmentManager({
         // Single attachment card view
         <div className={styles.singleAttachmentCard}>
           <div className={styles.attachmentInfo}>
-            {getFileIcon(currentAttachment.fileType)}
+            {getFileIcon(currentAttachment.mimetype ?? "")}
             <div className={styles.attachmentDetails}>
               <Text className={styles.attachmentName}>
-                {currentAttachment.fileName}
+                {currentAttachment.filename}
               </Text>
               <Text className={styles.attachmentMeta}>
-                {formatFileSize(currentAttachment.fileSize)} •{" "}
-                {currentAttachment.fileType} •{" "}
-                {formatDate(currentAttachment.uploadDate)}
+                {formatFileSize(currentAttachment.filesize ?? 0)}
+                {currentAttachment.mimetype ?? ""}
+                {formatDate(currentAttachment.createdon)}
               </Text>
             </div>
           </div>
@@ -375,7 +375,7 @@ export default function AttachmentManager({
                 icon={<ArrowDownload20Regular />}
                 onClick={() => handleDownloadAttachment()}
                 size="small"
-                aria-label={`Download ${currentAttachment.fileName}`}
+                aria-label={`Download ${currentAttachment.filename}`}
               >
                 Download
               </Button>
@@ -384,12 +384,12 @@ export default function AttachmentManager({
                 icon={<Delete20Regular />}
                 onClick={() =>
                   handleDeleteAttachment(
-                    currentAttachment.attachmentId,
-                    currentAttachment.fileName,
+                    currentAttachment.annotationid,
+                    currentAttachment.filename ?? "",
                   )
                 }
                 disabled={isDeleting || isUploading}
-                aria-label={`Delete ${currentAttachment.fileName}`}
+                aria-label={`Delete ${currentAttachment.filename}`}
                 size="small"
               >
                 Delete
@@ -412,25 +412,25 @@ export default function AttachmentManager({
             </TableHeader>
             <TableBody>
               {attachments.map(attachment => (
-                <TableRow key={attachment.attachmentId}>
+                <TableRow key={attachment.annotationid}>
                   <TableCell>
                     <div className={styles.fileIcon}>
-                      {getFileIcon(attachment.fileType)}
-                      <Text>{attachment.fileName}</Text>
+                      {getFileIcon(attachment.mimetype ?? "")}
+                      <Text>{attachment.filename}</Text>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Text className={styles.fileSize}>
-                      {formatFileSize(attachment.fileSize)}
+                      {formatFileSize(attachment.filesize ?? 0)}
                     </Text>
                   </TableCell>
                   <TableCell>
-                    <Text className={styles.fileSize}>
-                      {attachment.fileType}
+                    <Text className={styles.fileIcon}>
+                      {attachment.mimetype}
                     </Text>
                   </TableCell>
                   <TableCell>
-                    <Text>{formatDate(attachment.uploadDate)}</Text>
+                    <Text>{formatDate(attachment.createdon)}</Text>
                   </TableCell>
                   {!isLocked && (
                     <TableCell>
@@ -439,12 +439,12 @@ export default function AttachmentManager({
                         icon={<Delete20Regular />}
                         onClick={() =>
                           handleDeleteAttachment(
-                            attachment.attachmentId,
-                            attachment.fileName,
+                            attachment.annotationid,
+                            attachment.filename ?? "",
                           )
                         }
                         disabled={isDeleting}
-                        aria-label={`Delete ${attachment.fileName}`}
+                        aria-label={`Delete ${attachment.filename}`}
                       />
                     </TableCell>
                   )}

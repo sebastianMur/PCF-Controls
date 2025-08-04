@@ -13,6 +13,7 @@ type AppProvidersProps = {
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
   const methods = useTemplateCompletionForm();
+
   return (
     <FluentProvider theme={appTheme}>
       <FormProvider {...methods}>

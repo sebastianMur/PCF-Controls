@@ -63,36 +63,38 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
               <TableBody>
                 {data.gfcms.map(gfcm => {
                   const gfcmSummary = data.gfcmSummaries.find(
-                    s => s.gfcmId === gfcm.GFCMID,
+                    s => s.xomuog_gfcmid === gfcm.xomuog_gfcmid,
                   );
                   if (!gfcmSummary) return null;
 
-                  const isGFCMExpanded = !expandedGFCM.has(gfcm.GFCMID);
+                  const isGFCMExpanded = !expandedGFCM.has(gfcm.xomuog_gfcmid);
 
                   return (
-                    <React.Fragment key={gfcm.GFCMID}>
+                    <React.Fragment key={gfcm.xomuog_gfcmid}>
                       <GFCMRow
                         summary={gfcmSummary}
                         gfcm={gfcm}
                         isExpanded={isGFCMExpanded}
-                        onToggle={() => onToggleGFCM(gfcm.GFCMID)}
+                        onToggle={() => onToggleGFCM(gfcm.xomuog_gfcmid)}
                         formatCurrency={formatCurrency}
                       />
                       {isGFCMExpanded &&
                         data.lineItemDetails
                           .filter(
                             li =>
-                              li.gfcmSummaryId === gfcmSummary.gfcmSummaryId,
+                              li.xomuog_gfcmsummaryid ===
+                              gfcmSummary.xomuog_gfcmsummaryid,
                           )
                           .map(detail => {
                             const item = data.lineItems.find(
-                              li => li.lineItemId === detail.lineItemId,
+                              li =>
+                                li.xomuog_lineitemid === detail.xomuog_lineitem,
                             );
 
                             if (!item) return;
                             return (
                               <LineItemRow
-                                key={detail.lineItemDetailId}
+                                key={detail.xomuog_lineitemdetailid}
                                 detail={detail}
                                 item={item}
                                 onQuantityChange={onQuantityChange}

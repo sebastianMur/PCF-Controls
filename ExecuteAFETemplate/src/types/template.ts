@@ -1,26 +1,28 @@
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+
 export interface LineItem {
-  lineItemId: string;
-  gfcmId: string;
-  name: string;
+  xomuog_lineitemid: string;
+  xomuog_name: string;
+  xomuog_gfcmid: string;
 }
 export interface D365LineItem {
   "@odata.etag": string;
-  new_name: string;
-  new_lineitemid: string;
-  _new_gfcmid_value: string;
+  xomuog_lineitemid: string;
+  xomuog_name: string;
+  _xomuog_gfcmid_value: string;
 }
 export interface GFCM {
-  GFCMID: string;
-  name: string;
-  templateId: string;
-  gfcmCode: string;
+  xomuog_gfcmcode: string;
+  xomuog_name: string | null;
+  xomuog_templateid: string;
+  xomuog_gfcmid: string;
 }
 export interface D365GFCM {
   "@odata.etag": string;
-  new_gfcmid: string;
-  _new_templateid_value: string;
-  new_gfcmcode: string;
-  new_name: string;
+  xomuog_gfcmcode: string;
+  xomuog_name: string | null;
+  _xomuog_templateid_value: string;
+  xomuog_gfcmid: string;
 }
 
 export interface Unit {
@@ -29,61 +31,115 @@ export interface Unit {
 }
 
 export interface LineItemDetails {
-  lineItemDetailId: string;
-  lineItemId: string;
-  gfcmSummaryId: string;
-  quantity: number;
-  unitPrice: number;
-  unit: number;
-  total: number;
+  xomuog_lineitemdetailid: string;
+  xomuog_gfcmsummaryid?: string;
+  xomuog_lineitem?: string;
+  xomuog_name?: string;
+  xomuog_quantity: number;
+  xomuog_total: number;
+  xomuog_unit?: number;
+  xomuog_unitprice: number;
 }
 export interface D365LineItemDetails {
-  new_lineitemdetailid: string;
-  _new_lineitem_value: string;
-  _new_gfcmsummaryid_value: string;
-  new_quantity: number;
-  new_unitprice: number;
-  new_unit: number;
-  new_total: number;
+  xomuog_lineitemdetailid: string;
+  _xomuog_gfcmsummaryid_value?: string;
+  _xomuog_lineitem_value?: string;
+  xomuog_name?: string;
+  xomuog_quantity: number;
+  xomuog_total: number;
+  xomuog_unit?: number;
+  xomuog_unitprice: number;
 }
 
 export interface GFCMSummary {
-  gfcmSummaryId: string;
-  templateSummaryId: string;
-  gfcmId: string;
-  total: 0;
+  xomuog_gfcmsummaryid: string;
+  xomuog_templatesummaryid: string;
+  xomuog_gfcmid?: string;
+  xomuog_name?: string;
+  xomuog_total: number;
 }
 
 export interface D365GFCMSummary {
-  new_gfcmsummaryid: string;
-  _new_gfcmid_value: string;
-  _new_templatesummaryid_value: string;
-  new_total: 0;
+  xomuog_gfcmsummaryid: string;
+  _xomuog_xomuog_templatesummaryid_value: string;
+  _xomuog_gfcmid_value?: string;
+  xomuog_name?: string;
+  xomuog_total: number;
 }
 
 export interface TemplateSummary {
-  templateSummaryId: string;
-  templateId: string;
-  grandTotal: number;
-  name: string;
+  xomuog_templatesummaryid: string;
+  xomuog_capexopex?: string;
+  xomuog_companycode?: string;
+  xomuog_costcenter?: string;
+  xomuog_descriptionscopeofwork?: string;
+  xomuog_engineer?: string;
+  exchangerate?: number;
+  xomuog_grandtotal: number;
+  xomuog_grandtotal_base?: number;
+  xomuog_landman?: string;
+  xomuog_mainprojecttype?: string;
+  xomuog_operatore?: string;
+  xomuog_projectdescription?: string;
+  xomuog_name?: string;
+  xomuog_projectnumber?: string;
+  xomuog_specialinstruction?: string;
+  xomuog_subprojecttype?: string;
+  xomuog_templateid?: string;
+  xomuog_wpnid?: string;
 }
 export interface D365TemplateSummary {
-  new_templatesummaryid: string;
-  new_name: string;
-  _new_templateid_value: string;
-  new_grandtotal: number;
+  xomuog_templatesummaryid: string;
+  xomuog_capexopex?: string;
+  xomuog_companycode?: string;
+  xomuog_costcenter?: string;
+  xomuog_descriptionscopeofwork?: string;
+  xomuog_engineer?: string;
+  exchangerate?: number;
+  xomuog_grandtotal: number;
+  xomuog_grandtotal_base?: number;
+  xomuog_landman?: string;
+  xomuog_mainprojecttype?: string;
+  _xomuog_operator_value?: string;
+  xomuog_projectdescription?: string;
+  xomuog_name?: string;
+  xomuog_projectnumber?: string;
+  xomuog_specialinstruction?: string;
+  xomuog_subprojecttype?: string;
+  _xomuog_templateid_value?: string;
+  _xomuog_wpnid_value?: string;
 }
 
 export interface Template {
-  templateId: string;
-  name: string;
+  xomuog_templateid: string;
+  xomuog_name: string;
 }
-
 export interface D365Template {
-  "@odata.context": string;
-  "@odata.etag": string;
-  new_name: string;
-  new_templateid: string;
+  "@odata.etag": 'W/"589803275"';
+  xomuog_templateid: string;
+  xomuog_name: string;
+}
+export interface SendTemplate {
+  xomuog_name: string;
+}
+export interface Attachment {
+  annotationid: string;
+  objectid?: string;
+  filename?: string;
+  filesize?: number;
+  mimetype?: string;
+  createdon: string;
+  documentbody?: string;
+}
+export interface D365Attachment {
+  "@odata.etag": 'W/"589803275"';
+  annotationid: string;
+  _objectid_value?: string;
+  filename?: string;
+  filesize?: number;
+  mimetype?: string;
+  createdon: string;
+  documentbody?: string;
 }
 
 export interface WPN {
@@ -91,20 +147,19 @@ export interface WPN {
   name: string;
 }
 
-export interface Attachment {
-  attachmentId: string;
-  templateSummaryId: string;
-  fileName: string;
-  fileSize: number;
-  fileType: string;
-  uploadDate: string;
-  fileUrl: string;
+export interface ODataRawResult<T> {
+  value: T[];
 }
 
-// export interface D365Attachment {
-//   annotationid: string;
-//   notetext:
-// }
+export interface ODataMultipleResponse<T> {
+  data?: ODataRawResult<T>;
+  error?: FetchBaseQueryError;
+}
+
+export interface ODataEntityResponse<T> {
+  data?: T;
+  error?: FetchBaseQueryError;
+}
 
 // Template completion data structure
 export interface TemplateCompletionData {
@@ -123,35 +178,39 @@ export const getGFCMByTemplate = (
   gfcms: GFCM[],
   templateId: string,
 ): GFCM[] => {
-  return gfcms.filter(gfcm => gfcm.templateId === templateId);
+  return gfcms.filter(gfcm => gfcm.xomuog_templateid === templateId);
 };
 
 export const getLineItemsByGFCM = (
   lineItems: LineItem[],
   gfcmId: string,
 ): LineItem[] => {
-  return lineItems.filter(item => item.gfcmId === gfcmId);
+  return lineItems.filter(item => item.xomuog_gfcmid === gfcmId);
 };
 
 export const getGFCMsByTemplateSummary = (
   gfcmSummaries: GFCMSummary[],
   templateSummaryId: string,
 ): GFCMSummary[] => {
-  return gfcmSummaries.filter(cs => cs.templateSummaryId === templateSummaryId);
+  return gfcmSummaries.filter(
+    cs => cs.xomuog_templatesummaryid === templateSummaryId,
+  );
 };
 
 export const getLineItemDetailsByGFCMSummary = (
   lineItemDetails: LineItemDetails[],
   gfcmSummaryId: string,
 ): LineItemDetails[] => {
-  return lineItemDetails.filter(lid => lid.gfcmSummaryId === gfcmSummaryId);
+  return lineItemDetails.filter(
+    lid => lid.xomuog_gfcmsummaryid === gfcmSummaryId,
+  );
 };
 
 export const getAttachmentsByTemplateSummary = (
   attachments: Attachment[],
   templateSummaryId: string,
 ): Attachment[] => {
-  return attachments.filter(att => att.templateSummaryId === templateSummaryId);
+  return attachments.filter(att => att.objectid === templateSummaryId);
 };
 
 // Default export

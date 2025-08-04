@@ -33,8 +33,8 @@ export const GFCMRow: React.FC<{
           onClick={onToggle}
           style={{ color: tokens.colorNeutralForeground1 }}
         />
-        <Text weight="semibold">{gfcm?.gfcmCode}</Text>-
-        <Text weight="semibold">{gfcm?.name ?? "-"}</Text>
+        <Text weight="semibold">{gfcm?.xomuog_gfcmcode}</Text>-
+        <Text weight="semibold">{gfcm?.xomuog_name ?? "-"}</Text>
       </TableCell>
 
       <TableCell>
@@ -47,7 +47,7 @@ export const GFCMRow: React.FC<{
         <Text>-</Text>
       </TableCell>
       <TableCell>
-        <Text weight="semibold">{formatCurrency(summary.total)}</Text>
+        <Text weight="semibold">{formatCurrency(summary.xomuog_total)}</Text>
       </TableCell>
     </TableRow>
   );

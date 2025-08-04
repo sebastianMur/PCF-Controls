@@ -9,7 +9,15 @@ import { selectBaseUrl } from "./context-slice";
 
 export const baseApi = createApi({
   reducerPath: "api",
-  tagTypes: ["TemplateCompletion", "Attachment"],
+  tagTypes: [
+    "template",
+    "templateSummary",
+    "gfcm",
+    "gfcmSummary",
+    "lineItems",
+    "lineItemsDetail",
+    "attachments",
+  ],
   baseQuery: ((args, store, extraOptions) =>
     fetchBaseQuery({
       baseUrl: `${selectBaseUrl(store.getState() as RootState)}/api/data/v9.2`,

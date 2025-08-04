@@ -35,23 +35,26 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
     unitOptions,
   }) => {
     const styles = useTableStyles();
+
+    debugger;
+
     return (
       <TableRow className={styles.lineItemRow}>
         <TableCell className={`${styles.lineItemCell} ${styles.itemColumn}`}>
-          <Text className={styles.cellContent}>{item.name}</Text>
+          <Text className={styles.cellContent}>{item.xomuog_name}</Text>
         </TableCell>
 
         <TableCell>
           <Input
             type="number"
             step="0.01"
-            value={String(detail.unitPrice)}
+            value={String(detail.xomuog_unitprice ?? 0)}
             min="0"
             contentBefore="$"
             disabled={isLocked}
             onChange={(_e, d) =>
               onUnitPriceChange(
-                detail.lineItemDetailId,
+                detail.xomuog_lineitemdetailid,
                 Number.parseFloat(d.value) || 0,
               )
             }
@@ -59,7 +62,9 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
         </TableCell>
         <TableCell>
           <Dropdown
-            value={unitOptions.find(u => u.key === detail.unit)?.value ?? ""}
+            value={
+              unitOptions.find(u => u.key === detail.xomuog_unit)?.value ?? ""
+            }
             disabled={isLocked}
             onOptionSelect={(
               _event: SelectionEvents,
@@ -68,7 +73,7 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
               const unit = unitOptions.find(
                 (u: Unit) => u.value === d.optionValue,
               );
-              unit && onUnitChange(detail.lineItemDetailId, unit);
+              unit && onUnitChange(detail.xomuog_lineitemdetailid, unit);
             }}
             style={{ minWidth: "max-content" }}
           >
@@ -82,17 +87,20 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
         <TableCell>
           <Input
             type="number"
-            value={String(detail.quantity)}
+            value={String(detail.xomuog_quantity ?? 0)}
             min="0"
             disabled={isLocked}
             onChange={(_e, d) =>
-              onQuantityChange(detail.lineItemDetailId, Number(d.value) || 0)
+              onQuantityChange(
+                detail.xomuog_lineitemdetailid,
+                Number(d.value) || 0,
+              )
             }
           />
         </TableCell>
 
         <TableCell>
-          <Text weight="semibold">{formatCurrency(detail.total)}</Text>
+          <Text weight="semibold">{formatCurrency(detail.xomuog_total)}</Text>
         </TableCell>
       </TableRow>
     );
