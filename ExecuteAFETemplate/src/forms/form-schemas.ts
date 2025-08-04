@@ -37,7 +37,7 @@ export const attachmentSummarySchema = z
 
 export const templateFormSchema = z.object({
   templateSummary: templateSummarySchema.optional(),
-  gfcms: z.array(gfcmSummarySchema).optional(),
+  gfcmSummary: z.array(gfcmSummarySchema).optional(),
   lineItemsDetails: z.array(lineItemSchema).optional(),
   isNew: z.boolean(),
   // attachment: attachmentSummarySchema,

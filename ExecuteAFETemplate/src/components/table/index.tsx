@@ -1,9 +1,11 @@
+import type { TemplateFormData } from "@/forms/form-schemas";
 import type { TemplateCompletionData, Unit } from "@/types/template";
 import { useCallback, useState } from "react";
 import { TemplateCompletionTable } from "./table-view";
 
 export type TableContainerProps = {
-  data: TemplateCompletionData;
+  templateData: TemplateCompletionData;
+  templateSummaryData: TemplateFormData;
   onQuantityChange: (lineItemDetailId: string, newQuantity: number) => void;
   onUnitPriceChange: (lineItemDetailId: string, newUnitPrice: number) => void;
   onUnitChange: (lineItemDetailId: string, newUnit: Unit) => void;
@@ -12,7 +14,14 @@ export type TableContainerProps = {
 
 export const TemplateCompletionTableContainer: React.FC<
   TableContainerProps
-> = ({ data, onQuantityChange, onUnitPriceChange, onUnitChange, isLocked }) => {
+> = ({
+  templateData,
+  templateSummaryData,
+  onQuantityChange,
+  onUnitPriceChange,
+  onUnitChange,
+  isLocked,
+}) => {
   const [expandedGFCM, setExpandedGFCM] = useState<Set<string>>(new Set());
 
   const toggleSubcategory = useCallback((id: string) => {
@@ -25,7 +34,8 @@ export const TemplateCompletionTableContainer: React.FC<
 
   return (
     <TemplateCompletionTable
-      data={data}
+      templateData={templateData}
+      templateSummaryData={templateSummaryData}
       expandedGFCM={expandedGFCM}
       onToggleGFCM={toggleSubcategory}
       onQuantityChange={onQuantityChange}

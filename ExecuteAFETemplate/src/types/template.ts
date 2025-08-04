@@ -164,12 +164,8 @@ export interface ODataEntityResponse<T> {
 // Template completion data structure
 export interface TemplateCompletionData {
   template: Template;
-  templateSummary: TemplateSummary;
   gfcms: GFCM[];
-  gfcmSummaries: GFCMSummary[];
   lineItems: LineItem[];
-  lineItemDetails: LineItemDetails[];
-  attachments: Attachment[];
   units: Unit[];
 }
 

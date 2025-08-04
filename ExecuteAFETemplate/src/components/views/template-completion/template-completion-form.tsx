@@ -1,13 +1,7 @@
 import { TemplateCompletionTableContainer } from "@/components/table";
-import { useSaveTemplateCompletionMutation } from "@/store/template-completion-api";
+import type { TemplateFormData } from "@/forms/form-schemas";
 import { useFormStyles } from "@/styles/template-completion-form";
 import type { TemplateCompletionData, Unit } from "@/types/template";
-import {
-  adjustUnitPricesProportionally,
-  updateLineItemQuantity,
-  updateLineItemUnit,
-  updateLineItemUnitPrice,
-} from "@/utils/calculations";
 import {
   Button,
   Field,
@@ -17,113 +11,40 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { PresenceBlockedRegular, SaveRegular } from "@fluentui/react-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { type FC, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import z from "zod";
+import type { FC } from "react";
+import type { FieldErrors } from "react-hook-form";
 import AttachmentManager from "./attachment-manager";
 
-const grandTotalSchema = z.object({
-  grandTotal: z.coerce.number().min(0, "Grand total must be positive"),
-});
-
-type GrandTotalFormData = z.infer<typeof grandTotalSchema>;
-
-interface TemplateCompletionFormProps {
-  data: TemplateCompletionData;
-  onDataChange: (data: TemplateCompletionData) => void;
-}
-
-export const TemplateCompletionForm = ({
-  data,
-  onDataChange,
-}: TemplateCompletionFormProps) => {
-  const styles = useFormStyles();
-  const [isLocked, setIsLocked] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  const [saveTemplateCompletion, { isLoading: isSaving }] =
-    useSaveTemplateCompletionMutation();
-
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<GrandTotalFormData>({
-    resolver: zodResolver(grandTotalSchema),
-    defaultValues: {
-      grandTotal: data.templateSummary?.xomuog_grandtotal,
-    },
-  });
-
-  const watchedGrandTotal = watch("grandTotal");
-
-  const handleQuantityChange = (
-    lineItemDetailId: string,
-    newQuantity: number,
-  ): void => {
-    if (isLocked) return;
-
-    const updatedData = updateLineItemQuantity(
-      data,
-      lineItemDetailId,
-      newQuantity,
-    );
-    onDataChange(updatedData);
-    setValue("grandTotal", updatedData.templateSummary?.xomuog_grandtotal);
-    setHasChanges(true);
-  };
-
-  const handleUnitPriceChange = (
+type TemplateCompletionProps = {
+  isLocked: boolean;
+  templateData: TemplateCompletionData;
+  templateSummaryData: TemplateFormData;
+  hasChanges: boolean;
+  handleSave: () => Promise<void>;
+  handleUnlock: () => void;
+  isSaving: boolean;
+  errors: FieldErrors<TemplateFormData>;
+  handleQuantityChange: (lineItemDetailId: string, newQuantity: number) => void;
+  handleUnitPriceChange: (
     lineItemDetailId: string,
     newUnitPrice: number,
-  ): void => {
-    if (isLocked) return;
-
-    const updatedData = updateLineItemUnitPrice(
-      data,
-      lineItemDetailId,
-      newUnitPrice,
-    );
-    onDataChange(updatedData);
-    setValue("grandTotal", updatedData.templateSummary?.xomuog_grandtotal);
-    setHasChanges(true);
-  };
-
-  const handleUnitChange = (lineItemDetailId: string, newUnit: Unit): void => {
-    if (isLocked) return;
-
-    const updatedData = updateLineItemUnit(data, lineItemDetailId, newUnit);
-    onDataChange(updatedData);
-    setHasChanges(true);
-  };
-
-  const handleGrandTotalChange = (formData: GrandTotalFormData): void => {
-    if (isLocked) return;
-
-    const updatedData = adjustUnitPricesProportionally(
-      data,
-      formData.grandTotal,
-    );
-    onDataChange(updatedData);
-    setHasChanges(true);
-  };
-
-  const handleSave = async (): Promise<void> => {
-    try {
-      await saveTemplateCompletion(data).unwrap();
-      setHasChanges(false);
-      setIsLocked(true);
-    } catch (error) {
-      console.error("Failed to save template completion:", error);
-    }
-  };
-
-  const handleUnlock = (): void => {
-    setIsLocked(false);
-  };
+  ) => void;
+  handleUnitChange: (lineItemDetailId: string, newUnit: Unit) => void;
+};
+export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
+  isLocked,
+  templateData,
+  templateSummaryData,
+  hasChanges,
+  handleSave,
+  handleUnlock,
+  isSaving,
+  errors,
+  handleQuantityChange,
+  handleUnitPriceChange,
+  handleUnitChange,
+}) => {
+  const styles = useFormStyles();
 
   return (
     <fieldset
@@ -132,7 +53,7 @@ export const TemplateCompletionForm = ({
     >
       <div className={styles.container}>
         <PageHeader
-          data={data}
+          templateSummaryData={templateSummaryData}
           handleSave={handleSave}
           handleUnlock={handleUnlock}
           hasChanges={hasChanges}
@@ -150,50 +71,42 @@ export const TemplateCompletionForm = ({
             changes.
           </MessageBar>
         )}
-        <form onSubmit={handleSubmit(handleGrandTotalChange)}>
-          <div className={styles.grandTotalSection}>
-            <Text style={{ fontWeight: tokens.fontWeightSemibold }}>
-              Grand Total:
-            </Text>
-            <Field
-              validationState={errors.grandTotal ? "error" : "none"}
-              validationMessage={errors.grandTotal?.message}
-            >
-              <Controller
-                name="grandTotal"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    type="number"
-                    value={field?.value?.toString()}
-                    step="0.01"
-                    className={styles.grandTotalInput}
-                    contentBefore="$"
-                  />
-                )}
-              />
-            </Field>
-            <Button
-              appearance="secondary"
-              type="submit"
-              disabled={
-                watchedGrandTotal === data.templateSummary?.xomuog_grandtotal
-              }
-            >
-              Adjust Proportionally
-            </Button>
-          </div>
-        </form>
+        <div className={styles.grandTotalSection}>
+          <Text style={{ fontWeight: tokens.fontWeightSemibold }}>
+            Grand Total:
+          </Text>
+          <Field
+            validationState={
+              errors.templateSummary?.xomuog_grandtotal ? "error" : "none"
+            }
+            validationMessage={
+              errors.templateSummary?.xomuog_grandtotal?.message
+            }
+          >
+            <Input
+              type="number"
+              value={templateSummaryData.templateSummary?.xomuog_grandtotal?.toString()}
+              step="0.01"
+              className={styles.grandTotalInput}
+              contentBefore="$"
+            />
+          </Field>
+          <Button appearance="secondary" type="submit" disabled={true}>
+            Adjust Proportionally
+          </Button>
+        </div>
         <TemplateCompletionTableContainer
-          data={data}
+          templateData={templateData}
+          templateSummaryData={templateSummaryData}
           onQuantityChange={handleQuantityChange}
           onUnitPriceChange={handleUnitPriceChange}
           onUnitChange={handleUnitChange}
           isLocked={isLocked}
         />
         <AttachmentManager
-          templateSummaryId={data.templateSummary?.xomuog_templatesummaryid}
+          templateSummaryId={
+            templateSummaryData.templateSummary?.xomuog_templatesummaryid ?? ""
+          }
           isLocked={isLocked}
         />
       </div>
@@ -202,7 +115,7 @@ export const TemplateCompletionForm = ({
 };
 
 type PageHeaderProps = {
-  data: TemplateCompletionData;
+  templateSummaryData: TemplateFormData;
   isSaving: boolean;
   isLocked: boolean;
   handleUnlock: () => void;
@@ -210,7 +123,7 @@ type PageHeaderProps = {
   hasChanges: boolean;
 };
 const PageHeader: FC<PageHeaderProps> = ({
-  data,
+  templateSummaryData,
   isSaving,
   isLocked,
   handleUnlock,
@@ -223,7 +136,7 @@ const PageHeader: FC<PageHeaderProps> = ({
     <div className={styles.header}>
       <div className={styles.headerContent}>
         <Text className={styles.title}>
-          {data.templateSummary?.xomuog_name}
+          {templateSummaryData.templateSummary?.xomuog_name}
         </Text>
         <Text className={styles.subtitle}>
           Template Completion - Fill in quantities and adjust totals as needed

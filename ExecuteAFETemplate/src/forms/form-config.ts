@@ -31,7 +31,7 @@ const useGetDefaultValues = () => {
     // Provide an initial object with safe defaults
     const defaultValues: TemplateFormData = {
       templateSummary: undefined,
-      gfcms: [],
+      gfcmSummary: [],
       lineItemsDetails: [],
       isNew: false,
     };
@@ -55,7 +55,7 @@ const useGetDefaultValues = () => {
 
         return {
           templateSummary,
-          gfcms: gfcmSummaries,
+          gfcmSummary: gfcmSummaries,
           lineItemsDetails: lineItemDetails,
           isNew: false,
         };
@@ -72,7 +72,7 @@ const useGetDefaultValues = () => {
 
       return {
         templateSummary,
-        gfcms: gfcmSummaries,
+        gfcmSummary: gfcmSummaries,
         lineItemsDetails: lineItemDetails,
         isNew: true,
       };

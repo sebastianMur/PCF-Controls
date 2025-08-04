@@ -36,8 +36,6 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
   }) => {
     const styles = useTableStyles();
 
-    debugger;
-
     return (
       <TableRow className={styles.lineItemRow}>
         <TableCell className={`${styles.lineItemCell} ${styles.itemColumn}`}>

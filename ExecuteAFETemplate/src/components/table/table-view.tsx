@@ -1,3 +1,4 @@
+import type { TemplateFormData } from "@/forms/form-schemas";
 import { useTableStyles } from "@/styles/template-completion-table";
 import type { TemplateCompletionData, Unit } from "@/types/template";
 import {
@@ -12,7 +13,8 @@ import { GFCMRow } from "./gfcm-row";
 import { LineItemRow } from "./line-item-rows";
 
 interface TemplateCompletionTableProps {
-  data: TemplateCompletionData;
+  templateData: TemplateCompletionData;
+  templateSummaryData: TemplateFormData;
   onQuantityChange: (lineItemDetailId: string, quantity: number) => void;
   onUnitPriceChange: (lineItemDetailId: string, unitPrice: number) => void;
   onUnitChange: (lineItemDetailId: string, unit: Unit) => void;
@@ -24,7 +26,8 @@ interface TemplateCompletionTableProps {
 export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
   memo(
     ({
-      data,
+      templateData,
+      templateSummaryData,
       expandedGFCM,
       onToggleGFCM,
       onQuantityChange,
@@ -61,8 +64,8 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.gfcms.map(gfcm => {
-                  const gfcmSummary = data.gfcmSummaries.find(
+                {templateData.gfcms.map(gfcm => {
+                  const gfcmSummary = templateSummaryData.gfcmSummary?.find(
                     s => s.xomuog_gfcmid === gfcm.xomuog_gfcmid,
                   );
                   if (!gfcmSummary) return null;
@@ -79,14 +82,14 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
                         formatCurrency={formatCurrency}
                       />
                       {isGFCMExpanded &&
-                        data.lineItemDetails
-                          .filter(
+                        templateSummaryData.lineItemsDetails
+                          ?.filter(
                             li =>
                               li.xomuog_gfcmsummaryid ===
                               gfcmSummary.xomuog_gfcmsummaryid,
                           )
                           .map(detail => {
-                            const item = data.lineItems.find(
+                            const item = templateData.lineItems.find(
                               li =>
                                 li.xomuog_lineitemid === detail.xomuog_lineitem,
                             );
@@ -102,7 +105,7 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
                                 onUnitChange={onUnitChange}
                                 isLocked={isLocked}
                                 formatCurrency={formatCurrency}
-                                unitOptions={data.units}
+                                unitOptions={templateData.units}
                               />
                             );
                           })}
