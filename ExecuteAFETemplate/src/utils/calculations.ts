@@ -156,7 +156,7 @@ export const updateLineItemUnit = (
     item.xomuog_lineitemdetailid === lineItemDetailId
       ? {
           ...item,
-          unit: newUnit.key,
+          xomuog_unit: newUnit.key,
         }
       : item,
   );

@@ -2,14 +2,8 @@ import { TemplateCompletionTableContainer } from "@/components/table";
 import type { TemplateFormData } from "@/forms/form-schemas";
 import { useFormStyles } from "@/styles/template-completion-form";
 import type { TemplateCompletionData, Unit } from "@/types/template";
-import {
-  Button,
-  Field,
-  Input,
-  MessageBar,
-  Text,
-  tokens,
-} from "@fluentui/react-components";
+import { formatCurrency } from "@/utils/functions";
+import { Button, MessageBar, Text, tokens } from "@fluentui/react-components";
 import { PresenceBlockedRegular, SaveRegular } from "@fluentui/react-icons";
 import type { FC } from "react";
 import type { FieldErrors } from "react-hook-form";
@@ -39,7 +33,6 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   handleSave,
   handleUnlock,
   isSaving,
-  errors,
   handleQuantityChange,
   handleUnitPriceChange,
   handleUnitChange,
@@ -75,25 +68,11 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
           <Text style={{ fontWeight: tokens.fontWeightSemibold }}>
             Grand Total:
           </Text>
-          <Field
-            validationState={
-              errors.templateSummary?.xomuog_grandtotal ? "error" : "none"
-            }
-            validationMessage={
-              errors.templateSummary?.xomuog_grandtotal?.message
-            }
-          >
-            <Input
-              type="number"
-              value={templateSummaryData.templateSummary?.xomuog_grandtotal?.toString()}
-              step="0.01"
-              className={styles.grandTotalInput}
-              contentBefore="$"
-            />
-          </Field>
-          <Button appearance="secondary" type="submit" disabled={true}>
-            Adjust Proportionally
-          </Button>
+          <Text weight="semibold">
+            {formatCurrency(
+              templateSummaryData.templateSummary?.xomuog_grandtotal ?? 0,
+            )}
+          </Text>
         </div>
         <TemplateCompletionTableContainer
           templateData={templateData}

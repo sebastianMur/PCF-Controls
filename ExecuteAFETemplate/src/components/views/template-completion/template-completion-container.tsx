@@ -48,10 +48,13 @@ export default function TemplateCompletionContainer() {
       lineItemDetailId,
       newQuantity,
     );
-    setValue(
-      "templateSummary.xomuog_grandtotal",
-      updatedData.templateSummary?.xomuog_grandtotal ?? 0,
-    );
+    for (const [key, value] of Object.entries(updatedData)) {
+      setValue(key as unknown as keyof TemplateFormData, value);
+    }
+    // setValue(
+    //   "templateSummary.xomuog_grandtotal",
+    //   updatedData.templateSummary?.xomuog_grandtotal ?? 0,
+    // );
     setHasChanges(true);
   };
 
@@ -77,6 +80,7 @@ export default function TemplateCompletionContainer() {
   const handleUnitChange = (lineItemDetailId: string, newUnit: Unit): void => {
     if (isLocked) return;
     const data = getValues();
+
     const updatedData = updateLineItemUnit(data, lineItemDetailId, newUnit);
 
     for (const [key, value] of Object.entries(updatedData)) {
