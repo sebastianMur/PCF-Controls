@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
-	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="2025.08.7" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
+	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="2025.08.8" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
 		<external-service-usage enabled="false">
 		</external-service-usage>
 	    <property name="templateId" display-name-key="Template Lookup" description-key="Template Lookup " of-type="Lookup.Simple" usage="bound" required="true" />

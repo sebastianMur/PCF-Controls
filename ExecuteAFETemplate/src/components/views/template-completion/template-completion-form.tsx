@@ -45,14 +45,6 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
       className={isLocked ? styles.lockedOverlay : ""}
     >
       <div className={styles.container}>
-        <PageHeader
-          templateSummaryData={templateSummaryData}
-          handleSave={handleSave}
-          handleUnlock={handleUnlock}
-          hasChanges={hasChanges}
-          isLocked={isLocked}
-          isSaving={isSaving}
-        />
         {hasChanges && !isLocked && (
           <MessageBar intent="info">
             You have unsaved changes. Click "Save & Lock" to save your progress.
@@ -64,16 +56,41 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
             changes.
           </MessageBar>
         )}
-        <div className={styles.grandTotalSection}>
-          <Text style={{ fontWeight: tokens.fontWeightSemibold }}>
-            Grand Total:
-          </Text>
-          <Text weight="semibold">
-            {formatCurrency(
-              templateSummaryData.templateSummary?.xomuog_grandtotal ?? 0,
+
+        <div className={`${styles.header} ${styles.grandTotalSection}`}>
+          <div>
+            <Text style={{ fontWeight: tokens.fontWeightSemibold }}>
+              Grand Total:
+            </Text>
+            <Text weight="semibold">
+              {formatCurrency(
+                templateSummaryData.templateSummary?.xomuog_grandtotal ?? 0,
+              )}
+            </Text>
+          </div>
+
+          <div className={styles.actionButtons}>
+            {isLocked ? (
+              <Button
+                appearance="secondary"
+                icon={<PresenceBlockedRegular />}
+                onClick={handleUnlock}
+              >
+                Unlock Template
+              </Button>
+            ) : (
+              <Button
+                appearance="primary"
+                icon={<SaveRegular />}
+                onClick={handleSave}
+                disabled={!hasChanges || isSaving}
+              >
+                {isSaving ? "Saving..." : "Save & Lock"}
+              </Button>
             )}
-          </Text>
+          </div>
         </div>
+
         <TemplateCompletionTableContainer
           templateData={templateData}
           templateSummaryData={templateSummaryData}
@@ -90,57 +107,5 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
         />
       </div>
     </fieldset>
-  );
-};
-
-type PageHeaderProps = {
-  templateSummaryData: TemplateFormData;
-  isSaving: boolean;
-  isLocked: boolean;
-  handleUnlock: () => void;
-  handleSave: () => Promise<void>;
-  hasChanges: boolean;
-};
-const PageHeader: FC<PageHeaderProps> = ({
-  templateSummaryData,
-  isSaving,
-  isLocked,
-  handleUnlock,
-  handleSave,
-  hasChanges,
-}) => {
-  const styles = useFormStyles();
-
-  return (
-    <div className={styles.header}>
-      <div className={styles.headerContent}>
-        <Text className={styles.title}>
-          {templateSummaryData.templateSummary?.xomuog_name}
-        </Text>
-        <Text className={styles.subtitle}>
-          Template Completion - Fill in quantities and adjust totals as needed
-        </Text>
-      </div>
-      <div className={styles.actionButtons}>
-        {isLocked ? (
-          <Button
-            appearance="secondary"
-            icon={<PresenceBlockedRegular />}
-            onClick={handleUnlock}
-          >
-            Unlock Template
-          </Button>
-        ) : (
-          <Button
-            appearance="primary"
-            icon={<SaveRegular />}
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-          >
-            {isSaving ? "Saving..." : "Save & Lock"}
-          </Button>
-        )}
-      </div>
-    </div>
   );
 };
