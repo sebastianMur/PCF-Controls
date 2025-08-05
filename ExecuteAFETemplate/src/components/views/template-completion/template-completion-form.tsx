@@ -63,9 +63,9 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
               Grand Total:
             </Text>
             <Text weight="semibold">
-              {formatCurrency(
+              {` ${formatCurrency(
                 templateSummaryData.templateSummary?.xomuog_grandtotal ?? 0,
-              )}
+              )}`}
             </Text>
           </div>
 

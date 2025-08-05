@@ -1,3 +1,4 @@
+import { useGetDefaultValues } from "@/forms/form-config";
 import type { TemplateFormData } from "@/forms/form-schemas";
 import { useAppSelector } from "@/hooks";
 import { selectTemplateId } from "@/store";
@@ -12,6 +13,7 @@ import {
   updateLineItemUnit,
   updateLineItemUnitPrice,
 } from "@/utils/calculations";
+import { triggerNotifyOutputChange } from "@/utils/notifyOutputChange";
 import { MessageBar, Spinner } from "@fluentui/react-components";
 import { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -19,19 +21,24 @@ import { TemplateCompletionForm } from "./template-completion-form";
 
 export default function TemplateCompletionContainer() {
   const templateId = useAppSelector(selectTemplateId);
+
   const styles = useTemplateCompletionContainerStyles();
   const [isLocked, setIsLocked] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [localData, setLocalData] = useState<TemplateCompletionData | null>(
     null,
   );
+
   const [saveTemplateCompletion, { isLoading: isSaving }] =
     useSaveTemplateCompletionMutation();
+
+  const { getInitialTemplateValues } = useGetDefaultValues();
 
   const {
     control,
     setValue,
     getValues,
+    reset,
     formState: { errors },
   } = useFormContext<TemplateFormData>();
 
@@ -51,10 +58,6 @@ export default function TemplateCompletionContainer() {
     for (const [key, value] of Object.entries(updatedData)) {
       setValue(key as unknown as keyof TemplateFormData, value);
     }
-    // setValue(
-    //   "templateSummary.xomuog_grandtotal",
-    //   updatedData.templateSummary?.xomuog_grandtotal ?? 0,
-    // );
     setHasChanges(true);
   };
 
@@ -93,6 +96,9 @@ export default function TemplateCompletionContainer() {
     try {
       const data = getValues();
       await saveTemplateCompletion(data).unwrap();
+      const newTemplateFormValues = await getInitialTemplateValues();
+      triggerNotifyOutputChange();
+      reset(newTemplateFormValues);
       setHasChanges(false);
       setIsLocked(true);
     } catch (error) {

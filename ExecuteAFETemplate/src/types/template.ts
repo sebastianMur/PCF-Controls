@@ -51,6 +51,16 @@ export interface D365LineItemDetails {
   xomuog_unitprice: number;
 }
 
+export interface SendLineItemDetails {
+  "xomuog_gfcmsummaryid@odata.bind": string;
+  "xomuog_lineitem@odata.bind": string;
+  xomuog_name?: string;
+  xomuog_quantity: number;
+  xomuog_total: number;
+  xomuog_unit?: number;
+  xomuog_unitprice: number;
+}
+
 export interface GFCMSummary {
   xomuog_gfcmsummaryid: string;
   xomuog_templatesummaryid: string;
@@ -63,6 +73,13 @@ export interface D365GFCMSummary {
   xomuog_gfcmsummaryid: string;
   _xomuog_xomuog_templatesummaryid_value: string;
   _xomuog_gfcmid_value?: string;
+  xomuog_name?: string;
+  xomuog_total: number;
+}
+
+export interface SendGFCMSummary {
+  "xomuog_templatesummaryid@odata.bind": string;
+  "xomuog_gfcmid@odata.bind"?: string;
   xomuog_name?: string;
   xomuog_total: number;
 }
@@ -108,6 +125,13 @@ export interface D365TemplateSummary {
   xomuog_subprojecttype?: string;
   _xomuog_templateid_value?: string;
   _xomuog_wpnid_value?: string;
+}
+
+export interface SendTemplateSummary {
+  xomuog_grandtotal: number;
+  xomuog_name?: string;
+  "xomuog_templateid@odata.bind": string;
+  "xomuog_wpnid@odata.bind": string;
 }
 
 export interface Template {

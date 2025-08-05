@@ -1,9 +1,26 @@
-import type { TemplateFormData } from "@/forms/form-schemas";
-import { fromApiGFCM } from "@/mappers/gfcm-mapper";
-import { fromApiLineItem } from "@/mappers/line-item-mapper";
-import { fromApiTemplate } from "@/mappers/template-mapper";
+import type {
+  GFCMSummaryFormData,
+  LineItemDetailsFormData,
+  TemplateFormData,
+  TemplateSummaryFormData,
+} from "@/forms/form-schemas";
+import {
+  fromApiGFCM,
+  fromApiGFCMFormSummary,
+  toApiGFCMSummary,
+} from "@/mappers/gfcm-mapper";
+import {
+  fromApiLineItem,
+  toApiLineItemFormDetail,
+} from "@/mappers/line-item-mapper";
+import {
+  fromApiTemplate,
+  fromApiTemplateFormSummary,
+  toApiTemplateSummary,
+} from "@/mappers/template-mapper";
 import type {
   D365GFCM,
+  D365GFCMSummary,
   D365LineItem,
   D365Template,
   LineItemDetails,
@@ -14,8 +31,10 @@ import type {
   Unit,
 } from "../types/template";
 import { baseApi } from "./base-api";
+import { setTemplateSummaryId } from "./context-slice";
 interface SaveTemplateCompletionResponse {
   success: boolean;
+  templateSummaryId: string;
 }
 
 export const mockUnits: Unit[] = [
@@ -116,14 +135,115 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       SaveTemplateCompletionResponse,
       TemplateFormData
     >({
-      queryFn: async (data, _api, _extra) => {
+      async queryFn(data, _api, _extraOptions, fetchWithBQ) {
         try {
-          console.log(
-            "Saving template completion for:",
-            data.templateSummary?.xomuog_templateid,
-          );
-          // Stub implementation
-          return { data: { success: true } };
+          const { templateSummary, gfcmSummary, lineItemsDetails, isNew } =
+            data;
+
+          if (!templateSummary) {
+            return {
+              error: {
+                status: 400,
+                data: { message: "Template summary is required." },
+              },
+            };
+          }
+
+          let templateSummaryId = templateSummary.xomuog_templatesummaryid;
+
+          const templateSummaryUrl = isNew
+            ? "xomuog_templatesummaries"
+            : `xomuog_templatesummaries(${templateSummaryId})`;
+
+          const templateSummaryResult = await fetchWithBQ({
+            url: templateSummaryUrl,
+            method: isNew ? "POST" : "PATCH",
+            body: toApiTemplateSummary(templateSummary),
+            headers: {
+              Prefer: "return=representation",
+            },
+          });
+
+          if (templateSummaryResult.error) {
+            return { error: templateSummaryResult.error };
+          }
+          templateSummaryId = fromApiTemplateFormSummary(
+            templateSummaryResult?.data as TemplateSummaryFormData,
+          )?.xomuog_templatesummaryid;
+
+          let transformedGFCMResults: GFCMSummaryFormData[] = [];
+          if (gfcmSummary && gfcmSummary.length > 0) {
+            const newGFCMSummary = gfcmSummary.map(gfcmSumm => ({
+              ...gfcmSumm,
+              xomuog_templatesummaryid: templateSummaryId,
+            }));
+
+            const gfcmResults = await Promise.all(
+              newGFCMSummary.map(gfcmSummary => {
+                const url = isNew
+                  ? "xomuog_gfcmsummaries"
+                  : `xomuog_gfcmsummaries(${gfcmSummary.xomuog_gfcmsummaryid})`;
+
+                return fetchWithBQ({
+                  url,
+                  method: isNew ? "POST" : "PATCH",
+                  body: toApiGFCMSummary(gfcmSummary),
+                  headers: {
+                    Prefer: "return=representation",
+                  },
+                });
+              }),
+            );
+
+            transformedGFCMResults = gfcmResults.map(gfcmSumm => {
+              return fromApiGFCMFormSummary(gfcmSumm.data as D365GFCMSummary);
+            });
+
+            const failed = gfcmResults.find(r => r.error);
+            if (failed?.error) return { error: failed.error };
+          }
+
+          if (lineItemsDetails && lineItemsDetails.length > 0) {
+            const detailResults = await Promise.all(
+              lineItemsDetails.map(item => {
+                const gfcm = gfcmSummary?.find(
+                  gfcm =>
+                    gfcm.xomuog_gfcmsummaryid === item.xomuog_gfcmsummaryid,
+                );
+                const gfcmSummaryId = transformedGFCMResults.find(
+                  r => r.xomuog_gfcmid === gfcm?.xomuog_gfcmid,
+                )?.xomuog_gfcmsummaryid;
+                const updatedLineItem = {
+                  ...item,
+                  xomuog_gfcmsummaryid: gfcmSummaryId,
+                } as LineItemDetailsFormData;
+
+                const isNewDetail = !item.xomuog_lineitemdetailid;
+                const url = isNewDetail
+                  ? "xomuog_lineitemdetails"
+                  : `xomuog_lineitemdetails(${item.xomuog_lineitemdetailid})`;
+
+                return fetchWithBQ({
+                  url,
+                  method: isNewDetail ? "POST" : "PATCH",
+                  body: toApiLineItemFormDetail(updatedLineItem),
+                  headers: {
+                    Prefer: "return=representation",
+                  },
+                });
+              }),
+            );
+
+            const failed = detailResults.find(r => r.error);
+            if (failed?.error) return { error: failed.error };
+          }
+
+          return {
+            data: {
+              success: true,
+              templateSummaryId, // ✅ Pass it through
+            },
+          };
         } catch (e) {
           return {
             error: {
@@ -133,7 +253,11 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           };
         }
       },
-      invalidatesTags: [],
+      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
+        const { data } = await queryFulfilled;
+        dispatch(setTemplateSummaryId(data.templateSummaryId));
+      },
+      invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],
     }),
   }),
 });

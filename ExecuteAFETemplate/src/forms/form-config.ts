@@ -8,16 +8,20 @@ import { useLazyGetLineItemsDetailsQuery } from "@/services/line-item-detail";
 import { useLazyGetLineItemQuery } from "@/services/line-items";
 import { useLazyGetTemplateQuery } from "@/services/template";
 import { useLazyGetTemplateSummaryQuery } from "@/services/templateSummary";
-import { selectTemplateId, selectTemplateSummaryId } from "@/store";
+import {
+  selectTemplateId,
+  selectTemplateSummaryId,
+  selectWPNId,
+} from "@/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { type TemplateFormData, templateFormSchema } from "./form-schemas";
 
-const useGetDefaultValues = () => {
+export const useGetDefaultValues = () => {
   //* ───── RTK Query ─────
   const templateId = useAppSelector(selectTemplateId);
   const templateSummaryId = useAppSelector(selectTemplateSummaryId);
-
+  const wpnId = useAppSelector(selectWPNId);
   // get template summary with template information
   const [getTemplateFormData] = useLazyGetTemplateQuery();
   const [getTemplateSummaryFormData] = useLazyGetTemplateSummaryQuery();
@@ -62,7 +66,7 @@ const useGetDefaultValues = () => {
       }
 
       // If no templateSummaryId, build default values based on template
-      const templateSummary = fromTemplateToTemplateSummary(template);
+      const templateSummary = fromTemplateToTemplateSummary(template, wpnId);
       const gfcmSummaries = gfcms.map(gfcm =>
         fromGFCMtoGFCMSummary(gfcm, templateSummary.xomuog_templatesummaryid),
       );

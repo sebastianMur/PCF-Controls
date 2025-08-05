@@ -1,1 +1,3 @@
-export type ContextPage = { page: { getClientUrl: () => string } };
+export type ContextPage = {
+  page: { getClientUrl: () => string; entityId: string };
+};

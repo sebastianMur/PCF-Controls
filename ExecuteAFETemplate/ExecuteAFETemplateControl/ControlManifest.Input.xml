@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
-	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="2025.08.8" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
+	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="2025.08.10" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
 		<external-service-usage enabled="false">
 		</external-service-usage>
+		<property name="DevelopmentEntityId" display-name-key="DO NOT USE" description-key="Only used for development" of-type="SingleLine.Text" usage="input" required="false" />
 	    <property name="templateId" display-name-key="Template Lookup" description-key="Template Lookup " of-type="Lookup.Simple" usage="bound" required="true" />
 	    <property name="templateSummaryId" display-name-key="Template Summary Lookup" description-key="Template Summary Lookup" of-type="Lookup.Simple" usage="bound" required="true" />
 		<resources>

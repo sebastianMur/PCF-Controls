@@ -6,6 +6,7 @@ import type {
   GFCMSummary,
   LineItem,
   LineItemDetails,
+  SendLineItemDetails,
 } from "@/types/template";
 import { v4 as uuidv4 } from "uuid";
 export const fromApiLineItem = (record: D365LineItem): LineItem => ({
@@ -56,4 +57,16 @@ export const fromApiLineItemFormDetail = (
   xomuog_total: record.xomuog_total ?? 0,
   xomuog_unit: record.xomuog_unit ?? 0,
   xomuog_name: record.xomuog_name ?? "",
+});
+
+export const toApiLineItemFormDetail = (
+  record: LineItemDetailsFormData,
+): SendLineItemDetails => ({
+  "xomuog_gfcmsummaryid@odata.bind": `/xomuog_gfcmsummaries(${record.xomuog_gfcmsummaryid})`,
+  "xomuog_lineitem@odata.bind": `/xomuog_lineitems(${record.xomuog_lineitem})`,
+  xomuog_quantity: record.xomuog_quantity,
+  xomuog_total: record.xomuog_total,
+  xomuog_unitprice: record.xomuog_unitprice,
+  xomuog_name: record.xomuog_name,
+  xomuog_unit: record.xomuog_unit,
 });

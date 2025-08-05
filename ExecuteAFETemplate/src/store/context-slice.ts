@@ -9,8 +9,12 @@ export const contextSlice = createSlice({
     baseUrl: "",
     templateSummaryId: "",
     templateId: "",
+    wpnId: "",
   },
   reducers: {
+    setWPNId: (state, { payload }: PayloadAction<string>) => {
+      state.wpnId = isValidD365Guid(payload) ? payload : "";
+    },
     setTemplateSummaryId: (state, { payload }: PayloadAction<string>) => {
       state.templateSummaryId = isValidD365Guid(payload) ? payload : "";
     },
@@ -25,8 +29,9 @@ export const contextSlice = createSlice({
 
 export const selectTemplateSummaryId = (state: RootState) =>
   state.context.templateSummaryId;
+export const selectWPNId = (state: RootState) => state.context.wpnId;
 export const selectTemplateId = (state: RootState) => state.context.templateId;
 export const selectBaseUrl = (state: RootState) => state.context.baseUrl;
 
-export const { setTemplateSummaryId, setTemplateId, setBaseUrl } =
+export const { setTemplateSummaryId, setTemplateId, setBaseUrl, setWPNId } =
   contextSlice.actions;

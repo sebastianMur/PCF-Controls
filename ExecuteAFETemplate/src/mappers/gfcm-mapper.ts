@@ -4,6 +4,7 @@ import type {
   D365GFCMSummary,
   GFCM,
   GFCMSummary,
+  SendGFCMSummary,
 } from "@/types/template";
 import { v4 as uuidv4 } from "uuid";
 export const fromApiGFCM = (record: D365GFCM): GFCM => ({
@@ -38,4 +39,12 @@ export const fromGFCMtoGFCMSummary = (
   xomuog_name: gfcm.xomuog_name ?? "",
   xomuog_templatesummaryid: templateSummaryId,
   xomuog_total: 0,
+});
+export const toApiGFCMSummary = (
+  gfcmSummary: GFCMSummaryFormData,
+): SendGFCMSummary => ({
+  "xomuog_templatesummaryid@odata.bind": `/xomuog_templatesummaries(${gfcmSummary.xomuog_templatesummaryid})`,
+  xomuog_name: gfcmSummary.xomuog_name,
+  xomuog_total: gfcmSummary.xomuog_total,
+  "xomuog_gfcmid@odata.bind": `/xomuog_gfcms(${gfcmSummary.xomuog_gfcmid})`,
 });

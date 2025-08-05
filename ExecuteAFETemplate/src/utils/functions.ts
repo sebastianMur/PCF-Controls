@@ -5,3 +5,24 @@ export const isValidD365Guid = (id: string): boolean => {
 };
 
 export const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+
+export const getLookupId = (lookup: any): string | undefined => {
+  if (!lookup) return undefined;
+
+  // Case 1: String (raw ID)
+  if (typeof lookup === "string") {
+    return lookup;
+  }
+
+  // Case 2: Array with standard structure (real app)
+  if (Array.isArray(lookup) && lookup.length > 0) {
+    const item = lookup[0];
+
+    return (
+      item?.id || // Real app
+      item?._id // Local/test mode
+    );
+  }
+
+  return undefined;
+};

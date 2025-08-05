@@ -3,6 +3,7 @@ import type {
   D365Template,
   D365TemplateSummary,
   SendTemplate,
+  SendTemplateSummary,
   Template,
   TemplateSummary,
 } from "@/types/template";
@@ -47,15 +48,27 @@ export const fromApiTemplateFormSummary = (
   xomuog_name: record.xomuog_name ?? "",
   xomuog_templateid: record._xomuog_templateid_value ?? "",
   xomuog_grandtotal: record.xomuog_grandtotal ?? 0,
+  xomuog_wpnid: record._xomuog_wpnid_value ?? "",
 });
 
 export const fromTemplateToTemplateSummary = (
   record: Template,
+  wpnId: string,
 ): TemplateSummaryFormData => ({
   xomuog_templatesummaryid: uuidv4(),
   xomuog_name: record.xomuog_name,
   xomuog_templateid: record.xomuog_templateid,
   xomuog_grandtotal: 0,
+  xomuog_wpnid: wpnId,
+});
+
+export const toApiTemplateSummary = (
+  record: TemplateSummaryFormData,
+): SendTemplateSummary => ({
+  "xomuog_templateid@odata.bind": `/xomuog_templates(${record.xomuog_templateid})`,
+  "xomuog_wpnid@odata.bind": `/xomuog_wellproblemnotifications(${record.xomuog_wpnid})`,
+  xomuog_grandtotal: record.xomuog_grandtotal,
+  xomuog_name: record.xomuog_name,
 });
 
 //
