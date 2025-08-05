@@ -238,10 +238,28 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             if (failed?.error) return { error: failed.error };
           }
 
+          const wpnId = templateSummary.xomuog_wpnid;
+
+          const afeExecuteResult = await fetchWithBQ({
+            url: "xomuog_apiwpnsendexecuteaferecord",
+            method: "POST",
+            body: JSON.stringify({ wpnid: wpnId }),
+            headers: {
+              "OData-MaxVersion": "4.0",
+              "OData-Version": "4.0",
+              "Content-Type": "application/json; charset=utf-8",
+              Accept: "application/json",
+            },
+          });
+
+          if (afeExecuteResult.error) {
+            return { error: afeExecuteResult.error };
+          }
+
           return {
             data: {
               success: true,
-              templateSummaryId, // ✅ Pass it through
+              templateSummaryId,
             },
           };
         } catch (e) {
