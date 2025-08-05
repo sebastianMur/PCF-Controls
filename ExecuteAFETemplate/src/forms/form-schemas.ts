@@ -41,12 +41,10 @@ export const templateFormSchema = z.object({
   gfcmSummary: z.array(gfcmSummarySchema).optional(),
   lineItemsDetails: z.array(lineItemSchema).optional(),
   isNew: z.boolean(),
-  // attachment: attachmentSummarySchema,
 });
 
 export type TemplateSummaryFormData = z.infer<typeof templateSummarySchema>;
 export type GFCMSummaryFormData = z.infer<typeof gfcmSummarySchema>;
 export type LineItemDetailsFormData = z.infer<typeof lineItemSchema>;
 export type AttachmentFormData = z.infer<typeof attachmentSummarySchema>;
-
 export type TemplateFormData = z.infer<typeof templateFormSchema>;

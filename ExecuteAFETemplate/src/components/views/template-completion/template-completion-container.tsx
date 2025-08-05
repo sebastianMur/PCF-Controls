@@ -96,8 +96,8 @@ export default function TemplateCompletionContainer() {
     try {
       const data = getValues();
       await saveTemplateCompletion(data).unwrap();
-      const newTemplateFormValues = await getInitialTemplateValues();
       triggerNotifyOutputChange();
+      const newTemplateFormValues = await getInitialTemplateValues();
       reset(newTemplateFormValues);
       setHasChanges(false);
       setIsLocked(true);
@@ -114,7 +114,7 @@ export default function TemplateCompletionContainer() {
     data: templateData,
     error,
     isLoading,
-  } = useGetTemplateCompletionDataQuery({ templateId });
+  } = useGetTemplateCompletionDataQuery({ templateId }, { skip: !templateId });
 
   // Initialize local data when API data is loaded
   if (templateData && !localData) {

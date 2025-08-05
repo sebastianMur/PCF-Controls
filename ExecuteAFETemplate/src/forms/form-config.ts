@@ -14,6 +14,7 @@ import {
   selectWPNId,
 } from "@/store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { type TemplateFormData, templateFormSchema } from "./form-schemas";
 
@@ -31,61 +32,72 @@ export const useGetDefaultValues = () => {
 
   const [getLineItems] = useLazyGetLineItemQuery();
   const [getLineItemsDetails] = useLazyGetLineItemsDetailsQuery();
-  const getInitialTemplateValues = async (): Promise<TemplateFormData> => {
-    // Provide an initial object with safe defaults
-    const defaultValues: TemplateFormData = {
-      templateSummary: undefined,
-      gfcmSummary: [],
-      lineItemsDetails: [],
-      isNew: false,
-    };
+  const getInitialTemplateValues =
+    useCallback(async (): Promise<TemplateFormData> => {
+      // Provide an initial object with safe defaults
+      const defaultValues: TemplateFormData = {
+        templateSummary: undefined,
+        gfcmSummary: [],
+        lineItemsDetails: [],
+        isNew: false,
+      };
 
-    if (!templateId) return defaultValues;
+      if (!templateId) return defaultValues;
 
-    try {
-      const [template, lineItems, gfcms] = await Promise.all([
-        getTemplateFormData(templateId).unwrap(),
-        getLineItems(templateId).unwrap(),
-        getGFCMs(templateId).unwrap(),
-      ]);
+      try {
+        const [template, lineItems, gfcms] = await Promise.all([
+          getTemplateFormData(templateId).unwrap(),
+          getLineItems(templateId).unwrap(),
+          getGFCMs(templateId).unwrap(),
+        ]);
 
-      if (templateSummaryId) {
-        const [templateSummary, gfcmSummaries, lineItemDetails] =
-          await Promise.all([
-            getTemplateSummaryFormData(templateSummaryId).unwrap(),
-            getGFCMsSummary(templateSummaryId).unwrap(),
-            getLineItemsDetails(templateSummaryId).unwrap(),
-          ]);
+        if (templateSummaryId) {
+          const [templateSummary, gfcmSummaries, lineItemDetails] =
+            await Promise.all([
+              getTemplateSummaryFormData(templateSummaryId).unwrap(),
+              getGFCMsSummary(templateSummaryId).unwrap(),
+              getLineItemsDetails(templateSummaryId).unwrap(),
+            ]);
+
+          return {
+            templateSummary,
+            gfcmSummary: gfcmSummaries,
+            lineItemsDetails: lineItemDetails,
+            isNew: false,
+          };
+        }
+
+        // If no templateSummaryId, build default values based on template
+        const templateSummary = fromTemplateToTemplateSummary(template, wpnId);
+        const gfcmSummaries = gfcms.map(gfcm =>
+          fromGFCMtoGFCMSummary(gfcm, templateSummary.xomuog_templatesummaryid),
+        );
+        const lineItemDetails = lineItems.map(lineItem =>
+          fromLineItemToLineItemDetails(lineItem, gfcmSummaries),
+        );
 
         return {
           templateSummary,
           gfcmSummary: gfcmSummaries,
           lineItemsDetails: lineItemDetails,
-          isNew: false,
+          isNew: true,
         };
+      } catch (error) {
+        // Handle or log errors as needed
+        console.error("Failed to load initial template values", error);
+        return defaultValues;
       }
-
-      // If no templateSummaryId, build default values based on template
-      const templateSummary = fromTemplateToTemplateSummary(template, wpnId);
-      const gfcmSummaries = gfcms.map(gfcm =>
-        fromGFCMtoGFCMSummary(gfcm, templateSummary.xomuog_templatesummaryid),
-      );
-      const lineItemDetails = lineItems.map(lineItem =>
-        fromLineItemToLineItemDetails(lineItem, gfcmSummaries),
-      );
-
-      return {
-        templateSummary,
-        gfcmSummary: gfcmSummaries,
-        lineItemsDetails: lineItemDetails,
-        isNew: true,
-      };
-    } catch (error) {
-      // Handle or log errors as needed
-      console.error("Failed to load initial template values", error);
-      return defaultValues;
-    }
-  };
+    }, [
+      getGFCMs,
+      getGFCMsSummary,
+      getLineItems,
+      getLineItemsDetails,
+      getTemplateFormData,
+      getTemplateSummaryFormData,
+      templateId,
+      templateSummaryId,
+      wpnId,
+    ]);
 
   return {
     getInitialTemplateValues,
@@ -94,11 +106,19 @@ export const useGetDefaultValues = () => {
 
 export const useTemplateCompletionForm = () => {
   const { getInitialTemplateValues } = useGetDefaultValues();
-
-  return useForm<TemplateFormData>({
+  const methods = useForm<TemplateFormData>({
     resolver: zodResolver(templateFormSchema),
     shouldUnregister: false, // crucial for multi-step
     mode: "onChange",
     defaultValues: async () => await getInitialTemplateValues(),
   });
+
+  useEffect(() => {
+    (async () => {
+      const defaultValues = await getInitialTemplateValues();
+      methods.reset(defaultValues);
+    })();
+  }, [getInitialTemplateValues, methods.reset]);
+
+  return methods;
 };

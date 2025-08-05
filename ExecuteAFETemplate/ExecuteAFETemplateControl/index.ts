@@ -3,12 +3,13 @@ import type { ReactElement } from 'react';
 import { Provider } from 'react-redux';
 import type { ProviderProps } from 'react-redux';
 import type { ContextPage } from '../src/types';
-import { createStore, setBaseUrl,  setTemplateId, setTemplateSummaryId, setWPNId, } from '@/store';
+import { createStore, setBaseUrl, setTemplateId, setTemplateSummaryId, setWPNId, } from '@/store';
 import { IInputs, IOutputs } from './generated/ManifestTypes';
 import { AppProviders } from '@/app/provider';
 import TemplateCompletionContainer from '@/components/views/template-completion/template-completion-container';
 import { setNotifyOutputChange } from '@/utils/notifyOutputChange';
 import { getLookupId } from '@/utils/functions';
+import { FluentProvider, MessageBar ,webLightTheme} from '@fluentui/react-components';
 
 export class ExecuteAFETemplateControl implements ComponentFramework.ReactControl<IInputs, IOutputs> {
   private store: ReturnType<typeof createStore>;
@@ -30,7 +31,7 @@ export class ExecuteAFETemplateControl implements ComponentFramework.ReactContro
     }
   }
 
-  public updateView(context: ComponentFramework.Context<IInputs>): // context: ComponentFramework.Context<IInputs>,
+  public updateView(context: ComponentFramework.Context<IInputs>):
     ReactElement {
     const templateLookup = context.parameters.templateId.raw;
     const templateSummaryLookup = context.parameters.templateSummaryId.raw;
@@ -38,14 +39,20 @@ export class ExecuteAFETemplateControl implements ComponentFramework.ReactContro
     const templateId = getLookupId(templateLookup);
     const templateSummaryId = getLookupId(templateSummaryLookup);
 
-    if (templateId) {
-      this.store.dispatch(setTemplateId(templateId));
-    }
+    this.store.dispatch(setTemplateId(templateId ?? ""));
+    this.store.dispatch(setTemplateSummaryId(templateSummaryId ?? ""));
 
-    if (templateSummaryId) {
-      this.store.dispatch(setTemplateSummaryId(templateSummaryId));
+    if (!templateId) {
+return createElement(
+  FluentProvider,
+  { theme: webLightTheme,style:{width:"100%"} },
+  createElement(
+    MessageBar,
+    { intent: "warning" },
+    "No template selected."
+  )
+);
     }
-
 
     return createElement(
       Provider,

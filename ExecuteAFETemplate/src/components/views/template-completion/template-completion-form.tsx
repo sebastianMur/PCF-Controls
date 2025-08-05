@@ -1,5 +1,7 @@
 import { TemplateCompletionTableContainer } from "@/components/table";
 import type { TemplateFormData } from "@/forms/form-schemas";
+import { useAppSelector } from "@/hooks";
+import { selectTemplateSummaryId } from "@/store";
 import { useFormStyles } from "@/styles/template-completion-form";
 import type { TemplateCompletionData, Unit } from "@/types/template";
 import { formatCurrency } from "@/utils/functions";
@@ -26,7 +28,6 @@ type TemplateCompletionProps = {
   handleUnitChange: (lineItemDetailId: string, newUnit: Unit) => void;
 };
 export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
-  isLocked,
   templateData,
   templateSummaryData,
   hasChanges,
@@ -38,11 +39,13 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   handleUnitChange,
 }) => {
   const styles = useFormStyles();
+  const templateSummaryId = useAppSelector(selectTemplateSummaryId);
+  const isLocked = !!templateSummaryId;
 
   return (
     <fieldset
-      disabled={isLocked}
-      className={isLocked ? styles.lockedOverlay : ""}
+    // disabled={isLocked}
+    // className={isLocked ? styles.lockedOverlay : ""}
     >
       <div className={styles.container}>
         {hasChanges && !isLocked && (
@@ -50,12 +53,12 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
             You have unsaved changes. Click "Save & Lock" to save your progress.
           </MessageBar>
         )}
-        {isLocked && (
+        {/* {isLocked && (
           <MessageBar intent="success">
             Template is locked and saved. Click "Unlock Template" to make
             changes.
           </MessageBar>
-        )}
+        )} */}
 
         <div className={`${styles.header} ${styles.grandTotalSection}`}>
           <div>
@@ -69,7 +72,12 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
             </Text>
           </div>
 
-          <div className={styles.actionButtons}>
+          <div
+            style={{
+              display: templateSummaryId ? "none" : "block",
+            }}
+            className={styles.actionButtons}
+          >
             {isLocked ? (
               <Button
                 appearance="secondary"
