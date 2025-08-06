@@ -1,25 +1,23 @@
 import { TemplateCompletionTableContainer } from "@/components/table";
 import type { TemplateFormData } from "@/forms/form-schemas";
-import { useAppSelector } from "@/hooks";
-import { selectTemplateSummaryId } from "@/store";
 import { useFormStyles } from "@/styles/template-completion-form";
 import type { TemplateCompletionData, Unit } from "@/types/template";
 import { formatCurrency } from "@/utils/functions";
 import { Button, MessageBar, Text, tokens } from "@fluentui/react-components";
-import { PresenceBlockedRegular, SaveRegular } from "@fluentui/react-icons";
+import { SaveRegular, SendRegular } from "@fluentui/react-icons";
 import type { FC } from "react";
-import type { FieldErrors } from "react-hook-form";
 import AttachmentManager from "./attachment-manager";
 
 type TemplateCompletionProps = {
-  isLocked: boolean;
   templateData: TemplateCompletionData;
   templateSummaryData: TemplateFormData;
   hasChanges: boolean;
   handleSave: () => Promise<void>;
-  handleUnlock: () => void;
+  handleSendingAFEExecute: () => void;
+  isSending: boolean;
   isSaving: boolean;
-  errors: FieldErrors<TemplateFormData>;
+  isLocked: boolean;
+  templateSummaryId: string;
   handleQuantityChange: (lineItemDetailId: string, newQuantity: number) => void;
   handleUnitPriceChange: (
     lineItemDetailId: string,
@@ -32,15 +30,16 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   templateSummaryData,
   hasChanges,
   handleSave,
-  handleUnlock,
+  handleSendingAFEExecute,
+  isSending,
   isSaving,
+  isLocked,
   handleQuantityChange,
   handleUnitPriceChange,
   handleUnitChange,
+  templateSummaryId,
 }) => {
   const styles = useFormStyles();
-  const templateSummaryId = useAppSelector(selectTemplateSummaryId);
-  const isLocked = !!templateSummaryId;
 
   return (
     <fieldset
@@ -50,15 +49,9 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
       <div className={styles.container}>
         {hasChanges && !isLocked && (
           <MessageBar intent="info">
-            You have unsaved changes. Click "Save & Lock" to save your progress.
+            You have unsaved changes. Click "Save" to save your progress.
           </MessageBar>
         )}
-        {/* {isLocked && (
-          <MessageBar intent="success">
-            Template is locked and saved. Click "Unlock Template" to make
-            changes.
-          </MessageBar>
-        )} */}
 
         <div className={`${styles.header} ${styles.grandTotalSection}`}>
           <div>
@@ -72,28 +65,23 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
             </Text>
           </div>
 
-          <div
-            style={{
-              display: templateSummaryId ? "none" : "block",
-            }}
-            className={styles.actionButtons}
-          >
-            {isLocked ? (
-              <Button
-                appearance="secondary"
-                icon={<PresenceBlockedRegular />}
-                onClick={handleUnlock}
-              >
-                Unlock Template
-              </Button>
-            ) : (
+          <div className={styles.actionButtons}>
+            <Button
+              appearance="primary"
+              icon={<SaveRegular />}
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving}
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+            {templateSummaryId && (
               <Button
                 appearance="primary"
-                icon={<SaveRegular />}
-                onClick={handleSave}
-                disabled={!hasChanges || isSaving}
+                icon={<SendRegular />}
+                onClick={handleSendingAFEExecute}
+                disabled={isSending || isLocked}
               >
-                {isSaving ? "Saving..." : "Save & Lock"}
+                {isSending ? "Sending..." : "Send & Lock"}
               </Button>
             )}
           </div>
@@ -107,12 +95,16 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
           onUnitChange={handleUnitChange}
           isLocked={isLocked}
         />
-        <AttachmentManager
-          templateSummaryId={
-            templateSummaryData.templateSummary?.xomuog_templatesummaryid ?? ""
-          }
-          isLocked={isLocked}
-        />
+
+        {templateSummaryId && (
+          <AttachmentManager
+            templateSummaryId={
+              templateSummaryData.templateSummary?.xomuog_templatesummaryid ??
+              ""
+            }
+            isLocked={isLocked}
+          />
+        )}
       </div>
     </fieldset>
   );

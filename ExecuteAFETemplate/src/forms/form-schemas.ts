@@ -25,6 +25,7 @@ export const templateSummarySchema = z.object({
   xomuog_name: z.string(),
   xomuog_grandtotal: z.number(),
   xomuog_wpnid: z.string(),
+  statuscode: z.number(),
 });
 
 export const attachmentSummarySchema = z

@@ -2,7 +2,6 @@ import type {
   GFCMSummaryFormData,
   LineItemDetailsFormData,
   TemplateFormData,
-  TemplateSummaryFormData,
 } from "@/forms/form-schemas";
 import {
   fromApiGFCM,
@@ -23,11 +22,10 @@ import type {
   D365GFCMSummary,
   D365LineItem,
   D365Template,
-  LineItemDetails,
+  D365TemplateSummary,
   ODataEntityResponse,
   ODataMultipleResponse,
   TemplateCompletionData,
-  TemplateSummary,
   Unit,
 } from "../types/template";
 import { baseApi } from "./base-api";
@@ -91,46 +89,6 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       providesTags: ["attachments"],
     }),
 
-    updateTemplateSummary: builder.mutation<
-      TemplateSummary,
-      Partial<TemplateSummary> & { templateSummaryId: string }
-    >({
-      query: ({ templateSummaryId, ...updates }) => ({
-        url: `new_templatesummaries(${templateSummaryId})`,
-        method: "PATCH",
-        body: updates,
-      }),
-      invalidatesTags: [],
-    }),
-
-    updateLineItemDetails: builder.mutation<
-      LineItemDetails[],
-      LineItemDetails[]
-    >({
-      async queryFn(details, _api, _extra, fetchWithBQ) {
-        try {
-          await Promise.all(
-            details.map(d =>
-              fetchWithBQ({
-                url: `new_lineitemdetails(${d.xomuog_lineitemdetailid})`,
-                method: "PATCH",
-                body: d,
-              }),
-            ),
-          );
-          return { data: details };
-        } catch (e) {
-          return {
-            error: {
-              status: 500,
-              data: { message: "Failed to update line item details" },
-            },
-          };
-        }
-      },
-      invalidatesTags: [],
-    }),
-
     saveTemplateCompletion: builder.mutation<
       SaveTemplateCompletionResponse,
       TemplateFormData
@@ -168,7 +126,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             return { error: templateSummaryResult.error };
           }
           templateSummaryId = fromApiTemplateFormSummary(
-            templateSummaryResult?.data as TemplateSummaryFormData,
+            templateSummaryResult?.data as D365TemplateSummary,
           )?.xomuog_templatesummaryid;
 
           let transformedGFCMResults: GFCMSummaryFormData[] = [];
@@ -238,24 +196,6 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             if (failed?.error) return { error: failed.error };
           }
 
-          const wpnId = templateSummary.xomuog_wpnid;
-
-          const afeExecuteResult = await fetchWithBQ({
-            url: "xomuog_apiwpnsendexecuteaferecord",
-            method: "POST",
-            body: JSON.stringify({ wpnid: wpnId }),
-            headers: {
-              "OData-MaxVersion": "4.0",
-              "OData-Version": "4.0",
-              "Content-Type": "application/json; charset=utf-8",
-              Accept: "application/json",
-            },
-          });
-
-          if (afeExecuteResult.error) {
-            return { error: afeExecuteResult.error };
-          }
-
           return {
             data: {
               success: true,
@@ -277,13 +217,26 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],
     }),
+
+    sendToAFEExecute: builder.mutation<void, string>({
+      query: wpnid => ({
+        url: "xomuog_apiwpnsendexecuteaferecord",
+        method: "POST",
+        body: JSON.stringify({ wpnid }),
+        headers: {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Content-Type": "application/json; charset=utf-8",
+          Accept: "application/json",
+        },
+      }),
+    }),
   }),
 });
 
 export const {
   useGetTemplateCompletionDataQuery,
   useLazyGetTemplateCompletionDataQuery,
-  useUpdateTemplateSummaryMutation,
-  useUpdateLineItemDetailsMutation,
   useSaveTemplateCompletionMutation,
+  useSendToAFEExecuteMutation,
 } = templateCompletionApi;

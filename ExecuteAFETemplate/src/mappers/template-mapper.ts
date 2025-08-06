@@ -7,6 +7,7 @@ import type {
   Template,
   TemplateSummary,
 } from "@/types/template";
+import { STATUS_REASON } from "@/utils/constants";
 import { v4 as uuidv4 } from "uuid";
 
 export const fromApiTemplate = (record: D365Template): Template => ({
@@ -49,6 +50,7 @@ export const fromApiTemplateFormSummary = (
   xomuog_templateid: record._xomuog_templateid_value ?? "",
   xomuog_grandtotal: record.xomuog_grandtotal ?? 0,
   xomuog_wpnid: record._xomuog_wpnid_value ?? "",
+  statuscode: record.statuscode,
 });
 
 export const fromTemplateToTemplateSummary = (
@@ -60,6 +62,7 @@ export const fromTemplateToTemplateSummary = (
   xomuog_templateid: record.xomuog_templateid,
   xomuog_grandtotal: 0,
   xomuog_wpnid: wpnId,
+  statuscode: STATUS_REASON.Active,
 });
 
 export const toApiTemplateSummary = (
@@ -69,14 +72,5 @@ export const toApiTemplateSummary = (
   "xomuog_wpnid@odata.bind": `/xomuog_wellproblemnotifications(${record.xomuog_wpnid})`,
   xomuog_grandtotal: record.xomuog_grandtotal,
   xomuog_name: record.xomuog_name,
+  statuscode: record.statuscode,
 });
-
-//
-// export const fromApiAttachment = (record: any): Attachment => ({
-//   id: record.annotationid,
-//   name: record.filename,
-//   documentBody: record.documentbody,
-//   fileSize: record.filesize,
-//   mimeType: record.mimetype,
-//   note: record.notetext,
-// });

@@ -1,9 +1,11 @@
+import { toApiAttachments } from "@/mappers/attachment-mapper";
 import {
+  useCreateNoteMutation,
   useDeleteAttachmentMutation,
-  useGetAttachmentsQuery,
-  useUploadAttachmentMutation,
+  useGetNotesQuery,
 } from "@/services/notes";
 import { useAttachmentStyles } from "@/styles/template-completion-attachment";
+import type { Attachment } from "@/types/template";
 import {
   Button,
   MessageBar,
@@ -29,7 +31,7 @@ import {
   Document20Regular,
 } from "@fluentui/react-icons";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface AttachmentManagerProps {
   templateSummaryId: string;
@@ -55,10 +57,9 @@ export default function AttachmentManager({
     data: attachments = [],
     isLoading: isLoadingAttachments,
     refetch: refetchAttachments,
-  } = useGetAttachmentsQuery(templateSummaryId);
+  } = useGetNotesQuery(templateSummaryId, { skip: !templateSummaryId });
 
-  const [uploadAttachment, { isLoading: isUploading }] =
-    useUploadAttachmentMutation();
+  const [createNote, { isLoading: isUploading }] = useCreateNoteMutation();
   const [deleteAttachment, { isLoading: isDeleting }] =
     useDeleteAttachmentMutation();
 
@@ -115,24 +116,12 @@ export default function AttachmentManager({
     }
 
     try {
-      console.log(
-        "Uploading file:",
-        file.name,
-        "to template:",
-        templateSummaryId,
-      );
-
-      const result = await uploadAttachment({
-        file,
-        templateSummaryId,
-      }).unwrap();
+      const sendAttachment = await toApiAttachments(file, templateSummaryId);
+      const result = await createNote(sendAttachment).unwrap();
 
       console.log("Upload successful:", result);
 
       setUploadSuccess(`File "${file.name}" uploaded successfully!`);
-
-      // Refetch attachments to update the list
-      await refetchAttachments();
 
       // Clear the input
       if (fileInputRef.current) {
@@ -191,54 +180,14 @@ export default function AttachmentManager({
     }
   };
 
-  const handleDownloadAttachment = async (): Promise<void> => {
-    try {
-      // In a real application, you would fetch the file from the server
-      // For now, we'll simulate the download process
-      console.log("Downloading attachment:", currentAttachment.filename);
-
-      // Create a temporary link element for download
-      const link = document.createElement("a");
-      // link.href = currentAttachment.fileUrl;
-      // link.download = currentAttachment.filename;
-      link.target = "_blank";
-
-      // Append to body, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Show success message
-      setUploadSuccess(
-        `File "${currentAttachment.filename}" download started!`,
-      );
-
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setUploadSuccess(null);
-      }, 3000);
-    } catch (error) {
-      console.error("Failed to download attachment:", error);
-      setUploadError("Failed to download file. Please try again.");
-    }
-  };
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
-  };
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const downloadDocument = useCallback((doc: Attachment) => {
+    const link = document.createElement("a");
+    link.href = doc.url;
+    link.download = doc.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, []);
 
   const getFileIcon = (_fileType: string): React.ReactNode => {
     // You could customize icons based on file type
@@ -356,16 +305,16 @@ export default function AttachmentManager({
         // Single attachment card view
         <div className={styles.singleAttachmentCard}>
           <div className={styles.attachmentInfo}>
-            {getFileIcon(currentAttachment.mimetype ?? "")}
+            {getFileIcon(currentAttachment.type ?? "")}
             <div className={styles.attachmentDetails}>
               <Text className={styles.attachmentName}>
-                {currentAttachment.filename}
+                {currentAttachment.name}
               </Text>
-              <Text className={styles.attachmentMeta}>
+              {/* <Text className={styles.attachmentMeta}>
                 {formatFileSize(currentAttachment.filesize ?? 0)}
-                {currentAttachment.mimetype ?? ""}
+                {currentAttachment.type ?? ""}
                 {formatDate(currentAttachment.createdon)}
-              </Text>
+              </Text> */}
             </div>
           </div>
           {!isLocked && (
@@ -373,9 +322,9 @@ export default function AttachmentManager({
               <Button
                 appearance="secondary"
                 icon={<ArrowDownload20Regular />}
-                onClick={() => handleDownloadAttachment()}
+                onClick={() => downloadDocument(attachments[0])}
                 size="small"
-                aria-label={`Download ${currentAttachment.filename}`}
+                aria-label={`Download ${currentAttachment.name}`}
               >
                 Download
               </Button>
@@ -385,11 +334,11 @@ export default function AttachmentManager({
                 onClick={() =>
                   handleDeleteAttachment(
                     currentAttachment.annotationid,
-                    currentAttachment.filename ?? "",
+                    currentAttachment.name ?? "",
                   )
                 }
                 disabled={isDeleting || isUploading}
-                aria-label={`Delete ${currentAttachment.filename}`}
+                aria-label={`Delete ${currentAttachment.name}`}
                 size="small"
               >
                 Delete
@@ -415,22 +364,12 @@ export default function AttachmentManager({
                 <TableRow key={attachment.annotationid}>
                   <TableCell>
                     <div className={styles.fileIcon}>
-                      {getFileIcon(attachment.mimetype ?? "")}
-                      <Text>{attachment.filename}</Text>
+                      {getFileIcon(attachment.type ?? "")}
+                      <Text>{attachment.name}</Text>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Text className={styles.fileSize}>
-                      {formatFileSize(attachment.filesize ?? 0)}
-                    </Text>
-                  </TableCell>
-                  <TableCell>
-                    <Text className={styles.fileIcon}>
-                      {attachment.mimetype}
-                    </Text>
-                  </TableCell>
-                  <TableCell>
-                    <Text>{formatDate(attachment.createdon)}</Text>
+                    <Text className={styles.fileIcon}>{attachment.type}</Text>
                   </TableCell>
                   {!isLocked && (
                     <TableCell>
@@ -440,11 +379,11 @@ export default function AttachmentManager({
                         onClick={() =>
                           handleDeleteAttachment(
                             attachment.annotationid,
-                            attachment.filename ?? "",
+                            attachment.name ?? "",
                           )
                         }
                         disabled={isDeleting}
-                        aria-label={`Delete ${attachment.filename}`}
+                        aria-label={`Delete ${attachment.name}`}
                       />
                     </TableCell>
                   )}

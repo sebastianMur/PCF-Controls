@@ -125,6 +125,7 @@ export interface D365TemplateSummary {
   xomuog_subprojecttype?: string;
   _xomuog_templateid_value?: string;
   _xomuog_wpnid_value?: string;
+  statuscode: number;
 }
 
 export interface SendTemplateSummary {
@@ -132,6 +133,7 @@ export interface SendTemplateSummary {
   xomuog_name?: string;
   "xomuog_templateid@odata.bind": string;
   "xomuog_wpnid@odata.bind": string;
+  statuscode: number;
 }
 
 export interface Template {
@@ -148,22 +150,31 @@ export interface SendTemplate {
 }
 export interface Attachment {
   annotationid: string;
-  objectid?: string;
-  filename?: string;
-  filesize?: number;
-  mimetype?: string;
-  createdon: string;
-  documentbody?: string;
+  name: string;
+  type: string;
+  url: string;
 }
 export interface D365Attachment {
-  "@odata.etag": 'W/"589803275"';
   annotationid: string;
-  _objectid_value?: string;
-  filename?: string;
-  filesize?: number;
-  mimetype?: string;
-  createdon: string;
-  documentbody?: string;
+  documentbody: string;
+  filename: string;
+  filesize: number;
+  isdocument: boolean;
+  mimetype: string;
+  objecttypecode: string;
+  _objectid_value: string;
+  notetext: string;
+  subject: string;
+  "@odata.etag": string;
+}
+export interface SendAttachment {
+  objecttypecode: string;
+  mimetype: string;
+  "objectid_xomuog_templatesummary@odata.bind": string;
+  isdocument: true;
+  filename: string;
+  subject: string;
+  documentbody: string;
 }
 
 export interface WPN {
@@ -226,18 +237,10 @@ export const getLineItemDetailsByGFCMSummary = (
   );
 };
 
-export const getAttachmentsByTemplateSummary = (
-  attachments: Attachment[],
-  templateSummaryId: string,
-): Attachment[] => {
-  return attachments.filter(att => att.objectid === templateSummaryId);
-};
-
 // Default export
 export default {
   getGFCMsByTemplateSummary,
   getLineItemDetailsByGFCMSummary,
-  getAttachmentsByTemplateSummary,
   getLineItemsByGFCM,
   getGFCMByTemplate,
 };

@@ -1,7 +1,10 @@
+import { fromApiAttachments } from "@/mappers/attachment-mapper";
 import { baseApi } from "@/store/base-api";
-import type { Attachment } from "@/types/template";
-
-let mockAttachments: Attachment[] = [];
+import type {
+  Attachment,
+  D365Attachment,
+  SendAttachment,
+} from "@/types/template";
 
 interface DeleteAttachmentResponse {
   success: boolean;
@@ -9,59 +12,48 @@ interface DeleteAttachmentResponse {
 
 export const notesApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    uploadAttachment: builder.mutation<
-      Attachment,
-      { file: File; templateSummaryId: string }
-    >({
-      queryFn: async ({ file, templateSummaryId }) => {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        const attachment: Attachment = {
-          annotationid: `ATT${Date.now()}`,
-          objectid: templateSummaryId,
-          filename: file.name,
-          filesize: file.size,
-          mimetype: file.type,
-          createdon: new Date().toISOString(),
-        };
-
-        // Add to mock storage
-        mockAttachments.push(attachment);
-
-        return { data: attachment };
-      },
+    createNote: builder.mutation<void, SendAttachment>({
+      query: attachment => ({
+        url: "annotations",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(attachment),
+      }),
+      invalidatesTags: ["attachments"],
+    }),
+    updateNote: builder.mutation<void, SendAttachment>({
+      query: attachment => ({
+        url: "annotations",
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(attachment),
+      }),
       invalidatesTags: ["attachments"],
     }),
 
     deleteAttachment: builder.mutation<DeleteAttachmentResponse, string>({
-      queryFn: async attachmentId => {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Remove from mock storage
-        mockAttachments = mockAttachments.filter(
-          att => att.annotationid !== attachmentId,
-        );
-
-        return { data: { success: true } };
-      },
+      query: attachmentId => ({
+        url: `/annotations(${attachmentId})`,
+        method: "DELETE",
+      }),
       invalidatesTags: ["attachments"],
     }),
 
-    getAttachments: builder.query<Attachment[], string>({
-      queryFn: async templateSummaryId => {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const filteredAttachments = mockAttachments.filter(
-          att => att.objectid === templateSummaryId,
-        );
-        return { data: filteredAttachments };
+    getNotes: builder.query<Attachment[], string>({
+      query: templateSummaryId =>
+        `annotations?$select=annotationid,notetext,documentbody,filename,filesize,isdocument,mimetype,_objectid_value,subject&$filter=(isdocument eq true and _objectid_value eq ${templateSummaryId})`,
+      transformResponse: (response: {
+        value: D365Attachment[];
+      }): Attachment[] => {
+        return response.value.map(fromApiAttachments);
       },
-      providesTags: ["attachments"],
     }),
   }),
 });
 
 export const {
-  useUploadAttachmentMutation,
+  useGetNotesQuery,
+  useCreateNoteMutation,
+  useUpdateNoteMutation,
   useDeleteAttachmentMutation,
-  useGetAttachmentsQuery,
 } = notesApi;
