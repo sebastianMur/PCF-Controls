@@ -9,7 +9,7 @@ import type { Attachment } from "@/types/template";
 import {
   Button,
   MessageBar,
-  MessageBarActions,
+  // MessageBarActions,
   MessageBarBody,
   MessageBarTitle,
   Spinner,
@@ -27,7 +27,7 @@ import {
   Attach20Regular,
   AttachArrowRightFilled,
   Delete20Regular,
-  Dismiss24Regular,
+  // Dismiss24Regular,
   Document20Regular,
 } from "@fluentui/react-icons";
 import type React from "react";
@@ -201,7 +201,7 @@ export default function AttachmentManager({
   };
 
   const getUploadButtonIcon = (): React.ReactNode => {
-    if (isUploading) return <Spinner size="tiny" />;
+    // if (isUploading) return <Spinner size="tiny" />;
     if (hasMaxAttachments) return <AttachArrowRightFilled />;
     return <Attach20Regular />;
   };
@@ -250,13 +250,6 @@ export default function AttachmentManager({
           <MessageBarBody>
             <MessageBarTitle>Error</MessageBarTitle>
             {uploadError}
-            <MessageBarActions
-              containerAction={
-                <Button onClick={() => setUploadError(null)}>
-                  <Dismiss24Regular />
-                </Button>
-              }
-            />
           </MessageBarBody>
         </MessageBar>
       )}
@@ -264,15 +257,8 @@ export default function AttachmentManager({
       {uploadSuccess && (
         <MessageBar intent="success">
           <MessageBarBody>
-            <MessageBarTitle>Error</MessageBarTitle>
+            <MessageBarTitle>Success</MessageBarTitle>
             {uploadSuccess}
-            <MessageBarActions
-              containerAction={
-                <Button onClick={() => setUploadSuccess(null)}>
-                  <Dismiss24Regular />
-                </Button>
-              }
-            />
           </MessageBarBody>
         </MessageBar>
       )}
@@ -310,11 +296,6 @@ export default function AttachmentManager({
               <Text className={styles.attachmentName}>
                 {currentAttachment.name}
               </Text>
-              {/* <Text className={styles.attachmentMeta}>
-                {formatFileSize(currentAttachment.filesize ?? 0)}
-                {currentAttachment.type ?? ""}
-                {formatDate(currentAttachment.createdon)}
-              </Text> */}
             </div>
           </div>
           {!isLocked && (

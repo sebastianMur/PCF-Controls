@@ -47,6 +47,7 @@ export const notesApi = baseApi.injectEndpoints({
       }): Attachment[] => {
         return response.value.map(fromApiAttachments);
       },
+      providesTags: ["attachments"],
     }),
   }),
 });
