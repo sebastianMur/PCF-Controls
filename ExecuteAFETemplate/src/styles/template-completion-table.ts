@@ -128,6 +128,5 @@ export const useTableStyles = makeStyles({
   cellContent: {
     overflow: "hidden",
     textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
   },
 });

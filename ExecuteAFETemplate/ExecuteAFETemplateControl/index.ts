@@ -9,10 +9,11 @@ import { AppProviders } from '@/app/provider';
 import TemplateCompletionContainer from '@/components/views/template-completion/template-completion-container';
 import { setNotifyOutputChange } from '@/utils/notifyOutputChange';
 import { getLookupId } from '@/utils/functions';
-import { FluentProvider, MessageBar ,webLightTheme} from '@fluentui/react-components';
+import { FluentProvider, MessageBar, webLightTheme } from '@fluentui/react-components';
 
 export class ExecuteAFETemplateControl implements ComponentFramework.ReactControl<IInputs, IOutputs> {
   private store: ReturnType<typeof createStore>;
+  private isLocal = window.location.hostname === "localhost" || window.location.href.includes("localhost");
   constructor() {
     this.store = createStore();
   }
@@ -21,18 +22,21 @@ export class ExecuteAFETemplateControl implements ComponentFramework.ReactContro
     const { page } = context as unknown as ContextPage;
     setNotifyOutputChange(notifyOutputChanged)
 
-    try {
+    if (this.isLocal) {
+      if (context.parameters.DevelopmentEntityId.raw) {
+        this.store.dispatch(setWPNId(context.parameters.DevelopmentEntityId.raw));
+        this.store.dispatch(setBaseUrl('http://localhost:3030'));
+      }
+
+    } else {
       this.store.dispatch(setBaseUrl(page.getClientUrl()));
       this.store.dispatch(setWPNId(page.entityId));
-    } catch (_error) {
-      if (context.parameters.DevelopmentEntityId.raw)
-        this.store.dispatch(setWPNId(context.parameters.DevelopmentEntityId.raw));
-      this.store.dispatch(setBaseUrl('http://localhost:3030'));
     }
   }
 
   public updateView(context: ComponentFramework.Context<IInputs>):
     ReactElement {
+    const { page } = context as unknown as ContextPage;
     const templateLookup = context.parameters.templateId.raw;
     const templateSummaryLookup = context.parameters.templateSummaryId.raw;
 
@@ -42,16 +46,18 @@ export class ExecuteAFETemplateControl implements ComponentFramework.ReactContro
     this.store.dispatch(setTemplateId(templateId ?? ""));
     this.store.dispatch(setTemplateSummaryId(templateSummaryId ?? ""));
 
-    if (!templateId) {
-return createElement(
-  FluentProvider,
-  { theme: webLightTheme,style:{width:"100%"} },
-  createElement(
-    MessageBar,
-    { intent: "warning" },
-    "No template selected."
-  )
-);
+    if (!templateId || !(this.isLocal || page?.entityId)) {
+      this.store.dispatch(setWPNId(page.entityId));
+      return createElement(
+        FluentProvider,
+        { theme: webLightTheme, style: { width: "100%" } },
+        createElement(
+          MessageBar,
+          { intent: "warning" },
+          !templateId
+            ? "Please select a template to continue."
+            : "Save the record to view this section.")
+      );
     }
 
     return createElement(

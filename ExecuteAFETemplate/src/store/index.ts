@@ -2,7 +2,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "./base-api";
 import { contextSlice } from "./context-slice";
 
-
 export const createStore = () =>
   configureStore({
     reducer: {

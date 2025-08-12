@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
-	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="2025.08.18" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
+	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl" version="2025.08.23" display-name-key="ExecuteAFETemplateControl" description-key="ExecuteAFETemplateControl description" control-type="virtual">
 		<external-service-usage enabled="false">
 		</external-service-usage>
 		<property name="DevelopmentEntityId" display-name-key="DO NOT USE" description-key="Only used for development" of-type="SingleLine.Text" usage="input" required="false" />

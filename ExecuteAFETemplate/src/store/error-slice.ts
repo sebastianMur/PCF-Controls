@@ -1,7 +1,6 @@
 import { createSlice, isAnyOf } from "@reduxjs/toolkit";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
-
 export type State = {
   apiError: FetchBaseQueryError;
 };
@@ -23,11 +22,9 @@ export const mediumSlice = createSlice({
         // questionnaireApi.endpoints.patchQuestionnaire.matchRejected,
         // questionnairePageApi.endpoints.getPagesByQuestionnaire.matchRejected,
         // questionApi.endpoints.getQuestionsByQuestionnaire.matchRejected,
-
         // phhApi.endpoints.getPhhsByContact.matchRejected,
         // phhApi.endpoints.patchPhh.matchRejected,
         // phhApi.endpoints.postPhh.matchRejected,
-
         // contactApi.endpoints.getContact.matchRejected,
         // contactApi.endpoints.patchContact.matchRejected,
         // metadataApi.endpoints.getEntities.matchRejected,

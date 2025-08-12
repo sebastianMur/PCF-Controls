@@ -5,8 +5,8 @@
   "scripts": {
     "build": "pcf-scripts build",
     "clean": "pcf-scripts clean",
-    "lint": "biome check ExecuteAFETemplateControl",
-    "format": "biome check --write ExecuteAFETemplateControl",
+    "lint": "biome check src",
+    "format": "biome check --write src",
     "rebuild": "pcf-scripts rebuild",
     "start": "pcf-scripts start",
     "start:watch": "pcf-scripts start watch",
