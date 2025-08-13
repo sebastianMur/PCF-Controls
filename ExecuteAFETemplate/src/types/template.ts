@@ -158,15 +158,15 @@ export interface TemplateSummary {
 }
 export interface D365TemplateSummary {
   xomuog_templatesummaryid: string;
-  xomuog_capexopex?: string;
-  xomuog_companycode?: string;
-  xomuog_costcenter?: string;
-  xomuog_descriptionscopeofwork?: string;
-  xomuog_engineer?: string;
+  xomuog_capexopex: string;
+  xomuog_companycode: string;
+  xomuog_costcenter: string;
+  xomuog_descriptionscopeofwork: string;
+  _xomuog_engineerid_value?: string;
   exchangerate?: number;
   xomuog_grandtotal: number;
   xomuog_grandtotal_base?: number;
-  xomuog_landman?: string;
+  _xomuog_landmanid_value?: string;
   xomuog_mainprojecttype?: string;
   _xomuog_operator_value?: string;
   xomuog_projectdescription?: string;
@@ -180,11 +180,21 @@ export interface D365TemplateSummary {
 }
 
 export interface SendTemplateSummary {
+  xomuog_capexopex: string;
+  xomuog_projectdescription: string;
+  xomuog_mainprojecttype: string;
+  xomuog_subprojecttype: string;
+  "xomuog_engineerid@odata.bind": string | null;
+  "xomuog_landmanid@odata.bind": string | null;
+  "xomuog_operator@odata.bind": string | null;
+  xomuog_descriptionscopeofwork: string;
+  xomuog_companycode: string;
+  xomuog_costcenter: string;
   xomuog_grandtotal: number;
-  xomuog_name?: string;
+  xomuog_projectnumber?: string;
   "xomuog_templateid@odata.bind": string;
-  "xomuog_wpnid@odata.bind": string;
   statuscode: number;
+  "xomuog_wpnid@odata.bind": string;
 }
 
 export interface Template {
@@ -229,8 +239,33 @@ export interface SendAttachment {
 }
 
 export interface WPN {
-  wpnId: string;
-  name: string;
+  xomuog_wellproblemnotificationid: string;
+  xomuog_primaryjobtypeid: string;
+  xomuog_primaryjobtypename: string;
+  xomuog_engineerid: string;
+  xomuog_landman: string;
+  xomuog_secondaryjobtype: string;
+  xomuog_secondaryjobtypename: string;
+  xomuog_templateid: string;
+  xomuog_templatesummaryid: string;
+  xomuog_well: string;
+  xomuog_wellidname: string;
+}
+export interface D365WPN {
+  xomuog_wellproblemnotificationid: string;
+  xomuog_primaryjobtype_ee: string;
+  "xomuog_primaryjobtype_ee@OData.Community.Display.V1.FormattedValue": string;
+  _xomuog_engineerid_value: string;
+  "_xomuog_engineerid_value@OData.Community.Display.V1.FormattedValue": string;
+  xomuog_secondaryjobtype_ee: string;
+  "xomuog_secondaryjobtype_ee@OData.Community.Display.V1.FormattedValue": string;
+  _xomuog_templateid_value: string;
+  "_xomuog_templateid_value@OData.Community.Display.V1.FormattedValue": string;
+  _xomuog_templatesummaryid_value: string;
+  "_xomuog_templatesummaryid_value@OData.Community.Display.V1.FormattedValue": string;
+  _xomuog_wellid_value: string;
+  "_xomuog_wellid_value@OData.Community.Display.V1.FormattedValue": string;
+  _xomuog_landman_value: string;
 }
 
 export interface ODataRawResult<T> {

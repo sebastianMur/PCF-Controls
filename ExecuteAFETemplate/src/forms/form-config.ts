@@ -8,6 +8,7 @@ import { useLazyGetLineItemsDetailsQuery } from "@/services/line-item-detail";
 import { useLazyGetLineItemQuery } from "@/services/line-items";
 import { useLazyGetTemplateQuery } from "@/services/template";
 import { useLazyGetTemplateSummaryQuery } from "@/services/templateSummary";
+import { useLazyGetWPNQuery } from "@/services/wpn";
 import {
   selectTemplateId,
   selectTemplateSummaryId,
@@ -24,6 +25,9 @@ export const useGetDefaultValues = () => {
   const templateId = useAppSelector(selectTemplateId);
   const templateSummaryId = useAppSelector(selectTemplateSummaryId);
   const wpnId = useAppSelector(selectWPNId);
+
+  const [getWPN] = useLazyGetWPNQuery();
+
   // get template summary with template information
   const [getTemplateFormData] = useLazyGetTemplateQuery();
   const [getTemplateSummaryFormData] = useLazyGetTemplateSummaryQuery();
@@ -43,6 +47,7 @@ export const useGetDefaultValues = () => {
         isNew: false,
       };
 
+      const wpn = await getWPN(wpnId).unwrap();
       if (!templateId) return defaultValues;
 
       try {
@@ -71,7 +76,7 @@ export const useGetDefaultValues = () => {
         }
 
         // If no templateSummaryId, build default values based on template
-        const templateSummary = fromTemplateToTemplateSummary(template, wpnId);
+        const templateSummary = fromTemplateToTemplateSummary(template, wpn);
         const gfcmSummaries = gfcms.map(gfcm =>
           fromGFCMtoGFCMSummary(gfcm, templateSummary.xomuog_templatesummaryid),
         );
@@ -102,6 +107,7 @@ export const useGetDefaultValues = () => {
       templateId,
       templateSummaryId,
       wpnId,
+      getWPN,
     ]);
 
   return {

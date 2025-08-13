@@ -11,7 +11,7 @@ export const templateSummaryApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     getTemplateSummary: builder.query<TemplateSummaryFormData, string>({
       query: templateSummaryId =>
-        `xomuog_templatesummaries(${templateSummaryId})?$select=xomuog_templatesummaryid,xomuog_capexopex,xomuog_companycode,xomuog_costcenter,xomuog_descriptionscopeofwork,xomuog_engineer,exchangerate,xomuog_grandtotal,xomuog_grandtotal_base,xomuog_landman,xomuog_mainprojecttype,_xomuog_operator_value,xomuog_projectdescription,xomuog_name,xomuog_projectnumber,xomuog_specialinstruction,xomuog_subprojecttype,_xomuog_templateid_value,_xomuog_wpnid_value,statuscode`,
+        `xomuog_templatesummaries(${templateSummaryId})?$select=xomuog_templatesummaryid,xomuog_capexopex,xomuog_companycode,xomuog_costcenter,xomuog_descriptionscopeofwork,_xomuog_engineerid_value,exchangerate,xomuog_grandtotal,xomuog_grandtotal_base,_xomuog_landmanid_value,xomuog_mainprojecttype,_xomuog_operator_value,xomuog_projectdescription,xomuog_name,xomuog_projectnumber,xomuog_specialinstruction,xomuog_subprojecttype,_xomuog_templateid_value,_xomuog_wpnid_value,statuscode`,
 
       transformResponse: (
         response: D365TemplateSummary,

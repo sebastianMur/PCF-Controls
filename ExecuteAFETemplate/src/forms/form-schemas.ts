@@ -22,10 +22,20 @@ export const lineItemSchema = z.object({
 export const templateSummarySchema = z.object({
   xomuog_templatesummaryid: z.string(),
   xomuog_templateid: z.string(),
-  xomuog_name: z.string(),
+  xomuog_projectnumber: z.string(),
   xomuog_grandtotal: z.number(),
   xomuog_wpnid: z.string(),
   statuscode: z.number(),
+  xomuog_engineerid: z.string().optional(),
+  xomuog_landmanid: z.string().optional(),
+  xomuog_operator: z.string().optional(),
+  xomuog_capexopex: z.string(),
+  xomuog_companycode: z.string(),
+  xomuog_costcenter: z.string(),
+  xomuog_descriptionscopeofwork: z.string(),
+  xomuog_mainprojecttype: z.string(),
+  xomuog_projectdescription: z.string(),
+  xomuog_subprojecttype: z.string(),
 });
 
 export const attachmentSummarySchema = z
