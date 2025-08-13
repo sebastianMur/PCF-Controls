@@ -4,11 +4,15 @@ export interface LineItem {
   xomuog_lineitemid: string;
   xomuog_name: string;
   xomuog_gfcmid: string;
+  xomuog_defaultunitprice: number;
+  xomuog_defaultunit: number;
 }
 export interface D365LineItem {
   "@odata.etag": string;
   xomuog_lineitemid: string;
   xomuog_name: string;
+  xomuog_defaultunit: number;
+  xomuog_defaultunitprice: number;
   _xomuog_gfcmid_value: string;
 }
 export interface GFCM {
@@ -29,6 +33,53 @@ export interface Unit {
   key: number;
   value: string;
 }
+export type D365GlobalOptionset = {
+  Value: 529510000;
+  Color: null;
+  IsManaged: false;
+  ExternalValue: "";
+  ParentValues: [];
+  Tag: null;
+  IsHidden: false;
+  MetadataId: null;
+  HasChanged: null;
+  Label: {
+    LocalizedLabels: [
+      {
+        Label: "Per Day";
+        LanguageCode: 1033;
+        IsManaged: false;
+        MetadataId: "8603ac38-96bc-417d-b7e7-9e679e038981";
+        HasChanged: null;
+      },
+    ];
+    UserLocalizedLabel: {
+      Label: "Per Day";
+      LanguageCode: 1033;
+      IsManaged: false;
+      MetadataId: "8603ac38-96bc-417d-b7e7-9e679e038981";
+      HasChanged: null;
+    };
+  };
+  Description: {
+    LocalizedLabels: [
+      {
+        Label: "";
+        LanguageCode: 1033;
+        IsManaged: false;
+        MetadataId: "0702ebfa-7fd7-4dd0-9496-83f2a8f11f31";
+        HasChanged: null;
+      },
+    ];
+    UserLocalizedLabel: {
+      Label: "";
+      LanguageCode: 1033;
+      IsManaged: false;
+      MetadataId: "0702ebfa-7fd7-4dd0-9496-83f2a8f11f31";
+      HasChanged: null;
+    };
+  };
+};
 
 export interface LineItemDetails {
   xomuog_lineitemdetailid: string;
@@ -193,6 +244,14 @@ export interface ODataMultipleResponse<T> {
 
 export interface ODataEntityResponse<T> {
   data?: T;
+  error?: FetchBaseQueryError;
+}
+
+export interface ODataRawGlobalOptionset<T> {
+  Options: T[];
+}
+export interface ODataGlobalOptionset<T> {
+  data?: ODataRawGlobalOptionset<T>;
   error?: FetchBaseQueryError;
 }
 

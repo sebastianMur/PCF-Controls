@@ -1,5 +1,6 @@
 import { useTableStyles } from "@/styles/template-completion-table";
 import type { LineItem, LineItemDetails, Unit } from "@/types/template";
+import { formatCurrency } from "@/utils/functions";
 import {
   Dropdown,
   Input,
@@ -19,7 +20,6 @@ type LineItemRowProps = {
   onUnitPriceChange: (lineItemDetailId: string, unitPrice: number) => void;
   onUnitChange: (lineItemDetailId: string, unit: Unit) => void;
   isLocked: boolean;
-  formatCurrency: (amount: number) => string;
   unitOptions: Unit[];
 };
 
@@ -31,7 +31,6 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
     onUnitPriceChange,
     onUnitChange,
     isLocked,
-    formatCurrency,
     unitOptions,
   }) => {
     const styles = useTableStyles();
@@ -44,8 +43,7 @@ export const LineItemRow: FC<LineItemRowProps> = memo(
 
         <TableCell>
           <Input
-            type="number"
-            step="0.01"
+            type="text"
             value={String(detail.xomuog_unitprice ?? 0)}
             min="0"
             contentBefore="$"

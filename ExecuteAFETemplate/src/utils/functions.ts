@@ -4,8 +4,12 @@ export const isValidD365Guid = (id: string): boolean => {
   return d365GuidRegex.test(id);
 };
 
-export const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
-
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const getLookupId = (lookup: any): string | undefined => {
   if (!lookup) return undefined;

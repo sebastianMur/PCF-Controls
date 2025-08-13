@@ -30,7 +30,7 @@ export default function TemplateCompletionContainer() {
   const styles = useTemplateCompletionContainerStyles();
   const templateId = useAppSelector(selectTemplateId);
   const templateSummaryId = useAppSelector(selectTemplateSummaryId);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [hasChanges, setHasChanges] = useState(true);
   const [localData, setLocalData] = useState<TemplateCompletionData | null>(
     null,
   );

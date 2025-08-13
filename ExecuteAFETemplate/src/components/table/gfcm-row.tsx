@@ -1,5 +1,6 @@
 import { useTableStyles } from "@/styles/template-completion-table";
 import type { GFCM, GFCMSummary } from "@/types/template";
+import { formatCurrency } from "@/utils/functions";
 import {
   Button,
   TableCell,
@@ -18,8 +19,7 @@ export const GFCMRow: React.FC<{
   gfcm?: GFCM;
   isExpanded: boolean;
   onToggle(): void;
-  formatCurrency(amount: number): string;
-}> = memo(({ summary, gfcm, isExpanded, onToggle, formatCurrency }) => {
+}> = memo(({ summary, gfcm, isExpanded, onToggle }) => {
   const styles = useTableStyles();
   return (
     <TableRow className={styles.subcategoryRow}>

@@ -2,13 +2,18 @@ import type { TemplateFormData } from "@/forms/form-schemas";
 import { useTableStyles } from "@/styles/template-completion-table";
 import type { TemplateCompletionData, Unit } from "@/types/template";
 import {
+  Button,
   Table,
   TableBody,
   TableHeader,
   TableHeaderCell,
   TableRow,
 } from "@fluentui/react-components";
-import React, { memo, useCallback } from "react";
+import {
+  ArrowCollapseAllFilled,
+  ArrowExpandAllFilled,
+} from "@fluentui/react-icons";
+import React, { memo, useCallback, useState } from "react";
 import { GFCMRow } from "./gfcm-row";
 import { LineItemRow } from "./line-item-rows";
 
@@ -19,8 +24,6 @@ interface TemplateCompletionTableProps {
   onUnitPriceChange: (lineItemDetailId: string, unitPrice: number) => void;
   onUnitChange: (lineItemDetailId: string, unit: Unit) => void;
   isLocked: boolean;
-  expandedGFCM: Set<string>;
-  onToggleGFCM: (id: string) => void;
 }
 
 export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
@@ -28,19 +31,33 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
     ({
       templateData,
       templateSummaryData,
-      expandedGFCM,
-      onToggleGFCM,
       onQuantityChange,
       onUnitPriceChange,
       onUnitChange,
       isLocked,
     }) => {
       const styles = useTableStyles();
+      const [expandedGFCM, setExpandedGFCM] = useState<Set<string>>(new Set());
 
-      const formatCurrency = useCallback(
-        (amount: number) => `$${amount.toFixed(2)}`,
-        [],
-      );
+      const onToggleGFCM = useCallback((id: string) => {
+        setExpandedGFCM(prev => {
+          const next = new Set(prev);
+          next.has(id) ? next.delete(id) : next.add(id);
+          return next;
+        });
+      }, []);
+
+      // expand all
+      const expandAll = () => {
+        setExpandedGFCM(
+          new Set(templateData.gfcms.map(gfcm => gfcm.xomuog_gfcmid)),
+        );
+      };
+
+      // collapse all
+      const collapseAll = () => {
+        setExpandedGFCM(new Set());
+      };
 
       return (
         <div className={styles.tableContainer}>
@@ -52,14 +69,41 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
               <TableHeader>
                 <TableRow>
                   {["Item", "Unit Price", "Unit", "Quantity", "Total"].map(
-                    header => (
-                      <TableHeaderCell
-                        key={header}
-                        // className={styles.headerCell}
-                      >
-                        {header}
-                      </TableHeaderCell>
-                    ),
+                    (header, idx) => {
+                      const icon =
+                        expandedGFCM.size > 0 ? (
+                          <ArrowExpandAllFilled />
+                        ) : (
+                          <ArrowCollapseAllFilled />
+                        );
+
+                      return (
+                        <TableHeaderCell
+                          key={header}
+                          // className={styles.headerCell}
+                        >
+                          {header}
+
+                          {idx === 0 && (
+                            <Button
+                              appearance="transparent"
+                              aria-label={
+                                expandedGFCM.size > 0
+                                  ? "Expand Records"
+                                  : "Collapse Records"
+                              }
+                              size="small"
+                              icon={icon}
+                              onClick={() =>
+                                expandedGFCM.size === templateData.gfcms.length
+                                  ? collapseAll()
+                                  : expandAll()
+                              }
+                            />
+                          )}
+                        </TableHeaderCell>
+                      );
+                    },
                   )}
                 </TableRow>
               </TableHeader>
@@ -79,7 +123,6 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
                         gfcm={gfcm}
                         isExpanded={isGFCMExpanded}
                         onToggle={() => onToggleGFCM(gfcm.xomuog_gfcmid)}
-                        formatCurrency={formatCurrency}
                       />
                       {isGFCMExpanded &&
                         templateSummaryData.lineItemsDetails
@@ -104,7 +147,6 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
                                 onUnitPriceChange={onUnitPriceChange}
                                 onUnitChange={onUnitChange}
                                 isLocked={isLocked}
-                                formatCurrency={formatCurrency}
                                 unitOptions={templateData.units}
                               />
                             );

@@ -13,6 +13,7 @@ import {
   selectTemplateSummaryId,
   selectWPNId,
 } from "@/store";
+import { recalculateAllTotals } from "@/utils/calculations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -59,12 +60,14 @@ export const useGetDefaultValues = () => {
               getLineItemsDetails(templateSummaryId).unwrap(),
             ]);
 
-          return {
+          const d365DefaultValues = {
             templateSummary,
             gfcmSummary: gfcmSummaries,
             lineItemsDetails: lineItemDetails,
             isNew: false,
           };
+
+          return recalculateAllTotals(d365DefaultValues);
         }
 
         // If no templateSummaryId, build default values based on template
@@ -76,12 +79,14 @@ export const useGetDefaultValues = () => {
           fromLineItemToLineItemDetails(lineItem, gfcmSummaries),
         );
 
-        return {
+        const d365DefaultValues = {
           templateSummary,
           gfcmSummary: gfcmSummaries,
           lineItemsDetails: lineItemDetails,
           isNew: true,
         };
+
+        return recalculateAllTotals(d365DefaultValues);
       } catch (error) {
         // Handle or log errors as needed
         console.error("Failed to load initial template values", error);
