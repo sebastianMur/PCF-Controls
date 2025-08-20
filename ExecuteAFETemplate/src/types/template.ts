@@ -239,7 +239,7 @@ export interface SendAttachment {
 }
 
 export type Well = {
-  xomuog_sapcostcenter: string;
+  xomuog_accountingnumber: string;
   xomuog_wellid: string;
 };
 
@@ -255,7 +255,7 @@ export interface WPN {
   xomuog_templatesummaryid: string;
   xomuog_well: string;
   xomuog_wellidname: string;
-  xomuog_sapcostcenter: string;
+  xomuog_accountingnumber: string;
 }
 export interface D365WPN {
   xomuog_wellproblemnotificationid: string;
