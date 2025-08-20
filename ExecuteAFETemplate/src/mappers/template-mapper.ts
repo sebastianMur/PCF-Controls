@@ -7,7 +7,11 @@ import type {
   Template,
   WPN,
 } from "@/types/template";
-import { STATUS_REASON } from "@/utils/constants";
+import {
+  CAPEX_OPEX,
+  MAIN_PROJECT_TYPE,
+  STATUS_REASON,
+} from "@/utils/constants";
 import { v4 as uuidv4 } from "uuid";
 
 export const fromApiTemplate = (record: D365Template): Template => ({
@@ -28,11 +32,11 @@ export const fromApiTemplateFormSummary = (
   xomuog_grandtotal: record.xomuog_grandtotal ?? 0,
   xomuog_wpnid: record._xomuog_wpnid_value ?? "",
   statuscode: record.statuscode,
-  xomuog_capexopex: record.xomuog_capexopex,
+  xomuog_capexopex: record.xomuog_capexopex ?? CAPEX_OPEX.Opex,
   xomuog_companycode: record.xomuog_companycode,
   xomuog_costcenter: record.xomuog_costcenter,
   xomuog_descriptionscopeofwork: record.xomuog_descriptionscopeofwork,
-  xomuog_mainprojecttype: record.xomuog_mainprojecttype ?? "",
+  xomuog_mainprojecttype: record.xomuog_mainprojecttype ?? MAIN_PROJECT_TYPE.CW,
   xomuog_projectdescription: record.xomuog_projectdescription ?? "",
   xomuog_subprojecttype: record.xomuog_subprojecttype ?? "",
   xomuog_engineerid: record._xomuog_engineerid_value,
@@ -50,11 +54,21 @@ export const fromTemplateToTemplateSummary = (
   xomuog_grandtotal: 0,
   xomuog_wpnid: wpn.xomuog_wellproblemnotificationid,
   statuscode: STATUS_REASON.Active,
-  xomuog_capexopex: "OPEX",
+  xomuog_capexopex:
+    record.xomuog_name === "RW - DEFAULT TEMPLATE"
+      ? CAPEX_OPEX.Opex
+      : record.xomuog_name === "CW - DEFAULT TEMPLATE"
+        ? CAPEX_OPEX.Capex
+        : undefined,
   xomuog_companycode: "XTO ENERGY INC RU4331",
-  xomuog_costcenter: "",
+  xomuog_costcenter: wpn?.xomuog_sapcostcenter ?? "",
   xomuog_descriptionscopeofwork: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
-  xomuog_mainprojecttype: "RW -REMEDIAL WORKOVER",
+  xomuog_mainprojecttype:
+    record.xomuog_name === "RW - DEFAULT TEMPLATE"
+      ? MAIN_PROJECT_TYPE.RW
+      : record.xomuog_name === "CW - DEFAULT TEMPLATE"
+        ? MAIN_PROJECT_TYPE.CW
+        : undefined,
   xomuog_projectdescription: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
   xomuog_subprojecttype: "GENERAL USE",
   xomuog_engineerid: wpn.xomuog_engineerid,
@@ -80,8 +94,8 @@ export const toApiTemplateSummary = (
   xomuog_capexopex: record.xomuog_capexopex,
   xomuog_companycode: record.xomuog_companycode,
   xomuog_costcenter: record.xomuog_costcenter,
-  xomuog_descriptionscopeofwork: record.xomuog_descriptionscopeofwork,
+  xomuog_descriptionscopeofwork: record.xomuog_descriptionscopeofwork.trim(),
   xomuog_mainprojecttype: record.xomuog_mainprojecttype,
-  xomuog_projectdescription: record.xomuog_projectdescription,
+  xomuog_projectdescription: record.xomuog_projectdescription.trim(),
   xomuog_subprojecttype: record.xomuog_subprojecttype,
 });

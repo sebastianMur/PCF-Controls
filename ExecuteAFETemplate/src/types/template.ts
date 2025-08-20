@@ -137,7 +137,7 @@ export interface SendGFCMSummary {
 
 export interface TemplateSummary {
   xomuog_templatesummaryid: string;
-  xomuog_capexopex?: string;
+  xomuog_capexopex?: number;
   xomuog_companycode?: string;
   xomuog_costcenter?: string;
   xomuog_descriptionscopeofwork?: string;
@@ -146,7 +146,7 @@ export interface TemplateSummary {
   xomuog_grandtotal: number;
   xomuog_grandtotal_base?: number;
   xomuog_landman?: string;
-  xomuog_mainprojecttype?: string;
+  xomuog_mainprojecttype?: number;
   xomuog_operatore?: string;
   xomuog_projectdescription?: string;
   xomuog_name?: string;
@@ -158,7 +158,7 @@ export interface TemplateSummary {
 }
 export interface D365TemplateSummary {
   xomuog_templatesummaryid: string;
-  xomuog_capexopex: string;
+  xomuog_capexopex?: number;
   xomuog_companycode: string;
   xomuog_costcenter: string;
   xomuog_descriptionscopeofwork: string;
@@ -167,7 +167,7 @@ export interface D365TemplateSummary {
   xomuog_grandtotal: number;
   xomuog_grandtotal_base?: number;
   _xomuog_landmanid_value?: string;
-  xomuog_mainprojecttype?: string;
+  xomuog_mainprojecttype?: number;
   _xomuog_operator_value?: string;
   xomuog_projectdescription?: string;
   xomuog_name?: string;
@@ -180,9 +180,9 @@ export interface D365TemplateSummary {
 }
 
 export interface SendTemplateSummary {
-  xomuog_capexopex: string;
+  xomuog_capexopex?: number;
   xomuog_projectdescription: string;
-  xomuog_mainprojecttype: string;
+  xomuog_mainprojecttype?: number;
   xomuog_subprojecttype: string;
   "xomuog_engineerid@odata.bind": string | null;
   "xomuog_landmanid@odata.bind": string | null;
@@ -238,6 +238,11 @@ export interface SendAttachment {
   documentbody: string;
 }
 
+export type Well = {
+  xomuog_sapcostcenter: string;
+  xomuog_wellid: string;
+};
+
 export interface WPN {
   xomuog_wellproblemnotificationid: string;
   xomuog_primaryjobtypeid: string;
@@ -250,6 +255,7 @@ export interface WPN {
   xomuog_templatesummaryid: string;
   xomuog_well: string;
   xomuog_wellidname: string;
+  xomuog_sapcostcenter: string;
 }
 export interface D365WPN {
   xomuog_wellproblemnotificationid: string;
@@ -266,6 +272,7 @@ export interface D365WPN {
   _xomuog_wellid_value: string;
   "_xomuog_wellid_value@OData.Community.Display.V1.FormattedValue": string;
   _xomuog_landman_value: string;
+  xomuog_wellid: Well;
 }
 
 export interface ODataRawResult<T> {

@@ -1,41 +1,60 @@
-import { createElement } from 'react';
-import type { ReactElement } from 'react';
-import { Provider } from 'react-redux';
-import type { ProviderProps } from 'react-redux';
-import type { ContextPage } from '../src/types';
-import { createStore, setBaseUrl, setTemplateId, setTemplateSummaryId, setWPNId, } from '@/store';
-import { IInputs, IOutputs } from './generated/ManifestTypes';
-import { AppProviders } from '@/app/provider';
-import TemplateCompletionContainer from '@/components/views/template-completion/template-completion-container';
-import { setNotifyOutputChange } from '@/utils/notifyOutputChange';
-import { getLookupId } from '@/utils/functions';
-import { FluentProvider, MessageBar, webLightTheme } from '@fluentui/react-components';
+import { AppProviders } from "@/app/provider";
+import TemplateCompletionContainer from "@/components/views/template-completion/template-completion-container";
+import {
+  createStore,
+  setBaseUrl,
+  setTemplateId,
+  setTemplateSummaryId,
+  setWPNId,
+} from "@/store";
+import { getLookupId } from "@/utils/functions";
+import { setNotifyOutputChange } from "@/utils/notifyOutputChange";
+import {
+  FluentProvider,
+  MessageBar,
+  webLightTheme,
+} from "@fluentui/react-components";
+import { createElement } from "react";
+import type { ReactElement } from "react";
+import { Provider } from "react-redux";
+import type { ProviderProps } from "react-redux";
+import type { ContextPage } from "../src/types";
+import type { IInputs, IOutputs } from "./generated/ManifestTypes";
 
-export class ExecuteAFETemplateControl implements ComponentFramework.ReactControl<IInputs, IOutputs> {
+export class ExecuteAFETemplateControl
+  implements ComponentFramework.ReactControl<IInputs, IOutputs>
+{
   private store: ReturnType<typeof createStore>;
-  private isLocal = window.location.hostname === "localhost" || window.location.href.includes("localhost");
+  private isLocal =
+    window.location.hostname === "localhost" ||
+    window.location.href.includes("localhost");
   constructor() {
     this.store = createStore();
   }
 
-  public init(context: ComponentFramework.Context<IInputs>, notifyOutputChanged: () => void): void {
+  public init(
+    context: ComponentFramework.Context<IInputs>,
+    notifyOutputChanged: () => void,
+  ): void {
     const { page } = context as unknown as ContextPage;
-    setNotifyOutputChange(notifyOutputChanged)
+    setNotifyOutputChange(notifyOutputChanged);
 
     if (this.isLocal) {
       if (context.parameters.DevelopmentEntityId.raw) {
-        this.store.dispatch(setWPNId(context.parameters.DevelopmentEntityId.raw));
-        this.store.dispatch(setBaseUrl('http://localhost:3030'));
+        this.store.dispatch(
+          setWPNId(context.parameters.DevelopmentEntityId.raw),
+        );
+        this.store.dispatch(setBaseUrl("http://localhost:3030"));
       }
-
     } else {
       this.store.dispatch(setBaseUrl(page.getClientUrl()));
       this.store.dispatch(setWPNId(page.entityId));
     }
   }
 
-  public updateView(context: ComponentFramework.Context<IInputs>):
-    ReactElement {
+  public updateView(
+    context: ComponentFramework.Context<IInputs>,
+  ): ReactElement {
     const { page } = context as unknown as ContextPage;
     const templateLookup = context.parameters.templateId.raw;
     const templateSummaryLookup = context.parameters.templateSummaryId.raw;
@@ -56,22 +75,35 @@ export class ExecuteAFETemplateControl implements ComponentFramework.ReactContro
           { intent: "warning" },
           !templateId
             ? "Please select a template to continue."
-            : "Save the record to view this section.")
+            : "Save the record to view this section.",
+        ),
       );
     }
 
     return createElement(
       Provider,
       { store: this.store } as ProviderProps,
-      createElement(AppProviders, null, createElement(TemplateCompletionContainer)),
+      createElement(
+        AppProviders,
+        null,
+        createElement(TemplateCompletionContainer),
+      ),
     );
   }
 
   public getOutputs(): IOutputs {
-    const states = this.store.getState()
-    const templateSummaryId = states.context.templateSummaryId
-    return { templateSummaryId: [{ entityType: "xomuog_templatesummary", id: templateSummaryId, name: "Saved Record" }] as ComponentFramework.LookupValue[] };
+    const states = this.store.getState();
+    const templateSummaryId = states.context.templateSummaryId;
+    return {
+      templateSummaryId: [
+        {
+          entityType: "xomuog_templatesummary",
+          id: templateSummaryId,
+          name: "Saved Record",
+        },
+      ] as ComponentFramework.LookupValue[],
+    };
   }
 
-  public destroy(): void { }
+  public destroy(): void {}
 }

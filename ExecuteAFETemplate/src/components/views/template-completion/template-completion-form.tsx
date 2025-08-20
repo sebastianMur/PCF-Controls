@@ -42,10 +42,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   const styles = useFormStyles();
 
   return (
-    <fieldset
-    // disabled={isLocked}
-    // className={isLocked ? styles.lockedOverlay : ""}
-    >
+    <fieldset>
       <div className={styles.container}>
         {hasChanges && !isLocked && (
           <MessageBar intent="info">

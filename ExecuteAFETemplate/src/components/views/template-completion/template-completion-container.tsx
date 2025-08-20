@@ -151,7 +151,6 @@ export default function TemplateCompletionContainer() {
     );
   }
 
-  console.log("data", templateData);
   if (error) {
     return (
       <MessageBar intent="error">

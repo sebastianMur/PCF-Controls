@@ -19,4 +19,5 @@ export const fromApiWPN = (record: D365WPN): WPN => ({
   xomuog_wellidname:
     record["_xomuog_wellid_value@OData.Community.Display.V1.FormattedValue"],
   xomuog_landman: record._xomuog_landman_value,
+  xomuog_sapcostcenter: record?.xomuog_wellid?.xomuog_sapcostcenter ?? "",
 });

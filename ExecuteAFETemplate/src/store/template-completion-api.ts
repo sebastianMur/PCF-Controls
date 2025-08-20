@@ -37,13 +37,6 @@ interface SaveTemplateCompletionResponse {
   templateSummaryId: string;
 }
 
-export const mockUnits: Unit[] = [
-  { key: 529510000, value: "Per day" },
-  { key: 529510001, value: "Per hour" },
-  { key: 529510002, value: "Per foot" },
-  { key: 529510003, value: "Each" },
-];
-
 export const templateCompletionApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     getTemplateCompletionData: builder.query<
@@ -105,7 +98,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           };
         }
       },
-      providesTags: ["attachments"],
+      providesTags: ["template"],
     }),
 
     saveTemplateCompletion: builder.mutation<

@@ -29,11 +29,11 @@ export const templateSummarySchema = z.object({
   xomuog_engineerid: z.string().optional(),
   xomuog_landmanid: z.string().optional(),
   xomuog_operator: z.string().optional(),
-  xomuog_capexopex: z.string(),
+  xomuog_capexopex: z.number().optional(),
   xomuog_companycode: z.string(),
   xomuog_costcenter: z.string(),
   xomuog_descriptionscopeofwork: z.string(),
-  xomuog_mainprojecttype: z.string(),
+  xomuog_mainprojecttype: z.number().optional(),
   xomuog_projectdescription: z.string(),
   xomuog_subprojecttype: z.string(),
 });
