@@ -123,8 +123,7 @@ export default function TemplateCompletionContainer() {
   const handleSendingAFEExecute = async (): Promise<void> => {
     try {
       const data = getValues();
-      const wpnId = data.templateSummary?.xomuog_wpnid;
-      if (wpnId) await sendToAFEExecute(wpnId).unwrap();
+      if (templateSummaryId) await sendToAFEExecute(templateSummaryId).unwrap();
 
       await updateTemplateSummary({
         record: toApiTemplateSummary({

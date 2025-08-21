@@ -194,7 +194,7 @@ export interface SendTemplateSummary {
   xomuog_projectnumber?: string;
   "xomuog_templateid@odata.bind": string;
   statuscode: number;
-  "xomuog_wpnid@odata.bind": string;
+  // "xomuog_wpnid@odata.bind": string;
 }
 
 export interface Template {
@@ -239,7 +239,7 @@ export interface SendAttachment {
 }
 
 export type Well = {
-  xomuog_sapcostcenter: string;
+  xomuog_sap_costcenter: string;
   xomuog_wellid: string;
 };
 
@@ -255,7 +255,7 @@ export interface WPN {
   xomuog_templatesummaryid: string;
   xomuog_well: string;
   xomuog_wellidname: string;
-  xomuog_sapcostcenter: string;
+  xomuog_sap_costcenter: string;
 }
 export interface D365WPN {
   xomuog_wellproblemnotificationid: string;

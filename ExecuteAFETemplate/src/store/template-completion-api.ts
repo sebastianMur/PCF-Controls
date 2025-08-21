@@ -231,10 +231,10 @@ export const templateCompletionApi = baseApi.injectEndpoints({
     }),
 
     sendToAFEExecute: builder.mutation<void, string>({
-      query: wpnid => ({
+      query: templatesummary => ({
         url: "xomuog_apiwpnsendexecuteaferecord",
         method: "POST",
-        body: JSON.stringify({ wpnid }),
+        body: JSON.stringify({ templatesummary }),
         headers: {
           "OData-MaxVersion": "4.0",
           "OData-Version": "4.0",
@@ -242,6 +242,12 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           Accept: "application/json",
         },
       }),
+      transformResponse: (response: unknown) => {
+        if (typeof response === "string") {
+          return JSON.parse(response);
+        }
+        return response;
+      },
     }),
   }),
 });

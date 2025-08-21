@@ -61,7 +61,7 @@ export const fromTemplateToTemplateSummary = (
         ? CAPEX_OPEX.Capex
         : undefined,
   xomuog_companycode: "XTO ENERGY INC RU4331",
-  xomuog_costcenter: wpn?.xomuog_sapcostcenter ?? "",
+  xomuog_costcenter: wpn?.xomuog_sap_costcenter ?? "",
   xomuog_descriptionscopeofwork: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
   xomuog_mainprojecttype:
     record.xomuog_name === "RW - DEFAULT TEMPLATE"
@@ -80,7 +80,7 @@ export const toApiTemplateSummary = (
   record: TemplateSummaryFormData,
 ): SendTemplateSummary => ({
   "xomuog_templateid@odata.bind": `/xomuog_templates(${record.xomuog_templateid})`,
-  "xomuog_wpnid@odata.bind": `/xomuog_wellproblemnotifications(${record.xomuog_wpnid})`,
+  // "xomuog_wpnid@odata.bind": `/xomuog_wellproblemnotifications(${record.xomuog_wpnid})`,
   xomuog_grandtotal: record.xomuog_grandtotal,
   xomuog_projectnumber: record.xomuog_projectnumber,
   statuscode: record.statuscode,
