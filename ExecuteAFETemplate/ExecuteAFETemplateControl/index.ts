@@ -18,9 +18,9 @@ import { createElement } from "react";
 import type { ReactElement } from "react";
 import { Provider } from "react-redux";
 import type { ProviderProps } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 import type { ContextPage } from "../src/types";
 import type { IInputs, IOutputs } from "./generated/ManifestTypes";
-
 export class ExecuteAFETemplateControl
   implements ComponentFramework.ReactControl<IInputs, IOutputs>
 {
@@ -99,7 +99,7 @@ export class ExecuteAFETemplateControl
         {
           entityType: "xomuog_templatesummary",
           id: templateSummaryId,
-          name: "Saved Record",
+          name: `Saved Record ${uuidv4()}`,
         },
       ] as ComponentFramework.LookupValue[],
     };

@@ -194,7 +194,7 @@ export interface SendTemplateSummary {
   xomuog_projectnumber?: string;
   "xomuog_templateid@odata.bind": string;
   statuscode: number;
-  // "xomuog_wpnid@odata.bind": string;
+  "xomuog_wpnid@odata.bind": string;
 }
 
 export interface Template {

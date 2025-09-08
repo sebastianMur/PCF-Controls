@@ -80,7 +80,7 @@ export const toApiTemplateSummary = (
   record: TemplateSummaryFormData,
 ): SendTemplateSummary => ({
   "xomuog_templateid@odata.bind": `/xomuog_templates(${record.xomuog_templateid})`,
-  // "xomuog_wpnid@odata.bind": `/xomuog_wellproblemnotifications(${record.xomuog_wpnid})`,
+  "xomuog_wpnid@odata.bind": `/xomuog_wellproblemnotifications(${record.xomuog_wpnid})`,
   xomuog_grandtotal: record.xomuog_grandtotal,
   xomuog_projectnumber: record.xomuog_projectnumber,
   statuscode: record.statuscode,
@@ -94,8 +94,8 @@ export const toApiTemplateSummary = (
   xomuog_capexopex: record.xomuog_capexopex,
   xomuog_companycode: record.xomuog_companycode,
   xomuog_costcenter: record.xomuog_costcenter,
-  xomuog_descriptionscopeofwork: record.xomuog_descriptionscopeofwork.trim(),
+  xomuog_descriptionscopeofwork: record?.xomuog_descriptionscopeofwork?.trim(),
   xomuog_mainprojecttype: record.xomuog_mainprojecttype,
-  xomuog_projectdescription: record.xomuog_projectdescription.trim(),
+  xomuog_projectdescription: record?.xomuog_projectdescription?.trim(),
   xomuog_subprojecttype: record.xomuog_subprojecttype,
 });

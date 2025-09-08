@@ -230,7 +230,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],
     }),
 
-    sendToAFEExecute: builder.mutation<void, string>({
+    sendToAFEExecute: builder.mutation<string, string>({
       query: templatesummary => ({
         url: "xomuog_apiwpnsendexecuteaferecord",
         method: "POST",
@@ -242,11 +242,11 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           Accept: "application/json",
         },
       }),
-      transformResponse: (response: unknown) => {
-        if (typeof response === "string") {
-          return JSON.parse(response);
-        }
-        return response;
+      transformResponse: (response: {
+        Tracing: string;
+        executeafeapiresponse: string;
+      }) => {
+        return response.executeafeapiresponse;
       },
     }),
   }),

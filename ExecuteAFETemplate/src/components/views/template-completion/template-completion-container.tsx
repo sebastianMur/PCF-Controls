@@ -122,16 +122,20 @@ export default function TemplateCompletionContainer() {
 
   const handleSendingAFEExecute = async (): Promise<void> => {
     try {
+      let apiNumber = "N/A"; // Placeholder for API number if needed
       const data = getValues();
-      if (templateSummaryId) await sendToAFEExecute(templateSummaryId).unwrap();
+      if (templateSummaryId)
+        apiNumber = await sendToAFEExecute(templateSummaryId).unwrap();
 
       await updateTemplateSummary({
         record: toApiTemplateSummary({
           ...data.templateSummary,
+          xomuog_projectnumber: apiNumber,
           statuscode: STATUS_REASON.Sent,
         } as TemplateSummaryFormData),
         templateSummaryId,
       }).unwrap();
+      triggerNotifyOutputChange();
     } catch (error) {
       console.error("Failed to save template completion:", error);
     }
