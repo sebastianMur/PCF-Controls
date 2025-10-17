@@ -222,10 +222,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
 
           {templateSummaryId && (
             <AttachmentManager
-              templateSummaryId={
-                templateSummaryData.templateSummary?.xomuog_templatesummaryid ??
-                ""
-              }
+              templateSummaryId={templateSummaryId ?? ""}
               isLocked={isProjectNumberDefined}
             />
           )}

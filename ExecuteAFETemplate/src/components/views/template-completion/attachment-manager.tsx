@@ -213,7 +213,7 @@ export default function AttachmentManager({
             ? ""
             : `(${attachments.length}/${ATTACHMENT_CONFIG.maxAttachments})`}
         </Text>
-        {!isLocked && (
+        {templateSummaryId && !isLocked && (
           <div className={styles.uploadArea}>
             <input
               ref={fileInputRef}
