@@ -24,6 +24,11 @@ export const contextSlice = createSlice({
     setBaseUrl: (state, { payload }: PayloadAction<string>) => {
       state.baseUrl = payload;
     },
+    resetTemplateContext: state => {
+      state.wpnId = "";
+      state.templateSummaryId = "";
+      // optionally reset other related data slices if needed
+    },
   },
 });
 
@@ -33,5 +38,10 @@ export const selectWPNId = (state: RootState) => state.context.wpnId;
 export const selectTemplateId = (state: RootState) => state.context.templateId;
 export const selectBaseUrl = (state: RootState) => state.context.baseUrl;
 
-export const { setTemplateSummaryId, setTemplateId, setBaseUrl, setWPNId } =
-  contextSlice.actions;
+export const {
+  setTemplateSummaryId,
+  setTemplateId,
+  setBaseUrl,
+  setWPNId,
+  resetTemplateContext,
+} = contextSlice.actions;

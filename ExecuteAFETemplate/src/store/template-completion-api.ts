@@ -1,29 +1,18 @@
-import type {
-  GFCMSummaryFormData,
-  LineItemDetailsFormData,
-  TemplateFormData,
-} from "@/forms/form-schemas";
-import {
-  fromApiGFCM,
-  fromApiGFCMFormSummary,
-  toApiGFCMSummary,
-} from "@/mappers/gfcm-mapper";
+import type { TemplateFormData } from "@/forms/form-schemas";
+import { fromApiGFCM, toApiGFCMSummary } from "@/mappers/gfcm-mapper";
 import {
   fromApiLineItem,
   toApiLineItemFormDetail,
 } from "@/mappers/line-item-mapper";
 import {
   fromApiTemplate,
-  fromApiTemplateFormSummary,
   toApiTemplateSummary,
 } from "@/mappers/template-mapper";
 import type {
   D365GFCM,
-  D365GFCMSummary,
   D365GlobalOptionset,
   D365LineItem,
   D365Template,
-  D365TemplateSummary,
   ODataEntityResponse,
   ODataGlobalOptionset,
   ODataMultipleResponse,
@@ -101,7 +90,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       providesTags: ["template"],
     }),
 
-    saveTemplateCompletion1: builder.mutation<
+    saveTemplateCompletion: builder.mutation<
       SaveTemplateCompletionResponse,
       TemplateFormData
     >({
@@ -109,134 +98,6 @@ export const templateCompletionApi = baseApi.injectEndpoints({
         try {
           const { templateSummary, gfcmSummary, lineItemsDetails, isNew } =
             data;
-
-          if (!templateSummary) {
-            return {
-              error: {
-                status: 400,
-                data: { message: "Template summary is required." },
-              },
-            };
-          }
-
-          let templateSummaryId = templateSummary.xomuog_templatesummaryid;
-
-          const templateSummaryUrl = isNew
-            ? "xomuog_templatesummaries"
-            : `xomuog_templatesummaries(${templateSummaryId})`;
-
-          const templateSummaryResult = await fetchWithBQ({
-            url: templateSummaryUrl,
-            method: isNew ? "POST" : "PATCH",
-            body: toApiTemplateSummary(templateSummary),
-            headers: {
-              Prefer: "return=representation",
-            },
-          });
-
-          if (templateSummaryResult.error) {
-            return { error: templateSummaryResult.error };
-          }
-          templateSummaryId = fromApiTemplateFormSummary(
-            templateSummaryResult?.data as D365TemplateSummary,
-          )?.xomuog_templatesummaryid;
-
-          let transformedGFCMResults: GFCMSummaryFormData[] = [];
-          if (gfcmSummary && gfcmSummary.length > 0) {
-            const newGFCMSummary = gfcmSummary.map(gfcmSumm => ({
-              ...gfcmSumm,
-              xomuog_templatesummaryid: templateSummaryId,
-            }));
-
-            const gfcmResults = await Promise.all(
-              newGFCMSummary.map(gfcmSummary => {
-                const url = isNew
-                  ? "xomuog_gfcmsummaries"
-                  : `xomuog_gfcmsummaries(${gfcmSummary.xomuog_gfcmsummaryid})`;
-
-                return fetchWithBQ({
-                  url,
-                  method: isNew ? "POST" : "PATCH",
-                  body: toApiGFCMSummary(gfcmSummary),
-                  headers: {
-                    Prefer: "return=representation",
-                  },
-                });
-              }),
-            );
-
-            transformedGFCMResults = gfcmResults.map(gfcmSumm => {
-              return fromApiGFCMFormSummary(gfcmSumm.data as D365GFCMSummary);
-            });
-
-            const failed = gfcmResults.find(r => r.error);
-            if (failed?.error) return { error: failed.error };
-          }
-
-          if (lineItemsDetails && lineItemsDetails.length > 0) {
-            const detailResults = await Promise.all(
-              lineItemsDetails.map(item => {
-                const gfcm = gfcmSummary?.find(
-                  gfcm =>
-                    gfcm.xomuog_gfcmsummaryid === item.xomuog_gfcmsummaryid,
-                );
-                const gfcmSummaryId = transformedGFCMResults.find(
-                  r => r.xomuog_gfcmid === gfcm?.xomuog_gfcmid,
-                )?.xomuog_gfcmsummaryid;
-                const updatedLineItem = {
-                  ...item,
-                  xomuog_gfcmsummaryid: gfcmSummaryId,
-                } as LineItemDetailsFormData;
-
-                const isNewDetail = !item.xomuog_lineitemdetailid;
-                const url = isNewDetail
-                  ? "xomuog_lineitemdetails"
-                  : `xomuog_lineitemdetails(${item.xomuog_lineitemdetailid})`;
-
-                return fetchWithBQ({
-                  url,
-                  method: isNewDetail ? "POST" : "PATCH",
-                  body: toApiLineItemFormDetail(updatedLineItem),
-                  headers: {
-                    Prefer: "return=representation",
-                  },
-                });
-              }),
-            );
-
-            const failed = detailResults.find(r => r.error);
-            if (failed?.error) return { error: failed.error };
-          }
-
-          return {
-            data: {
-              success: true,
-              templateSummaryId,
-            },
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 500,
-              data: { message: "Save failed" },
-            },
-          };
-        }
-      },
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        const { data } = await queryFulfilled;
-        dispatch(setTemplateSummaryId(data.templateSummaryId));
-      },
-      invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],
-    }),
-
-    saveTemplateCompletion: builder.mutation<
-      SaveTemplateCompletionResponse,
-      TemplateFormData
-    >({
-      async queryFn(data, _api, _extraOptions, fetchWithBQ) {
-        try {
-          const { templateSummary, gfcmSummary, lineItemsDetails } = data;
 
           if (!templateSummary) {
             return {
@@ -260,7 +121,6 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           parts.push("");
 
           // 1️⃣ TEMPLATE SUMMARY
-          const isNewTemplate = !templateSummary.xomuog_templatesummaryid;
           const templateContentId = contentId;
           parts.push(`--${changeset}`);
           parts.push("Content-Type: application/http");
@@ -268,8 +128,8 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           parts.push(`Content-ID: ${contentId}`);
           parts.push("");
           parts.push(
-            `${isNewTemplate ? "POST" : "PATCH"} ${
-              isNewTemplate
+            `${isNew ? "POST" : "PATCH"} ${
+              isNew
                 ? "xomuog_templatesummaries"
                 : `xomuog_templatesummaries(${templateSummary.xomuog_templatesummaryid})`
             } HTTP/1.1`,
@@ -302,7 +162,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             parts.push("");
 
             // referenciar template si es nuevo
-            const gfcmBodyWithLink = isNewTemplate
+            const gfcmBodyWithLink = isNew
               ? {
                   ...gfcmSummaryBody,
                   "xomuog_templatesummaryid@odata.bind": `$${templateContentId}`,
@@ -328,7 +188,6 @@ export const templateCompletionApi = baseApi.injectEndpoints({
                   gfcm.xomuog_gfcmsummaryid === lineItem.xomuog_gfcmsummaryid,
               ) || 0;
 
-            const isNewDetail = !lineItem.xomuog_lineitemdetailid;
             const relatedGfcmId =
               gfcmContentIds[gfcmIndex] || gfcmContentIds[0];
 
@@ -338,8 +197,8 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             parts.push(`Content-ID: ${contentId}`);
             parts.push("");
             parts.push(
-              `${isNewDetail ? "POST" : "PATCH"} ${
-                isNewDetail
+              `${isNew ? "POST" : "PATCH"} ${
+                isNew
                   ? "xomuog_lineitemdetails"
                   : `xomuog_lineitemdetails(${lineItem.xomuog_lineitemdetailid})`
               } HTTP/1.1`,
@@ -393,10 +252,28 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             };
           }
 
+          // Match TemplateSummary ID from either the OData-EntityId or JSON body
+          const match = responseText.match(
+            /xomuog_templatesummaries\(([\w-]+)\)/i,
+          );
+
+          let newTemplateSummaryId = "";
+
+          if (match?.[1]) {
+            newTemplateSummaryId = match[1];
+          } else {
+            // Fallback: try to extract from JSON in case of "return=representation"
+            const jsonMatch = responseText.match(
+              /"xomuog_templatesummaryid"\s*:\s*"([\w-]+)"/i,
+            );
+            if (jsonMatch?.[1]) {
+              newTemplateSummaryId = jsonMatch[1];
+            }
+          }
           return {
             data: {
               success: true,
-              templateSummaryId: templateSummary.xomuog_templatesummaryid ?? "",
+              templateSummaryId: newTemplateSummaryId,
             },
           };
         } catch (e) {

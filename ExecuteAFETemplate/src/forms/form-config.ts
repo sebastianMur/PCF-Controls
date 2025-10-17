@@ -41,39 +41,42 @@ export const useGetDefaultValues = () => {
   const [getLineItems] = useLazyGetLineItemQuery();
   const [getLineItemsDetails] = useLazyGetLineItemsDetailsQuery();
 
-  const saveExistingTemplateSummary = useCallback(async () => {
-    if (templateSummaryId) {
-      const [templateSummary, gfcmSummaries, lineItemDetails, attachments] =
-        await Promise.all([
-          getTemplateSummaryFormData(templateSummaryId).unwrap(),
-          getGFCMsSummary(templateSummaryId).unwrap(),
-          getLineItemsDetails(templateSummaryId).unwrap(),
-          getAttachments(templateSummaryId).unwrap(),
-        ]);
+  const saveExistingTemplateSummary = useCallback(
+    async tempSummaryId => {
+      if (tempSummaryId) {
+        const [templateSummary, gfcmSummaries, lineItemDetails, attachments] =
+          await Promise.all([
+            getTemplateSummaryFormData(templateSummaryId).unwrap(),
+            getGFCMsSummary(templateSummaryId).unwrap(),
+            getLineItemsDetails(templateSummaryId).unwrap(),
+            getAttachments(templateSummaryId).unwrap(),
+          ]);
 
-      const requiredFieldsMessages = getTemplateSummaryRequiredFields(
-        templateSummary,
-        attachments.length > 0,
-      );
+        const requiredFieldsMessages = getTemplateSummaryRequiredFields(
+          templateSummary,
+          attachments.length > 0,
+        );
 
-      const d365DefaultValues = {
-        templateSummary: templateSummary,
-        gfcmSummary: gfcmSummaries,
-        lineItemsDetails: lineItemDetails,
-        isNew: false,
-        requiredFieldsMessages,
-      };
+        const d365DefaultValues = {
+          templateSummary: templateSummary,
+          gfcmSummary: gfcmSummaries,
+          lineItemsDetails: lineItemDetails,
+          isNew: false,
+          requiredFieldsMessages,
+        };
 
-      return recalculateAllTotals(d365DefaultValues);
-    }
-    return undefined;
-  }, [
-    getGFCMsSummary,
-    getLineItemsDetails,
-    getTemplateSummaryFormData,
-    templateSummaryId,
-    getAttachments,
-  ]);
+        return recalculateAllTotals(d365DefaultValues);
+      }
+      return undefined;
+    },
+    [
+      getGFCMsSummary,
+      getLineItemsDetails,
+      getTemplateSummaryFormData,
+      templateSummaryId,
+      getAttachments,
+    ],
+  );
 
   const createNewTemplateSummary = useCallback(async () => {
     const [template, lineItems, gfcms] = await Promise.all([
@@ -113,12 +116,13 @@ export const useGetDefaultValues = () => {
         isNew: false,
         requiredFieldsMessages: [],
       };
-
       if (!templateId) return defaultValues;
 
       try {
         // ** Save Existing Template Summary **
-        const defaultValuesForAFECreation = await saveExistingTemplateSummary();
+
+        const defaultValuesForAFECreation =
+          await saveExistingTemplateSummary(templateSummaryId);
         if (
           defaultValuesForAFECreation?.templateSummary?.xomuog_templatesummaryid
         )
@@ -132,10 +136,16 @@ export const useGetDefaultValues = () => {
         console.error("Failed to load initial template values", error);
         return defaultValues;
       }
-    }, [templateId, createNewTemplateSummary, saveExistingTemplateSummary]);
+    }, [
+      templateId,
+      createNewTemplateSummary,
+      saveExistingTemplateSummary,
+      templateSummaryId,
+    ]);
 
   return {
     getInitialTemplateValues,
+    saveExistingTemplateSummary,
   };
 };
 

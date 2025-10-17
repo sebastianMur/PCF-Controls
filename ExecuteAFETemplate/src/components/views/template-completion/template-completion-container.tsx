@@ -82,7 +82,7 @@ export default function TemplateCompletionContainer() {
   const [sendForRevision, { isLoading: isLoadingSendForRevision }] =
     useSendAFEForRevisionMutation();
 
-  const { getInitialTemplateValues } = useGetDefaultValues();
+  const { saveExistingTemplateSummary } = useGetDefaultValues();
 
   const { control, setValue, getValues, reset } =
     useFormContext<TemplateFormData>();
@@ -184,6 +184,7 @@ export default function TemplateCompletionContainer() {
       // todo: Save Template to send AFE Records
       if (
         templateSummaryId &&
+        templateSummaryId === data.templateSummary?.xomuog_templatesummaryid &&
         data.templateSummary?.statuscode === STATUS_REASON.Active
       ) {
         const [templateSummaryData, wpn, template, attachments] =
@@ -196,7 +197,7 @@ export default function TemplateCompletionContainer() {
 
         const fieldsToCheck = fromTemplateToTemplateSummaryOnSave(
           template,
-          templateSummaryData,
+          { ...templateSummaryData },
           wpn,
         );
         const requiredFieldsMessages = getTemplateSummaryRequiredFields(
@@ -217,7 +218,8 @@ export default function TemplateCompletionContainer() {
 
       triggerNotifyOutputChange();
 
-      const newTemplateFormValues = await getInitialTemplateValues();
+      const newTemplateFormValues =
+        await saveExistingTemplateSummary(templateSummaryId);
       reset(newTemplateFormValues);
       setHasChanges(false);
     } catch (error) {
