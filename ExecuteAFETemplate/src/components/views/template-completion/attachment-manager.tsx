@@ -59,15 +59,6 @@ export default function AttachmentManager({
     useDeleteAttachmentMutation();
 
   const hasMaxAttachments = attachments.length >= maxAttachments;
-  const currentAttachment = attachments[0];
-
-  /** ---------------------------
-   * 🔄 File Handlers
-   * -------------------------- */
-
-  const handleFileSelect = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
 
   const resetFeedback = useCallback(() => {
     setFeedback({ type: null, message: null });
@@ -81,6 +72,13 @@ export default function AttachmentManager({
     [resetFeedback],
   );
 
+  const handleFileSelect = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  /** ---------------------------
+   * Upload / Delete Logic
+   * -------------------------- */
   const handleFileChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -88,19 +86,24 @@ export default function AttachmentManager({
 
       resetFeedback();
 
-      if (hasMaxAttachments && !allowMultiple) {
+      const currentAttachmentsCount = attachments.length;
+
+      // Validate count
+      if (currentAttachmentsCount >= maxAttachments) {
         showFeedback(
           "error",
-          `Only ${maxAttachments} attachment is allowed. Please delete or replace the existing one.`,
+          `Only ${maxAttachments} attachment${maxAttachments > 1 ? "s" : ""} allowed. Please delete or replace the revision file.`,
         );
         return;
       }
 
+      // Validate size
       if (file.size > 10 * 1024 * 1024) {
-        showFeedback("error", "File size must be less than 10MB.");
+        showFeedback("error", "The file must be smaller than 10 MB.");
         return;
       }
 
+      // Validate type
       const allowedTypes = new Set([
         "application/pdf",
         "application/msword",
@@ -116,34 +119,67 @@ export default function AttachmentManager({
       if (!allowedTypes.has(file.type)) {
         showFeedback(
           "error",
-          "Unsupported file type. Upload PDF, Word, Excel, image, or text files.",
+          "Unsupported file type. Only PDF, Word, Excel, image, or text files are allowed.",
         );
         return;
       }
 
       try {
-        const payload = await toApiAttachments(file, templateSummaryId);
+        // ✅ Check if a file with the same name already exists
+        const existingNames = attachments.map(a => a.name.toLowerCase());
+        let newFileName = file.name;
+
+        if (existingNames.includes(file.name.toLowerCase())) {
+          const dotIndex = file.name.lastIndexOf(".");
+          const baseName =
+            dotIndex !== -1 ? file.name.slice(0, dotIndex) : file.name;
+          const extension = dotIndex !== -1 ? file.name.slice(dotIndex) : "";
+          let version = 2;
+
+          // If versions like (vX) already exist, increment the number
+          while (
+            existingNames.includes(
+              `${baseName} (v${version})${extension}`.toLowerCase(),
+            )
+          ) {
+            version++;
+          }
+
+          newFileName = `${baseName} (v${version})${extension}`;
+        }
+
+        // ✅ Create a new File with the modified name if needed
+        const renamedFile =
+          newFileName !== file.name
+            ? new File([file], newFileName, { type: file.type })
+            : file;
+
+        const payload = await toApiAttachments(renamedFile, templateSummaryId);
         await createNote(payload).unwrap();
 
         if (fileInputRef.current) fileInputRef.current.value = "";
+
+        // Mark revision as replaced
         if (isValidStatusForRevision) setWasRevisionFileReplaced(true);
 
-        showFeedback("success", `File "${file.name}" uploaded successfully!`);
+        showFeedback("success", `File "${newFileName}" uploaded successfully.`);
+        await refetchAttachments();
       } catch (err) {
         console.error("Upload failed:", err);
-        showFeedback("error", "Failed to upload file. Please try again.");
+        showFeedback("error", "Failed to upload the file. Please try again.");
       }
     },
     [
-      hasMaxAttachments,
-      allowMultiple,
+      attachments.length,
       createNote,
       isValidStatusForRevision,
       maxAttachments,
+      refetchAttachments,
       resetFeedback,
       showFeedback,
       templateSummaryId,
       setWasRevisionFileReplaced,
+      attachments,
     ],
   );
 
@@ -155,24 +191,26 @@ export default function AttachmentManager({
         showFeedback("success", `File "${fileName}" deleted successfully.`);
       } catch (err) {
         console.error("Delete failed:", err);
-        showFeedback("error", "Failed to delete file. Please try again.");
+        showFeedback("error", "Failed to delete the file.");
       }
     },
     [deleteAttachment, refetchAttachments, showFeedback],
   );
 
   const handleReplaceAttachment = useCallback(async () => {
-    if (!currentAttachment) return;
+    const revisionAttachment = attachments[1]; // second attachment
+    if (!revisionAttachment) return;
+
     try {
-      await deleteAttachment(currentAttachment.annotationid).unwrap();
+      await deleteAttachment(revisionAttachment.annotationid).unwrap();
       await refetchAttachments();
       setTimeout(handleFileSelect, 100);
     } catch (err) {
       console.error("Replace failed:", err);
-      showFeedback("error", "Failed to replace attachment. Please try again.");
+      showFeedback("error", "Failed to replace the revision file.");
     }
   }, [
-    currentAttachment,
+    attachments,
     deleteAttachment,
     refetchAttachments,
     handleFileSelect,
@@ -180,9 +218,8 @@ export default function AttachmentManager({
   ]);
 
   /** ---------------------------
-   * 🧩 Utilities
+   * Utilities
    * -------------------------- */
-
   const downloadDocument = useCallback((doc: Attachment) => {
     const link = document.createElement("a");
     link.href = doc.url;
@@ -194,8 +231,7 @@ export default function AttachmentManager({
 
   const uploadButtonLabel = useMemo(() => {
     if (isUploading) return "Uploading...";
-    if (hasMaxAttachments) return "Replace File";
-    return "Upload File";
+    return hasMaxAttachments ? "Replace revision file" : "Upload file";
   }, [isUploading, hasMaxAttachments]);
 
   const uploadButtonIcon = useMemo(() => {
@@ -204,14 +240,13 @@ export default function AttachmentManager({
   }, [hasMaxAttachments]);
 
   /** ---------------------------
-   * 🧱 Render
+   * Render
    * -------------------------- */
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <Text className={styles.title}>
-          {isValidStatusForRevision ? "Revision Attachment" : "Attachment"}
+          {isValidStatusForRevision ? "Revision attachment" : "Attachment"}
           {allowMultiple && ` (${attachments.length}/${maxAttachments})`}
         </Text>
 
@@ -224,23 +259,27 @@ export default function AttachmentManager({
               className={styles.hiddenInput}
               accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt"
             />
-            <Button
-              appearance="secondary"
-              icon={<span>{uploadButtonIcon}</span>}
-              onClick={
-                hasMaxAttachments ? handleReplaceAttachment : handleFileSelect
-              }
-              disabled={isUploading || isDeleting}
-            >
-              {isUploading ? (
-                <div className={styles.uploadProgress}>
-                  <Spinner size="tiny" />
-                  <Text>Uploading...</Text>
-                </div>
-              ) : (
-                uploadButtonLabel
-              )}
-            </Button>
+            {(!hasMaxAttachments || isValidStatusForRevision) && (
+              <Button
+                appearance="secondary"
+                icon={<span>{uploadButtonIcon}</span>}
+                onClick={
+                  hasMaxAttachments && isValidStatusForRevision
+                    ? handleReplaceAttachment
+                    : handleFileSelect
+                }
+                disabled={isUploading || isDeleting}
+              >
+                {isUploading ? (
+                  <div className={styles.uploadProgress}>
+                    <Spinner size="tiny" />
+                    <Text>Uploading...</Text>
+                  </div>
+                ) : (
+                  uploadButtonLabel
+                )}
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -258,24 +297,77 @@ export default function AttachmentManager({
 
       {isLoadingAttachments ? (
         <div>
-          <Spinner size="medium" label="Loading attachment..." />
+          <Spinner size="medium" label="Loading attachments..." />
         </div>
       ) : attachments.length === 0 ? (
         <div className={styles.emptyState}>
-          <Text>No attachment uploaded yet.</Text>
-          {!isLocked && (
-            <Text>
-              Click "Upload File" to add a document, image, or text file.
-            </Text>
-          )}
+          <Text>No attachments yet.</Text>
         </div>
-      ) : maxAttachments === 1 ? (
+      ) : allowMultiple ? (
+        // Revision mode (2 possible attachments)
+        <div className={styles.attachmentTable}>
+          {attachments.map((att, index) => {
+            const isRevisionAttachment = index === 1;
+
+            return (
+              <div
+                key={att.annotationid}
+                className={styles.singleAttachmentCard}
+              >
+                <div className={styles.attachmentInfo}>
+                  {getFileIcon()}
+                  <div className={styles.attachmentDetails}>
+                    <Text className={styles.attachmentName}>{att.name}</Text>
+                    {isRevisionAttachment ? (
+                      <Text>Revision file</Text>
+                    ) : (
+                      <Text style={{ opacity: 0.6 }}>
+                        Base attachment (locked)
+                      </Text>
+                    )}
+                  </div>
+                </div>
+
+                {!isLocked && (
+                  <div className={styles.actionButtons}>
+                    <Button
+                      appearance="secondary"
+                      icon={<ArrowDownload20Regular />}
+                      onClick={() => downloadDocument(att)}
+                      size="small"
+                    >
+                      Download
+                    </Button>
+                    {isRevisionAttachment && (
+                      <Button
+                        appearance="subtle"
+                        icon={<Delete20Regular />}
+                        onClick={() =>
+                          handleDeleteAttachment(
+                            att.annotationid,
+                            att.name ?? "",
+                          )
+                        }
+                        disabled={isDeleting || isUploading}
+                        size="small"
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        // Normal mode (1 attachment)
         <div className={styles.singleAttachmentCard}>
           <div className={styles.attachmentInfo}>
             {getFileIcon()}
             <div className={styles.attachmentDetails}>
               <Text className={styles.attachmentName}>
-                {currentAttachment.name}
+                {attachments[0].name}
               </Text>
             </div>
           </div>
@@ -285,9 +377,8 @@ export default function AttachmentManager({
               <Button
                 appearance="secondary"
                 icon={<ArrowDownload20Regular />}
-                onClick={() => downloadDocument(currentAttachment)}
+                onClick={() => downloadDocument(attachments[0])}
                 size="small"
-                aria-label={`Download ${currentAttachment.name}`}
               >
                 Download
               </Button>
@@ -296,56 +387,17 @@ export default function AttachmentManager({
                 icon={<Delete20Regular />}
                 onClick={() =>
                   handleDeleteAttachment(
-                    currentAttachment.annotationid,
-                    currentAttachment.name ?? "",
+                    attachments[0].annotationid,
+                    attachments[0].name ?? "",
                   )
                 }
                 disabled={isDeleting || isUploading}
                 size="small"
-                aria-label={`Delete ${currentAttachment.name}`}
               >
                 Delete
               </Button>
             </div>
           )}
-        </div>
-      ) : (
-        <div className={styles.attachmentTable}>
-          {attachments.map(att => (
-            <div key={att.annotationid} className={styles.singleAttachmentCard}>
-              <div className={styles.attachmentInfo}>
-                {getFileIcon()}
-                <div className={styles.attachmentDetails}>
-                  <Text className={styles.attachmentName}>{att.name}</Text>
-                </div>
-              </div>
-              {!isLocked && (
-                <div className={styles.actionButtons}>
-                  <Button
-                    appearance="secondary"
-                    icon={<ArrowDownload20Regular />}
-                    onClick={() => downloadDocument(att)}
-                    size="small"
-                    aria-label={`Download ${att.name}`}
-                  >
-                    Download
-                  </Button>
-                  <Button
-                    appearance="subtle"
-                    icon={<Delete20Regular />}
-                    onClick={() =>
-                      handleDeleteAttachment(att.annotationid, att.name ?? "")
-                    }
-                    disabled={isDeleting || isUploading}
-                    size="small"
-                    aria-label={`Delete ${att.name}`}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
         </div>
       )}
     </div>

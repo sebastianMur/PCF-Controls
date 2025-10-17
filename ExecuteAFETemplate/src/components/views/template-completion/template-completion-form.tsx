@@ -6,7 +6,7 @@ import { RevisionStatusDialog } from "@/components/ui/revision-status-dialog";
 import type { TemplateFormData } from "@/forms/form-schemas";
 import { useFormStyles } from "@/styles/template-completion-form";
 import type { TemplateCompletionData, Unit } from "@/types/template";
-import { AFE_STATUS_COLOR } from "@/utils/constants";
+import { AFE_STATUS_COLOR, STATUS_REASON } from "@/utils/constants";
 import { formatCurrency } from "@/utils/functions";
 import {
   Badge,
@@ -231,7 +231,11 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
             <AttachmentManager
               templateSummaryId={templateSummaryId ?? ""}
               isLocked={!isValidStatusForRevision && isProjectNumberDefined}
-              isValidStatusForRevision={isValidStatusForRevision}
+              isValidStatusForRevision={
+                isValidStatusForRevision ||
+                templateSummaryData.templateSummary?.statuscode ===
+                  STATUS_REASON.SentforRevision
+              }
               setWasRevisionFileReplaced={setWasRevisionFileReplaced}
             />
           )}

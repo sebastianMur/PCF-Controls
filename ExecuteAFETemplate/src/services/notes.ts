@@ -41,7 +41,7 @@ export const notesApi = baseApi.injectEndpoints({
 
     getNotes: builder.query<Attachment[], string>({
       query: templateSummaryId =>
-        `annotations?$select=annotationid,notetext,documentbody,filename,filesize,isdocument,mimetype,_objectid_value,subject&$filter=(isdocument eq true and _objectid_value eq ${templateSummaryId})`,
+        `annotations?$select=annotationid,notetext,documentbody,filename,filesize,isdocument,mimetype,_objectid_value,subject,createdon&$filter=(isdocument eq true and _objectid_value eq ${templateSummaryId})&$orderby=createdon asc`,
       transformResponse: (response: {
         value: D365Attachment[];
       }): Attachment[] => {

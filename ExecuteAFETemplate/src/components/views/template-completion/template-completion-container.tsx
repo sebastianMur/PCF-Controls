@@ -293,6 +293,11 @@ export default function TemplateCompletionContainer() {
       }).unwrap();
 
       triggerNotifyOutputChange();
+
+      const newTemplateFormValues =
+        await saveExistingTemplateSummary(templateSummaryId);
+      reset({ ...newTemplateFormValues });
+
       await refetch().unwrap();
     } catch (error) {
       console.error("Failed to save template completion:", error);
