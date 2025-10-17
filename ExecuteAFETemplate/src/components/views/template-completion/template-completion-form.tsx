@@ -54,6 +54,8 @@ type TemplateCompletionProps = {
   requiredFieldsMessages: string[];
   setOpenRevisionStatusDialog: (open: boolean) => void;
   openRevisionStatusDialog: boolean;
+  setWasRevisionFileReplaced: (wasReplaced: boolean) => void;
+  wasRevisionFileReplaced?: boolean;
 };
 export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   templateData,
@@ -81,6 +83,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   requiredFieldsMessages,
   setOpenRevisionDialog,
   isLoadingSendForRevision,
+  setWasRevisionFileReplaced,
 }) => {
   const styles = useFormStyles();
 
@@ -227,7 +230,9 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
           {templateSummaryId && (
             <AttachmentManager
               templateSummaryId={templateSummaryId ?? ""}
-              isLocked={isProjectNumberDefined}
+              isLocked={!isValidStatusForRevision && isProjectNumberDefined}
+              isValidStatusForRevision={isValidStatusForRevision}
+              setWasRevisionFileReplaced={setWasRevisionFileReplaced}
             />
           )}
         </div>

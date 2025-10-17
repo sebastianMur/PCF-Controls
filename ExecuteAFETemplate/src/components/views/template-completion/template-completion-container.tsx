@@ -50,6 +50,8 @@ export default function TemplateCompletionContainer() {
   const [hasChanges, setHasChanges] = useState<boolean>(
     () => !templateSummaryId,
   );
+  const [wasRevisionFileReplaced, setWasRevisionFileReplaced] =
+    useState<boolean>(false);
   const [localData, setLocalData] = useState<TemplateCompletionData | null>(
     null,
   );
@@ -355,6 +357,8 @@ export default function TemplateCompletionContainer() {
         }
         setOpenRevisionStatusDialog={setOpenRevisionStatusDialog}
         openRevisionStatusDialog={openRevisionStatusDialog}
+        setWasRevisionFileReplaced={setWasRevisionFileReplaced}
+        wasRevisionFileReplaced={wasRevisionFileReplaced}
       />
     </div>
   );

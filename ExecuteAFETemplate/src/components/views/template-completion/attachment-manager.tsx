@@ -12,14 +12,7 @@ import {
   MessageBarBody,
   MessageBarTitle,
   Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableHeaderCell,
-  TableRow,
   Text,
-  tokens,
 } from "@fluentui/react-components";
 import {
   ArrowDownload20Regular,
@@ -29,27 +22,31 @@ import {
   Document20Regular,
 } from "@fluentui/react-icons";
 import type React from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-interface AttachmentManagerProps {
+type AttachmentManagerProps = {
   templateSummaryId: string;
   isLocked: boolean;
-}
-
-// Configuration for attachment limits
-const ATTACHMENT_CONFIG = {
-  maxAttachments: 1, // Change this to allow more attachments in the future
-  allowMultiple: false, // Set to true to enable multiple attachments
+  isValidStatusForRevision: boolean;
+  setWasRevisionFileReplaced: (wasReplaced: boolean) => void;
 };
 
 export default function AttachmentManager({
   templateSummaryId,
   isLocked,
+  isValidStatusForRevision,
+  setWasRevisionFileReplaced,
 }: AttachmentManagerProps) {
   const styles = useAttachmentStyles();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error" | null;
+    message: string | null;
+  }>({ type: null, message: null });
+
+  const allowMultiple = isValidStatusForRevision;
+  const maxAttachments = allowMultiple ? 2 : 1;
 
   const {
     data: attachments = [],
@@ -61,160 +58,163 @@ export default function AttachmentManager({
   const [deleteAttachment, { isLoading: isDeleting }] =
     useDeleteAttachmentMutation();
 
-  const hasMaxAttachments =
-    attachments.length >= ATTACHMENT_CONFIG.maxAttachments;
-  const currentAttachment = attachments[0]; // Get the single attachment
+  const hasMaxAttachments = attachments.length >= maxAttachments;
+  const currentAttachment = attachments[0];
 
-  const handleFileSelect = (): void => {
+  /** ---------------------------
+   * 🔄 File Handlers
+   * -------------------------- */
+
+  const handleFileSelect = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  // const handleRevisionAttachment = () => {};
+  const resetFeedback = useCallback(() => {
+    setFeedback({ type: null, message: null });
+  }, []);
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ): Promise<void> => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const showFeedback = useCallback(
+    (type: "success" | "error", message: string) => {
+      setFeedback({ type, message });
+      setTimeout(resetFeedback, 3000);
+    },
+    [resetFeedback],
+  );
 
-    // Clear previous messages
-    setUploadError(null);
-    setUploadSuccess(null);
+  const handleFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // Check if we already have the maximum number of attachments
-    if (hasMaxAttachments && !ATTACHMENT_CONFIG.allowMultiple) {
-      setUploadError(
-        `Only ${ATTACHMENT_CONFIG.maxAttachments} attachment is allowed. Please delete the existing attachment first or replace it.`,
-      );
-      return;
-    }
+      resetFeedback();
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError("File size must be less than 10MB");
-      return;
-    }
-
-    // Validate file type
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/vnd.ms-excel",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "text/plain",
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError(
-        "File type not supported. Please upload PDF, Word, Excel, image, or text files.",
-      );
-      return;
-    }
-
-    try {
-      const sendAttachment = await toApiAttachments(file, templateSummaryId);
-      const result = await createNote(sendAttachment).unwrap();
-
-      console.log("Upload successful:", result);
-
-      setUploadSuccess(`File "${file.name}" uploaded successfully!`);
-
-      // Clear the input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      if (hasMaxAttachments && !allowMultiple) {
+        showFeedback(
+          "error",
+          `Only ${maxAttachments} attachment is allowed. Please delete or replace the existing one.`,
+        );
+        return;
       }
 
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setUploadSuccess(null);
-      }, 3000);
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setUploadError("Failed to upload file. Please try again.");
-    }
-  };
+      if (file.size > 10 * 1024 * 1024) {
+        showFeedback("error", "File size must be less than 10MB.");
+        return;
+      }
 
-  const handleDeleteAttachment = async (
-    attachmentId: string,
-    fileName: string,
-  ): Promise<void> => {
-    try {
-      console.log("Deleting attachment:", attachmentId);
+      const allowedTypes = new Set([
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "text/plain",
+      ]);
 
-      await deleteAttachment(attachmentId).unwrap();
+      if (!allowedTypes.has(file.type)) {
+        showFeedback(
+          "error",
+          "Unsupported file type. Upload PDF, Word, Excel, image, or text files.",
+        );
+        return;
+      }
 
-      console.log("Delete successful");
-
-      setUploadSuccess(`File "${fileName}" deleted successfully!`);
-
-      // Refetch attachments to update the list
-      await refetchAttachments();
-
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setUploadSuccess(null);
-      }, 3000);
-    } catch (error) {
-      console.error("Failed to delete attachment:", error);
-      setUploadError("Failed to delete file. Please try again.");
-    }
-  };
-
-  const handleReplaceAttachment = async (): Promise<void> => {
-    if (currentAttachment) {
-      // Delete current attachment first, then allow new upload
       try {
-        await deleteAttachment(currentAttachment.annotationid).unwrap();
-        await refetchAttachments();
-        // Trigger file selection after deletion
-        setTimeout(() => {
-          handleFileSelect();
-        }, 100);
-      } catch (error) {
-        setUploadError("Failed to replace attachment. Please try again.");
+        const payload = await toApiAttachments(file, templateSummaryId);
+        await createNote(payload).unwrap();
+
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        if (isValidStatusForRevision) setWasRevisionFileReplaced(true);
+
+        showFeedback("success", `File "${file.name}" uploaded successfully!`);
+      } catch (err) {
+        console.error("Upload failed:", err);
+        showFeedback("error", "Failed to upload file. Please try again.");
       }
+    },
+    [
+      hasMaxAttachments,
+      allowMultiple,
+      createNote,
+      isValidStatusForRevision,
+      maxAttachments,
+      resetFeedback,
+      showFeedback,
+      templateSummaryId,
+      setWasRevisionFileReplaced,
+    ],
+  );
+
+  const handleDeleteAttachment = useCallback(
+    async (attachmentId: string, fileName: string) => {
+      try {
+        await deleteAttachment(attachmentId).unwrap();
+        await refetchAttachments();
+        showFeedback("success", `File "${fileName}" deleted successfully.`);
+      } catch (err) {
+        console.error("Delete failed:", err);
+        showFeedback("error", "Failed to delete file. Please try again.");
+      }
+    },
+    [deleteAttachment, refetchAttachments, showFeedback],
+  );
+
+  const handleReplaceAttachment = useCallback(async () => {
+    if (!currentAttachment) return;
+    try {
+      await deleteAttachment(currentAttachment.annotationid).unwrap();
+      await refetchAttachments();
+      setTimeout(handleFileSelect, 100);
+    } catch (err) {
+      console.error("Replace failed:", err);
+      showFeedback("error", "Failed to replace attachment. Please try again.");
     }
-  };
+  }, [
+    currentAttachment,
+    deleteAttachment,
+    refetchAttachments,
+    handleFileSelect,
+    showFeedback,
+  ]);
+
+  /** ---------------------------
+   * 🧩 Utilities
+   * -------------------------- */
 
   const downloadDocument = useCallback((doc: Attachment) => {
     const link = document.createElement("a");
     link.href = doc.url;
     link.download = doc.name;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   }, []);
 
-  const getFileIcon = (_fileType: string): React.ReactNode => {
-    // You could customize icons based on file type
-    return <Document20Regular />;
-  };
+  const getFileIcon = useCallback(() => <Document20Regular />, []);
 
-  const getUploadButtonText = (): string => {
+  const uploadButtonLabel = useMemo(() => {
     if (isUploading) return "Uploading...";
     if (hasMaxAttachments) return "Replace File";
     return "Upload File";
-  };
+  }, [isUploading, hasMaxAttachments]);
 
-  const getUploadButtonIcon = (): React.ReactNode => {
-    // if (isUploading) return <Spinner size="tiny" />;
+  const uploadButtonIcon = useMemo(() => {
     if (hasMaxAttachments) return <AttachArrowRightFilled />;
     return <Attach20Regular />;
-  };
+  }, [hasMaxAttachments]);
+
+  /** ---------------------------
+   * 🧱 Render
+   * -------------------------- */
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <Text className={styles.title}>
-          Attachment{" "}
-          {ATTACHMENT_CONFIG.maxAttachments === 1
-            ? ""
-            : `(${attachments.length}/${ATTACHMENT_CONFIG.maxAttachments})`}
+          {isValidStatusForRevision ? "Revision Attachment" : "Attachment"}
+          {allowMultiple && ` (${attachments.length}/${maxAttachments})`}
         </Text>
+
         {templateSummaryId && !isLocked && (
           <div className={styles.uploadArea}>
             <input
@@ -226,7 +226,7 @@ export default function AttachmentManager({
             />
             <Button
               appearance="secondary"
-              icon={<span> {getUploadButtonIcon()} </span>}
+              icon={<span>{uploadButtonIcon}</span>}
               onClick={
                 hasMaxAttachments ? handleReplaceAttachment : handleFileSelect
               }
@@ -238,72 +238,54 @@ export default function AttachmentManager({
                   <Text>Uploading...</Text>
                 </div>
               ) : (
-                getUploadButtonText()
+                uploadButtonLabel
               )}
             </Button>
           </div>
         )}
       </div>
 
-      {uploadError && (
-        <MessageBar intent="error">
+      {feedback.type && (
+        <MessageBar intent={feedback.type === "error" ? "error" : "success"}>
           <MessageBarBody>
-            <MessageBarTitle>Error</MessageBarTitle>
-            {uploadError}
-          </MessageBarBody>
-        </MessageBar>
-      )}
-
-      {uploadSuccess && (
-        <MessageBar intent="success">
-          <MessageBarBody>
-            <MessageBarTitle>Success</MessageBarTitle>
-            {uploadSuccess}
+            <MessageBarTitle>
+              {feedback.type === "error" ? "Error" : "Success"}
+            </MessageBarTitle>
+            {feedback.message}
           </MessageBarBody>
         </MessageBar>
       )}
 
       {isLoadingAttachments ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: tokens.spacingVerticalL,
-          }}
-        >
+        <div>
           <Spinner size="medium" label="Loading attachment..." />
         </div>
       ) : attachments.length === 0 ? (
         <div className={styles.emptyState}>
           <Text>No attachment uploaded yet.</Text>
           {!isLocked && (
-            <Text
-              style={{
-                fontSize: tokens.fontSizeBase200,
-                marginTop: tokens.spacingVerticalXS,
-              }}
-            >
-              Click "Upload File" to add a document, image, or other file.
+            <Text>
+              Click "Upload File" to add a document, image, or text file.
             </Text>
           )}
         </div>
-      ) : ATTACHMENT_CONFIG.maxAttachments === 1 ? (
-        // Single attachment card view
+      ) : maxAttachments === 1 ? (
         <div className={styles.singleAttachmentCard}>
           <div className={styles.attachmentInfo}>
-            {getFileIcon(currentAttachment.type ?? "")}
+            {getFileIcon()}
             <div className={styles.attachmentDetails}>
               <Text className={styles.attachmentName}>
                 {currentAttachment.name}
               </Text>
             </div>
           </div>
+
           {!isLocked && (
             <div className={styles.actionButtons}>
               <Button
                 appearance="secondary"
                 icon={<ArrowDownload20Regular />}
-                onClick={() => downloadDocument(attachments[0])}
+                onClick={() => downloadDocument(currentAttachment)}
                 size="small"
                 aria-label={`Download ${currentAttachment.name}`}
               >
@@ -319,8 +301,8 @@ export default function AttachmentManager({
                   )
                 }
                 disabled={isDeleting || isUploading}
-                aria-label={`Delete ${currentAttachment.name}`}
                 size="small"
+                aria-label={`Delete ${currentAttachment.name}`}
               >
                 Delete
               </Button>
@@ -328,50 +310,42 @@ export default function AttachmentManager({
           )}
         </div>
       ) : (
-        // Table view for multiple attachments (future use)
         <div className={styles.attachmentTable}>
-          <Table aria-label="Attachments table">
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell>File Name</TableHeaderCell>
-                <TableHeaderCell>Size</TableHeaderCell>
-                <TableHeaderCell>Type</TableHeaderCell>
-                <TableHeaderCell>Upload Date</TableHeaderCell>
-                {!isLocked && <TableHeaderCell>Actions</TableHeaderCell>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {attachments.map(attachment => (
-                <TableRow key={attachment.annotationid}>
-                  <TableCell>
-                    <div className={styles.fileIcon}>
-                      {getFileIcon(attachment.type ?? "")}
-                      <Text>{attachment.name}</Text>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Text className={styles.fileIcon}>{attachment.type}</Text>
-                  </TableCell>
-                  {!isLocked && (
-                    <TableCell>
-                      <Button
-                        appearance="subtle"
-                        icon={<Delete20Regular />}
-                        onClick={() =>
-                          handleDeleteAttachment(
-                            attachment.annotationid,
-                            attachment.name ?? "",
-                          )
-                        }
-                        disabled={isDeleting}
-                        aria-label={`Delete ${attachment.name}`}
-                      />
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {attachments.map(att => (
+            <div key={att.annotationid} className={styles.singleAttachmentCard}>
+              <div className={styles.attachmentInfo}>
+                {getFileIcon()}
+                <div className={styles.attachmentDetails}>
+                  <Text className={styles.attachmentName}>{att.name}</Text>
+                </div>
+              </div>
+              {!isLocked && (
+                <div className={styles.actionButtons}>
+                  <Button
+                    appearance="secondary"
+                    icon={<ArrowDownload20Regular />}
+                    onClick={() => downloadDocument(att)}
+                    size="small"
+                    aria-label={`Download ${att.name}`}
+                  >
+                    Download
+                  </Button>
+                  <Button
+                    appearance="subtle"
+                    icon={<Delete20Regular />}
+                    onClick={() =>
+                      handleDeleteAttachment(att.annotationid, att.name ?? "")
+                    }
+                    disabled={isDeleting || isUploading}
+                    size="small"
+                    aria-label={`Delete ${att.name}`}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
