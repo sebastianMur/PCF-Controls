@@ -54,6 +54,7 @@ export const notesApi = baseApi.injectEndpoints({
 
 export const {
   useGetNotesQuery,
+  useLazyGetNotesQuery,
   useCreateNoteMutation,
   useUpdateNoteMutation,
   useDeleteAttachmentMutation,

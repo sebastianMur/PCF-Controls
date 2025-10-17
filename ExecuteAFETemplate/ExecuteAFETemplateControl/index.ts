@@ -18,7 +18,6 @@ import { createElement } from "react";
 import type { ReactElement } from "react";
 import { Provider } from "react-redux";
 import type { ProviderProps } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
 import type { ContextPage } from "../src/types";
 import type { IInputs, IOutputs } from "./generated/ManifestTypes";
 export class ExecuteAFETemplateControl
@@ -28,6 +27,7 @@ export class ExecuteAFETemplateControl
   private isLocal =
     window.location.hostname === "localhost" ||
     window.location.href.includes("localhost");
+
   constructor() {
     this.store = createStore();
   }
@@ -94,12 +94,13 @@ export class ExecuteAFETemplateControl
   public getOutputs(): IOutputs {
     const states = this.store.getState();
     const templateSummaryId = states.context.templateSummaryId;
+
     return {
       templateSummaryId: [
         {
           entityType: "xomuog_templatesummary",
           id: templateSummaryId,
-          name: `Saved Record ${uuidv4()}`,
+          name: "Saved Record",
         },
       ] as ComponentFramework.LookupValue[],
     };

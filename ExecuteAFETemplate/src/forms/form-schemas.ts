@@ -36,6 +36,8 @@ export const templateSummarySchema = z.object({
   xomuog_mainprojecttype: z.number().optional(),
   xomuog_projectdescription: z.string(),
   xomuog_subprojecttype: z.string(),
+  xomuog_afeexecutebusinessunit: z.number().optional(),
+  xomuog_projectteam: z.string().optional(),
 });
 
 export const attachmentSummarySchema = z
@@ -52,6 +54,8 @@ export const templateFormSchema = z.object({
   gfcmSummary: z.array(gfcmSummarySchema).optional(),
   lineItemsDetails: z.array(lineItemSchema).optional(),
   isNew: z.boolean(),
+  requiredFieldsMessages: z.array(z.string()).optional(),
+  afeStatus: z.string().optional(),
 });
 
 export type TemplateSummaryFormData = z.infer<typeof templateSummarySchema>;

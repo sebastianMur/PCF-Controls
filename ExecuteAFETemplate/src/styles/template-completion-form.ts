@@ -15,6 +15,13 @@ export const useFormStyles = makeStyles({
     borderRadius: tokens.borderRadiusMedium,
     ...shorthands.border("1px", "solid", tokens.colorNeutralStroke2),
   },
+  badge: {
+    ...shorthands.padding("0 8px"),
+    ...shorthands.borderRadius("9999px"),
+    fontWeight: 600,
+    color: "white",
+    border: "none",
+  },
   headerContent: {
     display: "flex",
     flexDirection: "column",
@@ -43,6 +50,7 @@ export const useFormStyles = makeStyles({
   },
   actionButtons: {
     display: "flex",
+    alignItems: "center",
     columnGap: tokens.spacingHorizontalS,
   },
   lockedOverlay: {

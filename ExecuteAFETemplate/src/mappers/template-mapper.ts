@@ -27,7 +27,7 @@ export const fromApiTemplateFormSummary = (
   record: D365TemplateSummary,
 ): TemplateSummaryFormData => ({
   xomuog_templatesummaryid: record.xomuog_templatesummaryid,
-  xomuog_projectnumber: "### ## ##",
+  xomuog_projectnumber: record.xomuog_projectnumber ?? "### ## ##",
   xomuog_templateid: record._xomuog_templateid_value ?? "",
   xomuog_grandtotal: record.xomuog_grandtotal ?? 0,
   xomuog_wpnid: record._xomuog_wpnid_value ?? "",
@@ -42,6 +42,8 @@ export const fromApiTemplateFormSummary = (
   xomuog_engineerid: record._xomuog_engineerid_value,
   xomuog_landmanid: record._xomuog_landmanid_value,
   xomuog_operator: "e90b53d3-2778-f011-b4cb-7ced8d1fc3c0",
+  xomuog_afeexecutebusinessunit: record.xomuog_afeexecutebusinessunit,
+  xomuog_projectteam: record._xomuog_projectteam_value,
 });
 
 export const fromTemplateToTemplateSummary = (
@@ -70,10 +72,55 @@ export const fromTemplateToTemplateSummary = (
         ? MAIN_PROJECT_TYPE.CW
         : undefined,
   xomuog_projectdescription: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
-  xomuog_subprojecttype: "GENERAL USE",
+  xomuog_subprojecttype:
+    record.xomuog_name === "RW - DEFAULT TEMPLATE"
+      ? "REMEDIAL WORKOVER"
+      : record.xomuog_name === "CW - DEFAULT TEMPLATE"
+        ? "CAPITAL WORKOVER"
+        : "",
   xomuog_engineerid: wpn.xomuog_engineerid,
   xomuog_landmanid: wpn.xomuog_landman,
   xomuog_operator: "e90b53d3-2778-f011-b4cb-7ced8d1fc3c0",
+});
+
+export const fromTemplateToTemplateSummaryOnSave = (
+  record: Template,
+  templateSummary: TemplateSummaryFormData,
+  wpn: WPN,
+): TemplateSummaryFormData => ({
+  ...templateSummary,
+  xomuog_capexopex:
+    record.xomuog_name === "RW - DEFAULT TEMPLATE"
+      ? CAPEX_OPEX.Opex
+      : record.xomuog_name === "CW - DEFAULT TEMPLATE"
+        ? CAPEX_OPEX.Capex
+        : undefined,
+  xomuog_companycode: "XTO ENERGY INC RU4331",
+  xomuog_costcenter: wpn?.xomuog_sap_costcenter ?? "",
+  xomuog_descriptionscopeofwork: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
+  // todo: change for new fields values template type for this
+  xomuog_mainprojecttype:
+    record.xomuog_name === "RW - DEFAULT TEMPLATE"
+      ? MAIN_PROJECT_TYPE.RW
+      : record.xomuog_name === "CW - DEFAULT TEMPLATE"
+        ? MAIN_PROJECT_TYPE.CW
+        : undefined,
+  xomuog_projectdescription: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
+  // todo: change for new fields values template type for this
+  xomuog_subprojecttype:
+    record.xomuog_name === "RW - DEFAULT TEMPLATE"
+      ? "REMEDIAL WORKOVER"
+      : record.xomuog_name === "CW - DEFAULT TEMPLATE"
+        ? "CAPITAL WORKOVER"
+        : "",
+  xomuog_engineerid: wpn.xomuog_engineerid,
+  xomuog_landmanid: wpn.xomuog_landman,
+
+  // todo: call the operator from templpate summary default values
+  xomuog_operator: "e90b53d3-2778-f011-b4cb-7ced8d1fc3c0",
+  xomuog_projectteam: templateSummary.xomuog_projectteam || "",
+  xomuog_afeexecutebusinessunit:
+    templateSummary.xomuog_afeexecutebusinessunit || undefined,
 });
 
 export const toApiTemplateSummary = (

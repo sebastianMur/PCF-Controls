@@ -177,6 +177,8 @@ export interface D365TemplateSummary {
   _xomuog_templateid_value?: string;
   _xomuog_wpnid_value?: string;
   statuscode: number;
+  xomuog_afeexecutebusinessunit: number;
+  _xomuog_projectteam_value: string;
 }
 
 export interface SendTemplateSummary {

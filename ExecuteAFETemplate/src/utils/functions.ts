@@ -1,3 +1,5 @@
+import type { TemplateSummaryFormData } from "@/forms/form-schemas";
+
 const d365GuidRegex =
   /^[{(]?[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}[)}]?$/;
 export const isValidD365Guid = (id: string): boolean => {
@@ -58,4 +60,64 @@ export const fileToBase64 = (file: File): Promise<string> => {
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = error => reject(error);
   });
+};
+
+export const getTemplateSummaryRequiredFields = (
+  templateSummary: TemplateSummaryFormData,
+  hasAttachments = false,
+): string[] => {
+  // Map fields to human-friendly labels
+  const fieldLabels: Record<keyof TemplateSummaryFormData, string> = {
+    xomuog_companycode: "Company Code",
+    xomuog_costcenter: "Cost Center",
+    xomuog_descriptionscopeofwork: "Description / Scope of Work",
+    xomuog_projectdescription: "Project Description",
+    xomuog_subprojecttype: "Subproject Type",
+    xomuog_engineerid: "Engineer",
+    xomuog_landmanid: "Landman",
+    xomuog_operator: "Operator",
+    xomuog_capexopex: "Capex/Opex",
+    xomuog_mainprojecttype: "Main Project Type",
+    xomuog_projectnumber: "Project Number",
+    xomuog_grandtotal: "Grand Total",
+    xomuog_wpnid: "WPN",
+    statuscode: "Status",
+    xomuog_templateid: "Template ID",
+    xomuog_templatesummaryid: "Template Summary ID",
+    xomuog_afeexecutebusinessunit: "Business Unit",
+    xomuog_projectteam: "Project Team",
+  };
+
+  // Define which fields are required
+  const requiredFields: (keyof TemplateSummaryFormData)[] = [
+    "xomuog_companycode",
+    "xomuog_costcenter",
+    "xomuog_descriptionscopeofwork",
+    "xomuog_projectdescription",
+    "xomuog_subprojecttype",
+    "xomuog_engineerid",
+    "xomuog_landmanid",
+    "xomuog_operator",
+    "xomuog_capexopex",
+    "xomuog_mainprojecttype",
+    "xomuog_afeexecutebusinessunit",
+    "xomuog_projectteam",
+  ];
+
+  // Check which required fields are empty
+  const missingMessages = requiredFields
+    .filter(field => {
+      const value = templateSummary[field];
+      return (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "")
+      );
+    })
+    .map(field => `${fieldLabels[field]} is required.`);
+
+  if (!hasAttachments) {
+    missingMessages.push("Attachment is required.");
+  }
+  return missingMessages;
 };

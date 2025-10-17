@@ -101,7 +101,7 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       providesTags: ["template"],
     }),
 
-    saveTemplateCompletion: builder.mutation<
+    saveTemplateCompletion1: builder.mutation<
       SaveTemplateCompletionResponse,
       TemplateFormData
     >({
@@ -226,6 +226,190 @@ export const templateCompletionApi = baseApi.injectEndpoints({
       onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         const { data } = await queryFulfilled;
         dispatch(setTemplateSummaryId(data.templateSummaryId));
+      },
+      invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],
+    }),
+
+    saveTemplateCompletion: builder.mutation<
+      SaveTemplateCompletionResponse,
+      TemplateFormData
+    >({
+      async queryFn(data, _api, _extraOptions, fetchWithBQ) {
+        try {
+          const { templateSummary, gfcmSummary, lineItemsDetails } = data;
+
+          if (!templateSummary) {
+            return {
+              error: {
+                status: 400,
+                data: { message: "Template summary is required." },
+              },
+            };
+          }
+
+          const templateBody = toApiTemplateSummary(templateSummary);
+
+          const boundary = `batch_${Date.now()}`;
+          const changeset = `changeset_${Date.now()}`;
+          const parts: string[] = [];
+          let contentId = 1;
+
+          // === Start batch & changeset ===
+          parts.push(`--${boundary}`);
+          parts.push(`Content-Type: multipart/mixed;boundary=${changeset}`);
+          parts.push("");
+
+          // 1️⃣ TEMPLATE SUMMARY
+          const isNewTemplate = !templateSummary.xomuog_templatesummaryid;
+          const templateContentId = contentId;
+          parts.push(`--${changeset}`);
+          parts.push("Content-Type: application/http");
+          parts.push("Content-Transfer-Encoding: binary");
+          parts.push(`Content-ID: ${contentId}`);
+          parts.push("");
+          parts.push(
+            `${isNewTemplate ? "POST" : "PATCH"} ${
+              isNewTemplate
+                ? "xomuog_templatesummaries"
+                : `xomuog_templatesummaries(${templateSummary.xomuog_templatesummaryid})`
+            } HTTP/1.1`,
+          );
+          parts.push("Content-Type: application/json;type=entry");
+          parts.push("");
+          parts.push(JSON.stringify(templateBody));
+          parts.push("");
+          contentId++;
+
+          // 2️⃣ GFCM SUMMARIES
+          const gfcmContentIds: number[] = [];
+          for (const gfcm of gfcmSummary || []) {
+            const gfcmSummaryBody = toApiGFCMSummary(gfcm);
+
+            const isNewGfcm = !gfcm.xomuog_gfcmsummaryid;
+            parts.push(`--${changeset}`);
+            parts.push("Content-Type: application/http");
+            parts.push("Content-Transfer-Encoding: binary");
+            parts.push(`Content-ID: ${contentId}`);
+            parts.push("");
+            parts.push(
+              `${isNewGfcm ? "POST" : "PATCH"} ${
+                isNewGfcm
+                  ? "xomuog_gfcmsummaries"
+                  : `xomuog_gfcmsummaries(${gfcm.xomuog_gfcmsummaryid})`
+              } HTTP/1.1`,
+            );
+            parts.push("Content-Type: application/json;type=entry");
+            parts.push("");
+
+            // referenciar template si es nuevo
+            const gfcmBodyWithLink = isNewTemplate
+              ? {
+                  ...gfcmSummaryBody,
+                  "xomuog_templatesummaryid@odata.bind": `$${templateContentId}`,
+                }
+              : {
+                  ...gfcmSummaryBody,
+                  "xomuog_templatesummaryid@odata.bind": `/xomuog_templatesummaries(${templateSummary.xomuog_templatesummaryid})`,
+                };
+
+            parts.push(JSON.stringify(gfcmBodyWithLink));
+            parts.push("");
+            gfcmContentIds.push(contentId);
+            contentId++;
+          }
+
+          // 3️⃣ LINE ITEMS
+          for (const lineItem of lineItemsDetails || []) {
+            const sendLineItemDetail = toApiLineItemFormDetail(lineItem);
+
+            const gfcmIndex =
+              gfcmSummary?.findIndex(
+                gfcm =>
+                  gfcm.xomuog_gfcmsummaryid === lineItem.xomuog_gfcmsummaryid,
+              ) || 0;
+
+            const isNewDetail = !lineItem.xomuog_lineitemdetailid;
+            const relatedGfcmId =
+              gfcmContentIds[gfcmIndex] || gfcmContentIds[0];
+
+            parts.push(`--${changeset}`);
+            parts.push("Content-Type: application/http");
+            parts.push("Content-Transfer-Encoding: binary");
+            parts.push(`Content-ID: ${contentId}`);
+            parts.push("");
+            parts.push(
+              `${isNewDetail ? "POST" : "PATCH"} ${
+                isNewDetail
+                  ? "xomuog_lineitemdetails"
+                  : `xomuog_lineitemdetails(${lineItem.xomuog_lineitemdetailid})`
+              } HTTP/1.1`,
+            );
+            parts.push("Content-Type: application/json;type=entry");
+            parts.push("");
+
+            const lineItemBodyWithLink = gfcmSummary?.[gfcmIndex]
+              ?.xomuog_gfcmsummaryid
+              ? {
+                  ...sendLineItemDetail,
+                  "xomuog_gfcmsummaryid@odata.bind": `/xomuog_gfcmsummaries(${gfcmSummary[gfcmIndex].xomuog_gfcmsummaryid})`,
+                }
+              : {
+                  ...sendLineItemDetail,
+                  "xomuog_gfcmsummaryid@odata.bind": `$${relatedGfcmId}`,
+                };
+
+            parts.push(JSON.stringify(lineItemBodyWithLink));
+            parts.push("");
+            contentId++;
+          }
+
+          // === Close changeset & batch ===
+          parts.push(`--${changeset}--`);
+          parts.push(`--${boundary}--`);
+          const body = parts.join("\r\n");
+
+          const batchResult = await fetchWithBQ({
+            url: "$batch",
+            method: "POST",
+            headers: {
+              "Content-Type": `multipart/mixed;boundary=${boundary}`,
+              Prefer: "return=representation",
+            },
+            body,
+            responseHandler: "text", // 👈 prevent JSON parsing
+          });
+
+          if (batchResult.error) {
+            return { error: batchResult.error };
+          }
+
+          const responseText = batchResult.data as string;
+          if (!responseText.includes("HTTP/1.1 20")) {
+            return {
+              error: {
+                status: 500,
+                data: { message: "Batch request failed." },
+              },
+            };
+          }
+
+          return {
+            data: {
+              success: true,
+              templateSummaryId: templateSummary.xomuog_templatesummaryid ?? "",
+            },
+          };
+        } catch (e) {
+          return {
+            error: { status: 500, data: { message: "Batch save failed." } },
+          };
+        }
+      },
+      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
+        const { data } = await queryFulfilled;
+        if (data?.templateSummaryId) {
+          dispatch(setTemplateSummaryId(data.templateSummaryId));
+        }
       },
       invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],
     }),

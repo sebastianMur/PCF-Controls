@@ -131,6 +131,9 @@ export const TemplateCompletionTable: React.FC<TemplateCompletionTableProps> =
                               li.xomuog_gfcmsummaryid ===
                               gfcmSummary.xomuog_gfcmsummaryid,
                           )
+                          .sort((a, b) =>
+                            a.xomuog_name.localeCompare(b.xomuog_name),
+                          )
                           .map(detail => {
                             const item = templateData.lineItems.find(
                               li =>

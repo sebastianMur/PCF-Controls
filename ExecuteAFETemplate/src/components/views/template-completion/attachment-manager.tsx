@@ -9,7 +9,6 @@ import type { Attachment } from "@/types/template";
 import {
   Button,
   MessageBar,
-  // MessageBarActions,
   MessageBarBody,
   MessageBarTitle,
   Spinner,
@@ -27,7 +26,6 @@ import {
   Attach20Regular,
   AttachArrowRightFilled,
   Delete20Regular,
-  // Dismiss24Regular,
   Document20Regular,
 } from "@fluentui/react-icons";
 import type React from "react";
