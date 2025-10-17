@@ -38,6 +38,9 @@ export const templateSummarySchema = z.object({
   xomuog_subprojecttype: z.string(),
   xomuog_afeexecutebusinessunit: z.number().optional(),
   xomuog_projectteam: z.string().optional(),
+  xomuog_isfilereplaced: z.boolean().optional(),
+  xomuog_aferecordurl: z.string().optional(),
+  xomuog_afedocumentid: z.string().optional(),
 });
 
 export const attachmentSummarySchema = z

@@ -7,7 +7,7 @@ export const GFCMSummaryApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     getGFCMSummarys: builder.query<GFCMSummaryFormData[], string>({
       query: templateSummaryId =>
-        `xomuog_gfcmsummaries?$select=xomuog_gfcmsummaryid,_xomuog_gfcmid_value,xomuog_name,xomuog_total&$filter=_xomuog_templatesummaryid_value eq ${templateSummaryId}`,
+        `xomuog_gfcmsummaries?$select=xomuog_gfcmsummaryid,_xomuog_gfcmid_value,xomuog_name,xomuog_total,_xomuog_templatesummaryid_value&$filter=_xomuog_templatesummaryid_value eq ${templateSummaryId}`,
 
       transformResponse: (response: {
         value: D365GFCMSummary[];

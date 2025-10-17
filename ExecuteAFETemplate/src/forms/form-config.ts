@@ -18,7 +18,7 @@ import {
 import { recalculateAllTotals } from "@/utils/calculations";
 import { getTemplateSummaryRequiredFields } from "@/utils/functions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { type TemplateFormData, templateFormSchema } from "./form-schemas";
 
@@ -46,10 +46,10 @@ export const useGetDefaultValues = () => {
       if (tempSummaryId) {
         const [templateSummary, gfcmSummaries, lineItemDetails, attachments] =
           await Promise.all([
-            getTemplateSummaryFormData(templateSummaryId).unwrap(),
-            getGFCMsSummary(templateSummaryId).unwrap(),
-            getLineItemsDetails(templateSummaryId).unwrap(),
-            getAttachments(templateSummaryId).unwrap(),
+            getTemplateSummaryFormData(tempSummaryId).unwrap(),
+            getGFCMsSummary(tempSummaryId).unwrap(),
+            getLineItemsDetails(tempSummaryId).unwrap(),
+            getAttachments(tempSummaryId).unwrap(),
           ]);
 
         const requiredFieldsMessages = getTemplateSummaryRequiredFields(
@@ -73,7 +73,6 @@ export const useGetDefaultValues = () => {
       getGFCMsSummary,
       getLineItemsDetails,
       getTemplateSummaryFormData,
-      templateSummaryId,
       getAttachments,
     ],
   );
@@ -120,7 +119,6 @@ export const useGetDefaultValues = () => {
 
       try {
         // ** Save Existing Template Summary **
-
         const defaultValuesForAFECreation =
           await saveExistingTemplateSummary(templateSummaryId);
         if (
@@ -146,24 +144,19 @@ export const useGetDefaultValues = () => {
   return {
     getInitialTemplateValues,
     saveExistingTemplateSummary,
+    createNewTemplateSummary,
   };
 };
 
 export const useTemplateCompletionForm = () => {
   const { getInitialTemplateValues } = useGetDefaultValues();
+
   const methods = useForm<TemplateFormData>({
     resolver: zodResolver(templateFormSchema),
     shouldUnregister: false, // crucial for multi-step
     mode: "onChange",
     defaultValues: async () => await getInitialTemplateValues(),
   });
-
-  useEffect(() => {
-    (async () => {
-      const defaultValues = await getInitialTemplateValues();
-      methods.reset(defaultValues);
-    })();
-  }, [getInitialTemplateValues, methods.reset]);
 
   return methods;
 };

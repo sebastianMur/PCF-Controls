@@ -86,6 +86,9 @@ export const getTemplateSummaryRequiredFields = (
     xomuog_templatesummaryid: "Template Summary ID",
     xomuog_afeexecutebusinessunit: "Business Unit",
     xomuog_projectteam: "Project Team",
+    xomuog_isfilereplaced: "Is File Replaced",
+    xomuog_aferecordurl: "AFE Record URL",
+    xomuog_afedocumentid: "AFE Document ID",
   };
 
   // Define which fields are required

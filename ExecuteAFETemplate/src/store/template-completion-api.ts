@@ -20,7 +20,6 @@ import type {
   Unit,
 } from "../types/template";
 import { baseApi } from "./base-api";
-import { setTemplateSummaryId } from "./context-slice";
 interface SaveTemplateCompletionResponse {
   success: boolean;
   templateSummaryId: string;
@@ -145,15 +144,14 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           for (const gfcm of gfcmSummary || []) {
             const gfcmSummaryBody = toApiGFCMSummary(gfcm);
 
-            const isNewGfcm = !gfcm.xomuog_gfcmsummaryid;
             parts.push(`--${changeset}`);
             parts.push("Content-Type: application/http");
             parts.push("Content-Transfer-Encoding: binary");
             parts.push(`Content-ID: ${contentId}`);
             parts.push("");
             parts.push(
-              `${isNewGfcm ? "POST" : "PATCH"} ${
-                isNewGfcm
+              `${isNew ? "POST" : "PATCH"} ${
+                isNew
                   ? "xomuog_gfcmsummaries"
                   : `xomuog_gfcmsummaries(${gfcm.xomuog_gfcmsummaryid})`
               } HTTP/1.1`,
@@ -206,15 +204,14 @@ export const templateCompletionApi = baseApi.injectEndpoints({
             parts.push("Content-Type: application/json;type=entry");
             parts.push("");
 
-            const lineItemBodyWithLink = gfcmSummary?.[gfcmIndex]
-              ?.xomuog_gfcmsummaryid
+            const lineItemBodyWithLink = isNew
               ? {
                   ...sendLineItemDetail,
-                  "xomuog_gfcmsummaryid@odata.bind": `/xomuog_gfcmsummaries(${gfcmSummary[gfcmIndex].xomuog_gfcmsummaryid})`,
+                  "xomuog_gfcmsummaryid@odata.bind": `$${relatedGfcmId}`,
                 }
               : {
                   ...sendLineItemDetail,
-                  "xomuog_gfcmsummaryid@odata.bind": `$${relatedGfcmId}`,
+                  "xomuog_gfcmsummaryid@odata.bind": `/xomuog_gfcmsummaries(${gfcmSummary?.[gfcmIndex].xomuog_gfcmsummaryid})`,
                 };
 
             parts.push(JSON.stringify(lineItemBodyWithLink));
@@ -280,12 +277,6 @@ export const templateCompletionApi = baseApi.injectEndpoints({
           return {
             error: { status: 500, data: { message: "Batch save failed." } },
           };
-        }
-      },
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        const { data } = await queryFulfilled;
-        if (data?.templateSummaryId) {
-          dispatch(setTemplateSummaryId(data.templateSummaryId));
         }
       },
       invalidatesTags: ["gfcmSummary", "lineItemsDetail", "templateSummary"],

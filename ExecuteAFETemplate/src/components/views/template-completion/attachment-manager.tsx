@@ -69,6 +69,8 @@ export default function AttachmentManager({
     fileInputRef.current?.click();
   };
 
+  // const handleRevisionAttachment = () => {};
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ): Promise<void> => {

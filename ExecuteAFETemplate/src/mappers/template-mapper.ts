@@ -44,6 +44,9 @@ export const fromApiTemplateFormSummary = (
   xomuog_operator: "e90b53d3-2778-f011-b4cb-7ced8d1fc3c0",
   xomuog_afeexecutebusinessunit: record.xomuog_afeexecutebusinessunit,
   xomuog_projectteam: record._xomuog_projectteam_value,
+  xomuog_isfilereplaced: record.xomuog_isfilereplaced,
+  xomuog_aferecordurl: record.xomuog_aferecordurl,
+  xomuog_afedocumentid: record.xomuog_afedocumentid,
 });
 
 export const fromTemplateToTemplateSummary = (

@@ -122,7 +122,7 @@ export interface GFCMSummary {
 
 export interface D365GFCMSummary {
   xomuog_gfcmsummaryid: string;
-  _xomuog_xomuog_templatesummaryid_value: string;
+  _xomuog_templatesummaryid_value: string;
   _xomuog_gfcmid_value?: string;
   xomuog_name?: string;
   xomuog_total: number;
@@ -135,27 +135,27 @@ export interface SendGFCMSummary {
   xomuog_total: number;
 }
 
-export interface TemplateSummary {
-  xomuog_templatesummaryid: string;
-  xomuog_capexopex?: number;
-  xomuog_companycode?: string;
-  xomuog_costcenter?: string;
-  xomuog_descriptionscopeofwork?: string;
-  xomuog_engineer?: string;
-  exchangerate?: number;
-  xomuog_grandtotal: number;
-  xomuog_grandtotal_base?: number;
-  xomuog_landman?: string;
-  xomuog_mainprojecttype?: number;
-  xomuog_operatore?: string;
-  xomuog_projectdescription?: string;
-  xomuog_name?: string;
-  xomuog_projectnumber?: string;
-  xomuog_specialinstruction?: string;
-  xomuog_subprojecttype?: string;
-  xomuog_templateid?: string;
-  xomuog_wpnid?: string;
-}
+// export interface TemplateSummary {
+//   xomuog_templatesummaryid: string;
+//   xomuog_capexopex?: number;
+//   xomuog_companycode?: string;
+//   xomuog_costcenter?: string;
+//   xomuog_descriptionscopeofwork?: string;
+//   xomuog_engineer?: string;
+//   exchangerate?: number;
+//   xomuog_grandtotal: number;
+//   xomuog_grandtotal_base?: number;
+//   xomuog_landman?: string;
+//   xomuog_mainprojecttype?: number;
+//   xomuog_operatore?: string;
+//   xomuog_projectdescription?: string;
+//   xomuog_name?: string;
+//   xomuog_projectnumber?: string;
+//   xomuog_specialinstruction?: string;
+//   xomuog_subprojecttype?: string;
+//   xomuog_templateid?: string;
+//   xomuog_wpnid?: string;
+// }
 export interface D365TemplateSummary {
   xomuog_templatesummaryid: string;
   xomuog_capexopex?: number;
@@ -179,6 +179,9 @@ export interface D365TemplateSummary {
   statuscode: number;
   xomuog_afeexecutebusinessunit: number;
   _xomuog_projectteam_value: string;
+  xomuog_afedocumentid: string;
+  xomuog_aferecordurl: string;
+  xomuog_isfilereplaced?: boolean;
 }
 
 export interface SendTemplateSummary {

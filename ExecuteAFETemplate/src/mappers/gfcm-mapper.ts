@@ -17,7 +17,7 @@ export const fromApiGFCM = (record: D365GFCM): GFCM => ({
 export const fromApiGFCMSummary = (record: D365GFCMSummary): GFCMSummary => ({
   xomuog_gfcmsummaryid: record.xomuog_gfcmsummaryid,
   xomuog_gfcmid: record._xomuog_gfcmid_value,
-  xomuog_templatesummaryid: record._xomuog_xomuog_templatesummaryid_value,
+  xomuog_templatesummaryid: record._xomuog_templatesummaryid_value,
   xomuog_total: record.xomuog_total,
 });
 export const fromApiGFCMFormSummary = (
@@ -25,7 +25,7 @@ export const fromApiGFCMFormSummary = (
 ): GFCMSummaryFormData => ({
   xomuog_gfcmsummaryid: record.xomuog_gfcmsummaryid,
   xomuog_gfcmid: record._xomuog_gfcmid_value ?? "",
-  xomuog_templatesummaryid: record._xomuog_xomuog_templatesummaryid_value,
+  xomuog_templatesummaryid: record._xomuog_templatesummaryid_value,
   xomuog_total: record.xomuog_total,
   xomuog_name: record.xomuog_name ?? "",
 });

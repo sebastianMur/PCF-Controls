@@ -1,5 +1,6 @@
 import { TemplateCompletionTableContainer } from "@/components/table";
 import { SendForRevisionDialog } from "@/components/ui/confirmation-dialog";
+import { MoreOptions } from "@/components/ui/more-options";
 import { RequiredFieldModal } from "@/components/ui/required-fields-dialog";
 import { RevisionStatusDialog } from "@/components/ui/revision-status-dialog";
 import type { TemplateFormData } from "@/forms/form-schemas";
@@ -208,6 +209,9 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
                   {isLoadingSendForRevision ? "Sending..." : "Send Revision"}
                 </Button>
               )}
+              <MoreOptions
+                url={templateSummaryData.templateSummary?.xomuog_aferecordurl}
+              />
             </div>
           </div>
 

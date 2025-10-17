@@ -13,7 +13,7 @@ export const templateSummaryApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     getTemplateSummary: builder.query<TemplateSummaryFormData, string>({
       query: templateSummaryId =>
-        `xomuog_templatesummaries(${templateSummaryId})?$select=xomuog_templatesummaryid,xomuog_capexopex,xomuog_companycode,xomuog_costcenter,xomuog_descriptionscopeofwork,_xomuog_engineerid_value,exchangerate,xomuog_grandtotal,xomuog_grandtotal_base,_xomuog_landmanid_value,xomuog_mainprojecttype,_xomuog_operator_value,xomuog_projectdescription,xomuog_name,xomuog_projectnumber,xomuog_specialinstructions,xomuog_subprojecttype,_xomuog_templateid_value,_xomuog_wpnid_value,statuscode,xomuog_afeexecutebusinessunit,_xomuog_projectteam_value`,
+        `xomuog_templatesummaries(${templateSummaryId})?$select=xomuog_templatesummaryid,xomuog_capexopex,xomuog_companycode,xomuog_costcenter,xomuog_descriptionscopeofwork,xomuog_afedocumentid,xomuog_aferecordurl,xomuog_isfilereplaced,_xomuog_engineerid_value,exchangerate,xomuog_grandtotal,xomuog_grandtotal_base,_xomuog_landmanid_value,xomuog_mainprojecttype,_xomuog_operator_value,xomuog_projectdescription,xomuog_name,xomuog_projectnumber,xomuog_specialinstructions,xomuog_subprojecttype,_xomuog_templateid_value,_xomuog_wpnid_value,statuscode,xomuog_afeexecutebusinessunit,_xomuog_projectteam_value`,
 
       transformResponse: (
         response: D365TemplateSummary,
@@ -59,6 +59,7 @@ export const templateSummaryApi = baseApi.injectEndpoints({
         },
         body: JSON.stringify(record),
       }),
+      invalidatesTags: ["templateSummary"],
     }),
   }),
 });

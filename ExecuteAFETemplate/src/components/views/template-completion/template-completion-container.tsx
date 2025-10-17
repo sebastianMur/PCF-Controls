@@ -3,7 +3,7 @@ import type {
   TemplateFormData,
   TemplateSummaryFormData,
 } from "@/forms/form-schemas";
-import { useAppSelector } from "@/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks";
 import {
   fromTemplateToTemplateSummaryOnSave,
   toApiTemplateSummary,
@@ -21,6 +21,7 @@ import {
   selectTemplateId,
   selectTemplateSummaryId,
   selectWPNId,
+  setTemplateSummaryId,
 } from "@/store";
 import {
   useGetTemplateCompletionDataQuery,
@@ -38,12 +39,9 @@ import { STATUS_REASON } from "@/utils/constants";
 import { getTemplateSummaryRequiredFields } from "@/utils/functions";
 import { triggerNotifyOutputChange } from "@/utils/notifyOutputChange";
 import { MessageBar, Spinner } from "@fluentui/react-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { TemplateCompletionForm } from "./template-completion-form";
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-declare const Xrm: any;
 
 export default function TemplateCompletionContainer() {
   const styles = useTemplateCompletionContainerStyles();
@@ -60,6 +58,8 @@ export default function TemplateCompletionContainer() {
   const [openRevisionStatusDialog, setOpenRevisionStatusDialog] =
     useState(false);
   const wpnId = useAppSelector(selectWPNId);
+
+  const dispatch = useAppDispatch();
 
   const {
     data: templateData,
@@ -82,14 +82,14 @@ export default function TemplateCompletionContainer() {
   const [sendForRevision, { isLoading: isLoadingSendForRevision }] =
     useSendAFEForRevisionMutation();
 
-  const { saveExistingTemplateSummary } = useGetDefaultValues();
+  const { saveExistingTemplateSummary, createNewTemplateSummary } =
+    useGetDefaultValues();
 
   const { control, setValue, getValues, reset } =
     useFormContext<TemplateFormData>();
 
   const templateSummaryData = useWatch({ control }) as TemplateFormData;
-  // const isLocked =
-  //   templateSummaryData.templateSummary?.statuscode === STATUS_REASON.Sent;
+
   const regex = /^(?!\s*$)(?!(###\s##\s##|###\s###\s###)$).+/;
 
   const isProjectNumberDefined = regex.test(
@@ -105,11 +105,16 @@ export default function TemplateCompletionContainer() {
     skip: !isProjectNumberDefined,
   });
 
-  console.log(
-    "isProjectNumberDefined",
-    isProjectNumberDefined,
-    templateSummaryData.templateSummary?.xomuog_projectnumber,
-  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    (async () => {
+      if (!templateSummaryId && !templateSummaryData.isNew) {
+        const defaultValues = await createNewTemplateSummary();
+        reset(defaultValues);
+        setHasChanges(false);
+      }
+    })();
+  }, [templateSummaryId, reset]);
 
   const isValidStatusForRevision =
     status === "IREJ" || status === "IAPP" || status === "FAPP";
@@ -171,33 +176,39 @@ export default function TemplateCompletionContainer() {
   const handleSave = async (): Promise<void> => {
     try {
       const data = getValues();
-
-      // todo: Save Template first time
+      let templateSummaryIdUpdated: string = templateSummaryId;
+      // todo: Save Template first time And Revision
       if (
         !templateSummaryId ||
         (templateSummaryId &&
           data.templateSummary?.statuscode === STATUS_REASON.Sent)
       ) {
-        await saveTemplateCompletion(data).unwrap();
+        console.log(" data to save", data);
+        const saveData = await saveTemplateCompletion({
+          ...data,
+        }).unwrap();
+
+        templateSummaryIdUpdated = saveData.templateSummaryId;
+        dispatch(setTemplateSummaryId(saveData.templateSummaryId));
       }
 
       // todo: Save Template to send AFE Records
       if (
         templateSummaryId &&
-        templateSummaryId === data.templateSummary?.xomuog_templatesummaryid &&
         data.templateSummary?.statuscode === STATUS_REASON.Active
       ) {
-        const [templateSummaryData, wpn, template, attachments] =
-          await Promise.all([
+        const [templateSummary, wpn, template, attachments] = await Promise.all(
+          [
             getTemplateSummaryFormData(templateSummaryId).unwrap(),
             getWPN(wpnId).unwrap(),
             getTemplateFormData(templateId).unwrap(),
             getAttachments(templateSummaryId).unwrap(),
-          ]);
+          ],
+        );
 
         const fieldsToCheck = fromTemplateToTemplateSummaryOnSave(
           template,
-          { ...templateSummaryData },
+          { ...templateSummary },
           wpn,
         );
         const requiredFieldsMessages = getTemplateSummaryRequiredFields(
@@ -210,17 +221,23 @@ export default function TemplateCompletionContainer() {
           setOpenRequiredDialog(true);
           return;
         }
-        await saveTemplateCompletion({
+        const saveData = await saveTemplateCompletion({
           ...data,
           templateSummary: fieldsToCheck,
+          isNew: false,
         }).unwrap();
+
+        templateSummaryIdUpdated = saveData.templateSummaryId;
+        dispatch(setTemplateSummaryId(saveData.templateSummaryId));
       }
 
       triggerNotifyOutputChange();
+      const newTemplateFormValues = await saveExistingTemplateSummary(
+        templateSummaryIdUpdated,
+      );
+      console.log(" newTemplateFormValues", newTemplateFormValues);
 
-      const newTemplateFormValues =
-        await saveExistingTemplateSummary(templateSummaryId);
-      reset(newTemplateFormValues);
+      reset({ ...newTemplateFormValues });
       setHasChanges(false);
     } catch (error) {
       console.error("Failed to save template completion:", error);
@@ -243,7 +260,9 @@ export default function TemplateCompletionContainer() {
         templateSummaryId,
       }).unwrap();
 
-      setValue("templateSummary.xomuog_projectnumber", apiNumber);
+      const newTemplateFormValues =
+        await saveExistingTemplateSummary(templateSummaryId);
+      reset({ ...newTemplateFormValues });
       triggerNotifyOutputChange();
     } catch (error) {
       console.error("Failed to save template completion:", error);
