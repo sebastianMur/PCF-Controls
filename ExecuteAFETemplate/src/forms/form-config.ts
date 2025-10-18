@@ -7,6 +7,7 @@ import { useLazyGetGFCMSummarysQuery } from "@/services/gfcm-summary";
 import { useLazyGetLineItemsDetailsQuery } from "@/services/line-item-detail";
 import { useLazyGetLineItemQuery } from "@/services/line-items";
 import { useLazyGetNotesQuery } from "@/services/notes";
+import { useLazyGetOperatorQuery } from "@/services/operator";
 import { useLazyGetTemplateQuery } from "@/services/template";
 import { useLazyGetTemplateSummaryQuery } from "@/services/templateSummary";
 import { useLazyGetWPNQuery } from "@/services/wpn";
@@ -29,6 +30,7 @@ export const useGetDefaultValues = () => {
   const wpnId = useAppSelector(selectWPNId);
 
   const [getWPN] = useLazyGetWPNQuery();
+  const [getOperator] = useLazyGetOperatorQuery();
 
   const [getAttachments] = useLazyGetNotesQuery();
   // get template summary with template information
@@ -78,14 +80,19 @@ export const useGetDefaultValues = () => {
   );
 
   const createNewTemplateSummary = useCallback(async () => {
-    const [template, lineItems, gfcms] = await Promise.all([
+    const [template, lineItems, gfcms, operator] = await Promise.all([
       getTemplateFormData(templateId).unwrap(),
       getLineItems(templateId).unwrap(),
       getGFCMs(templateId).unwrap(),
+      getOperator().unwrap(),
     ]);
     const wpn = await getWPN(wpnId).unwrap();
 
-    const templateSummary = fromTemplateToTemplateSummary(template, wpn);
+    const templateSummary = fromTemplateToTemplateSummary(
+      template,
+      wpn,
+      operator,
+    );
     const gfcmSummaries = gfcms.map(gfcm =>
       fromGFCMtoGFCMSummary(gfcm, templateSummary.xomuog_templatesummaryid),
     );
@@ -103,7 +110,15 @@ export const useGetDefaultValues = () => {
     };
 
     return recalculateAllTotals(d365DefaultValues);
-  }, [getGFCMs, getLineItems, getTemplateFormData, templateId, wpnId, getWPN]);
+  }, [
+    getGFCMs,
+    getLineItems,
+    getTemplateFormData,
+    templateId,
+    wpnId,
+    getWPN,
+    getOperator,
+  ]);
 
   const getInitialTemplateValues =
     useCallback(async (): Promise<TemplateFormData> => {

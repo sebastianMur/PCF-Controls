@@ -205,11 +205,15 @@ export interface SendTemplateSummary {
 export interface Template {
   xomuog_templateid: string;
   xomuog_name: string;
+  xomuog_templatename: string;
+  xomuog_type: number;
 }
 export interface D365Template {
   "@odata.etag": 'W/"589803275"';
   xomuog_templateid: string;
   xomuog_name: string;
+  xomuog_templatename: string;
+  xomuog_type: number;
 }
 export interface SendTemplate {
   xomuog_name: string;
@@ -350,3 +354,17 @@ export default {
   getLineItemsByGFCM,
   getGFCMByTemplate,
 };
+
+export interface D365Operator {
+  xomuog_operatorid: string;
+  xomuog_name: string;
+  xomuog_number: string;
+  statuscode: number;
+}
+
+export interface Operator {
+  xomuog_operatorid: string;
+  xomuog_name: string;
+  xomuog_number: string;
+  statuscode: number;
+}

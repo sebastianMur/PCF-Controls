@@ -17,6 +17,11 @@ export const MAIN_PROJECT_TYPE = {
   CW: 529510001,
 };
 
+export const TEMPLATE_TYPE = {
+  RW: 529510000,
+  CW: 529510001,
+};
+
 export const AFE_STATUS_COLOR = {
   FAPP: "#16A34A", // ✅ Green — Final Approved
   IAPP: "#22C55E", // ✅ Light Green — Intermediate Approved
