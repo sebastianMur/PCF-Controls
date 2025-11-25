@@ -12,6 +12,7 @@ import { useLazyGetNotesQuery } from "@/services/notes";
 import { useLazyGetTemplateQuery } from "@/services/template";
 import {
   useGetAFEStatusQuery,
+  useLazyGetIsAnExistingUserQuery,
   useLazyGetTemplateSummaryQuery,
   useSendAFEForRevisionMutation,
   useUpdateTemplateSummaryMutation,
@@ -42,6 +43,7 @@ import { MessageBar, Spinner } from "@fluentui/react-components";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { TemplateCompletionForm } from "./template-completion-form";
+import { InvalidUserDialog } from "@/components/ui/invalid-user-dialog";
 
 export default function TemplateCompletionContainer() {
   const styles = useTemplateCompletionContainerStyles();
@@ -50,6 +52,9 @@ export default function TemplateCompletionContainer() {
   const [hasChanges, setHasChanges] = useState<boolean>(
     () => !templateSummaryId,
   );
+
+  const [IsUserInvalid, setIsUserInvalid] = useState<boolean>(false);
+  const [userInvalidMessage, setUserInvalidMessage] = useState<string | null>()
   const [wasRevisionFileReplaced, setWasRevisionFileReplaced] =
     useState<boolean>(false);
   const [localData, setLocalData] = useState<TemplateCompletionData | null>(
@@ -77,6 +82,9 @@ export default function TemplateCompletionContainer() {
   const [saveTemplateCompletion, { isLoading: isSaving }] =
     useSaveTemplateCompletionMutation();
   const [updateTemplateSummary] = useUpdateTemplateSummaryMutation();
+
+  const [isAnExistingUser,] =
+    useLazyGetIsAnExistingUserQuery();
 
   const [sendToAFEExecute, { isLoading: isSending }] =
     useSendToAFEExecuteMutation();
@@ -250,8 +258,20 @@ export default function TemplateCompletionContainer() {
     try {
       let apiNumber = "N/A"; // Placeholder for API number if needed
       const data = getValues();
+      if (!(data.templateSummary?.xomuog_engineerid && await isAnExistingUser(data.templateSummary?.xomuog_engineerid).unwrap())) {
+        setIsUserInvalid(true);
+        setUserInvalidMessage("The engineer selected does not exist in Execute.")
+        return;
+      }
+      if (!(data.templateSummary?.xomuog_landmanid && await isAnExistingUser(data.templateSummary?.xomuog_landmanid).unwrap())) {
+        setIsUserInvalid(true);
+        setUserInvalidMessage("The landman selected does not exist in Execute.")
+        return;
+      }
       if (templateSummaryId)
         apiNumber = await sendToAFEExecute(templateSummaryId).unwrap();
+
+
 
       await updateTemplateSummary({
         record: toApiTemplateSummary({
@@ -365,6 +385,8 @@ export default function TemplateCompletionContainer() {
         setWasRevisionFileReplaced={setWasRevisionFileReplaced}
         wasRevisionFileReplaced={wasRevisionFileReplaced}
       />
+
+      <InvalidUserDialog title="Invalid User" message={userInvalidMessage ?? ""} open={IsUserInvalid} onOpenChange={setIsUserInvalid} />
     </div>
   );
 }

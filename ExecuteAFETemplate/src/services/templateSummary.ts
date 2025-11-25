@@ -20,6 +20,18 @@ export const templateSummaryApi = baseApi.injectEndpoints({
       ): TemplateSummaryFormData => fromApiTemplateFormSummary(response),
     }),
 
+    getIsAnExistingUser: builder.query<boolean, string>({
+      query: (id) =>
+        `xomuog_isAnExistingUser(userId=@userId)?@userId=${id}`,
+
+      transformResponse: (response: {tracing:string,executeafeapiresponse:boolean}) => {
+        
+        console.log("🚀 ~ response.tracing:", response.tracing)
+        
+        return false
+      },
+    }),
+
     getAFEStatus: builder.query<string, string>({
       query: templateSummaryId =>
         `xomuog_getAFEStatus(templatesummaryid=@templatesummaryid)?@templatesummaryid=${templateSummaryId}`,
@@ -71,4 +83,5 @@ export const {
   useGetAFEStatusQuery,
   useLazyGetAFEStatusQuery,
   useSendAFEForRevisionMutation,
+  useLazyGetIsAnExistingUserQuery
 } = templateSummaryApi;
