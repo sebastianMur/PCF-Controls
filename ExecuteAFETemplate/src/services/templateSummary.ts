@@ -25,10 +25,8 @@ export const templateSummaryApi = baseApi.injectEndpoints({
         `xomuog_isAnExistingUser(userId=@userId)?@userId=${id}`,
 
       transformResponse: (response: {tracing:string,executeafeapiresponse:boolean}) => {
-        
-        console.log("🚀 ~ response.tracing:", response.tracing)
-        
-        return false
+               
+        return response.executeafeapiresponse
       },
     }),
 

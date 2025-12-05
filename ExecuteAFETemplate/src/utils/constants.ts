@@ -20,6 +20,7 @@ export const MAIN_PROJECT_TYPE = {
 export const TEMPLATE_TYPE = {
   RW: 529510000,
   CW: 529510001,
+  PA: 723710001
 };
 
 export const AFE_STATUS_COLOR = {

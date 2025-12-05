@@ -65,7 +65,7 @@ export const fromTemplateToTemplateSummary = (
   xomuog_wpnid: wpn.xomuog_wellproblemnotificationid,
   statuscode: STATUS_REASON.Active,
   xomuog_capexopex:
-    record.xomuog_type === TEMPLATE_TYPE.RW
+    record.xomuog_type === TEMPLATE_TYPE.RW || record.xomuog_type === TEMPLATE_TYPE.PA
       ? CAPEX_OPEX.Opex
       : record.xomuog_type === TEMPLATE_TYPE.CW
         ? CAPEX_OPEX.Capex
@@ -80,6 +80,8 @@ export const fromTemplateToTemplateSummary = (
       ? "REMEDIAL WORKOVER"
       : record.xomuog_type === TEMPLATE_TYPE.CW
         ? "CAPITAL WORKOVER"
+        : record.xomuog_type === TEMPLATE_TYPE.PA
+        ? "PLUG AND ABANDON"
         : "",
   xomuog_engineerid: wpn.xomuog_engineerid,
   xomuog_landmanid: wpn.xomuog_landman,
@@ -93,7 +95,7 @@ export const fromTemplateToTemplateSummaryOnSave = (
 ): TemplateSummaryFormData => ({
   ...templateSummary,
   xomuog_capexopex:
-    record.xomuog_type === TEMPLATE_TYPE.RW
+    record.xomuog_type === TEMPLATE_TYPE.RW || record.xomuog_type === TEMPLATE_TYPE.PA
       ? CAPEX_OPEX.Opex
       : record.xomuog_type === TEMPLATE_TYPE.CW
         ? CAPEX_OPEX.Capex
@@ -108,6 +110,8 @@ export const fromTemplateToTemplateSummaryOnSave = (
       ? "REMEDIAL WORKOVER"
       : record.xomuog_type === TEMPLATE_TYPE.CW
         ? "CAPITAL WORKOVER"
+        : record.xomuog_type === TEMPLATE_TYPE.PA
+        ? "PLUG AND ABANDON"
         : "",
   xomuog_engineerid: wpn.xomuog_engineerid,
   xomuog_landmanid: wpn.xomuog_landman,
