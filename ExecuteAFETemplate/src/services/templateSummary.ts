@@ -12,6 +12,7 @@ type APICall = { tracing: string; response: string };
 export const templateSummaryApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     getTemplateSummary: builder.query<TemplateSummaryFormData, string>({
+      providesTags : ["templateSummary"],
       query: templateSummaryId =>
         `xomuog_templatesummaries(${templateSummaryId})?$select=xomuog_templatesummaryid,xomuog_capexopex,xomuog_companycode,xomuog_costcenter,xomuog_descriptionscopeofwork,xomuog_afedocumentid,xomuog_aferecordurl,xomuog_isfilereplaced,_xomuog_engineerid_value,exchangerate,xomuog_grandtotal,xomuog_grandtotal_base,_xomuog_landmanid_value,xomuog_mainprojecttype,_xomuog_operator_value,xomuog_projectdescription,xomuog_name,xomuog_projectnumber,xomuog_specialinstructions,xomuog_subprojecttype,_xomuog_templateid_value,_xomuog_wpnid_value,statuscode,xomuog_afeexecutebusinessunit,_xomuog_projectteam_value`,
 
@@ -33,14 +34,24 @@ export const templateSummaryApi = baseApi.injectEndpoints({
     getAFEStatus: builder.query<string, string>({
       query: templateSummaryId =>
         `xomuog_getAFEStatus(templatesummaryid=@templatesummaryid)?@templatesummaryid=${templateSummaryId}`,
-
+        async onQueryStarted(_, { dispatch, queryFulfilled }) {
+    try {
+      await queryFulfilled; 
+      
+      dispatch(
+        templateSummaryApi.util.invalidateTags(['templateSummary']) 
+      );
+    } catch (err) {
+      console.error("Error in onQueryStarted:", err);}
+        },
       transformResponse: (response: APICall) => response.response,
     }),
 
     sendAFEForRevision: builder.mutation<
-      string, // ✅ Solo queremos el campo `response` (string)
-      { templatesummaryid: string } // Parámetro de entrada
+      string, 
+      { templatesummaryid: string } 
     >({
+      invalidatesTags: ["templateSummary"],
       query: body => ({
         url: "xomuog_SendAFEForRevision",
         method: "POST",

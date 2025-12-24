@@ -36,7 +36,7 @@ import {
   updateLineItemUnit,
   updateLineItemUnitPrice,
 } from "@/utils/calculations";
-import { STATUS_REASON } from "@/utils/constants";
+import { AFE_STATUS, STATUS_REASON } from "@/utils/constants";
 import { getTemplateSummaryRequiredFields } from "@/utils/functions";
 import { triggerNotifyOutputChange } from "@/utils/notifyOutputChange";
 import { MessageBar, Spinner } from "@fluentui/react-components";
@@ -126,8 +126,7 @@ export default function TemplateCompletionContainer() {
     })();
   }, [templateSummaryId, reset]);
 
-  const isValidStatusForRevision =
-    status === "IREJ" || status === "IAPP" || status === "FAPP";
+  const isValidStatusForRevision =["Internally Rejected","Internally Approved","Fully Approved"].includes(status ?? "");
 
   const isLoadingRevisionStatus = isRefetching || isLoadingStatus;
 
@@ -295,7 +294,7 @@ export default function TemplateCompletionContainer() {
     try {
       const sts = await refetch().unwrap();
 
-      const isValidStatus = sts === "IREJ" || sts === "IAPP" || sts === "FAPP";
+      const isValidStatus = sts === AFE_STATUS.IREJ.display || sts === AFE_STATUS.IAPP.display || sts === AFE_STATUS.FAPP.display;
       if (!isValidStatus) {
         setOpenRevisionStatusDialog(true);
         return;

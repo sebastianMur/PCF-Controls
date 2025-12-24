@@ -23,15 +23,17 @@ export const TEMPLATE_TYPE = {
   PA: 723710001
 };
 
-export const AFE_STATUS_COLOR = {
-  FAPP: "#16A34A", // ✅ Green — Final Approved
-  IAPP: "#22C55E", // ✅ Light Green — Intermediate Approved
-  IHLD: "#FACC15", // 🟡 Yellow — On Hold
-  IREJ: "#DC2626", // ❌ Red — Intermediate Rejected
-  PREJ: "#B91C1C", // ❌ Darker Red — Preliminary Rejected
-  REL: "#0284C7", // 📦 Blue — Released
-  REV: "#2563EB", // 🔵 Blue — Under Review
-  ROUTED: "#3B82F6", // 🔵 Blue — Routed for Approval
-  SUP: "#0EA5E9", // 🟦 Sky Blue — Submitted / Supported
-  UNREL: "#F97316", // 🟠 Orange — Unreleased / Pending
+export const AFE_STATUS = {
+  FAPP: {color:"#16A34A",display:"Fully Approved"}, 
+  IAPP: {color:"#22C55E",display:"Internally Approved"},
+  IHLD: {color:"#FACC15",display:"Internally Held"}, 
+  IREJ: {color:"#DC2626",display:"Internally Rejected"},
+  PREJ: {color:"#B91C1C",display:"Partner Rejected"}, 
+  REL: {color:"#0284C7",display:"Released for Approval"}, 
+  REV: {color:"#2563EB",display:"Revised"}, 
+  ROUTED: {color:"#3B82F6",display:"Routed for Review"}, 
+  SUP: {color:"#0EA5E9",display:"Supplemented"}, 
+  UNREL: {color:"#F97316",display:"Unreleased"},
 } as const;
+
+

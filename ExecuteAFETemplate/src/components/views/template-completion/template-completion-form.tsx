@@ -6,7 +6,7 @@ import { RevisionStatusDialog } from "@/components/ui/revision-status-dialog";
 import type { TemplateFormData } from "@/forms/form-schemas";
 import { useFormStyles } from "@/styles/template-completion-form";
 import type { TemplateCompletionData, Unit } from "@/types/template";
-import { AFE_STATUS_COLOR, STATUS_REASON } from "@/utils/constants";
+import { AFE_STATUS, STATUS_REASON } from "@/utils/constants";
 import { formatCurrency } from "@/utils/functions";
 import {
   Badge,
@@ -155,9 +155,19 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
                       appearance="filled"
                       style={{
                         backgroundColor:
-                          AFE_STATUS_COLOR?.[
-                            status as keyof typeof AFE_STATUS_COLOR
-                          ] || "#6B7280",
+                          (
+                            Object.keys(AFE_STATUS).find(
+                              (key) =>
+                                AFE_STATUS[key as keyof typeof AFE_STATUS]?.display === status
+                            )
+                              ? AFE_STATUS[
+                                  Object.keys(AFE_STATUS).find(
+                                    (key) =>
+                                      AFE_STATUS[key as keyof typeof AFE_STATUS]?.display === status
+                                  ) as keyof typeof AFE_STATUS
+                                ]?.color
+                              : "#6B7280"
+                          ),
                         marginRight: 8,
                       }}
                       className={styles.badge}
