@@ -24,6 +24,7 @@ import {
 } from "@fluentui/react-icons";
 import type { FC } from "react";
 import AttachmentManager from "./attachment-manager";
+import { AFECreationDialog } from "@/components/ui/afe-creation-dialog";
 
 type TemplateCompletionProps = {
   templateData: TemplateCompletionData;
@@ -52,10 +53,13 @@ type TemplateCompletionProps = {
   openRequiredFieldsDialog: boolean;
   setOpenRequiredDialog: (open: boolean) => void;
   requiredFieldsMessages: string[];
+  warningMessages: string[];
   setOpenRevisionStatusDialog: (open: boolean) => void;
   openRevisionStatusDialog: boolean;
   setWasRevisionFileReplaced: (wasReplaced: boolean) => void;
   wasRevisionFileReplaced?: boolean;
+  openSendingDialog: boolean;
+  setOpenSendingDialog: (open: boolean) => void;
 };
 export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   templateData,
@@ -63,6 +67,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   hasChanges,
   handleSave,
   handleSendingAFEExecute,
+
   isSending,
   isSaving,
   handleQuantityChange,
@@ -80,10 +85,13 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   openRevisionStatusDialog,
   setOpenRequiredDialog,
   setOpenRevisionStatusDialog,
+  warningMessages,
   requiredFieldsMessages,
   setOpenRevisionDialog,
   isLoadingSendForRevision,
   setWasRevisionFileReplaced,
+  openSendingDialog,
+  setOpenSendingDialog,
 }) => {
   const styles = useFormStyles();
 
@@ -201,7 +209,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
                 <Button
                   appearance="primary"
                   icon={<SendColor />}
-                  onClick={handleSendingAFEExecute}
+                  onClick={()=>setOpenSendingDialog(true)}
                   disabled={isSending || requiredFieldsMessages.length > 0}
                 >
                   {isSending ? "Sending..." : "Send"}
@@ -265,6 +273,14 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
       <RevisionStatusDialog
         onOpenChange={setOpenRevisionStatusDialog}
         open={openRevisionStatusDialog}
+      />
+
+      <AFECreationDialog
+        onOpenChange={setOpenSendingDialog}
+        open={openSendingDialog}
+        handleSendingAFEExecute={handleSendingAFEExecute}
+        warningFields={warningMessages}
+        isSending={isSending}
       />
     </>
   );

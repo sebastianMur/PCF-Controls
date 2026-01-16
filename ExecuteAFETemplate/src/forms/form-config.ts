@@ -17,7 +17,7 @@ import {
   selectWPNId,
 } from "@/store";
 import { recalculateAllTotals } from "@/utils/calculations";
-import { getTemplateSummaryRequiredFields } from "@/utils/functions";
+import { getTemplateSummaryRequiredFields,  getTemplateSummaryWarnings } from "@/utils/functions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -59,12 +59,15 @@ export const useGetDefaultValues = () => {
           attachments.length > 0,
         );
 
+        const warningMessages = getTemplateSummaryWarnings(templateSummary);
+
         const d365DefaultValues = {
           templateSummary: templateSummary,
           gfcmSummary: gfcmSummaries,
           lineItemsDetails: lineItemDetails,
           isNew: false,
           requiredFieldsMessages,
+          warningMessages
         };
 
         return recalculateAllTotals(d365DefaultValues);
@@ -106,6 +109,7 @@ export const useGetDefaultValues = () => {
       lineItemsDetails: lineItemDetails,
       isNew: true,
       requiredFieldsMessages: [""],
+      warningMessages: [""],
       hasAttachments: false,
     };
 
@@ -129,6 +133,7 @@ export const useGetDefaultValues = () => {
         lineItemsDetails: [],
         isNew: false,
         requiredFieldsMessages: [],
+        warningMessages: [],
       };
       if (!templateId) return defaultValues;
 

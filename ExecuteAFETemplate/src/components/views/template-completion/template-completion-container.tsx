@@ -37,7 +37,7 @@ import {
   updateLineItemUnitPrice,
 } from "@/utils/calculations";
 import { AFE_STATUS, STATUS_REASON } from "@/utils/constants";
-import { getTemplateSummaryRequiredFields } from "@/utils/functions";
+import { getTemplateSummaryRequiredFields, getTemplateSummaryWarnings } from "@/utils/functions";
 import { triggerNotifyOutputChange } from "@/utils/notifyOutputChange";
 import { MessageBar, Spinner } from "@fluentui/react-components";
 import { useEffect, useState } from "react";
@@ -52,6 +52,7 @@ export default function TemplateCompletionContainer() {
   const [hasChanges, setHasChanges] = useState<boolean>(
     () => !templateSummaryId,
   );
+  const [openSendingDialog, setOpenSendingDialog] = useState(false);
 
   const [IsUserInvalid, setIsUserInvalid] = useState<boolean>(false);
   const [userInvalidMessage, setUserInvalidMessage] = useState<string | null>()
@@ -230,6 +231,14 @@ export default function TemplateCompletionContainer() {
           setOpenRequiredDialog(true);
           return;
         }
+
+
+        const warningMessages = getTemplateSummaryWarnings(fieldsToCheck);
+
+        if (warningMessages.length > 0) 
+          setValue("warningMessages", warningMessages);
+
+
         const saveData = await saveTemplateCompletion({
           ...data,
           templateSummary: fieldsToCheck,
@@ -379,10 +388,13 @@ export default function TemplateCompletionContainer() {
         requiredFieldsMessages={
           templateSummaryData.requiredFieldsMessages || []
         }
+        warningMessages={templateSummaryData.warningMessages || []}
         setOpenRevisionStatusDialog={setOpenRevisionStatusDialog}
         openRevisionStatusDialog={openRevisionStatusDialog}
         setWasRevisionFileReplaced={setWasRevisionFileReplaced}
         wasRevisionFileReplaced={wasRevisionFileReplaced}
+        openSendingDialog={openSendingDialog}
+        setOpenSendingDialog={setOpenSendingDialog}
       />
 
       <InvalidUserDialog title="Invalid User" message={userInvalidMessage ?? ""} open={IsUserInvalid} onOpenChange={setIsUserInvalid} />

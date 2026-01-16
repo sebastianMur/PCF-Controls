@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
 	<control namespace="ExecuteAFETemplate" constructor="ExecuteAFETemplateControl"
-		version="2025.12.1" display-name-key="ExecuteAFETemplateControl"
+		version="2026.01.5" display-name-key="ExecuteAFETemplateControl"
 		description-key="ExecuteAFETemplateControl description" control-type="virtual">
 		<external-service-usage enabled="false">
 		</external-service-usage>

@@ -89,6 +89,7 @@ export const getTemplateSummaryRequiredFields = (
     xomuog_isfilereplaced: "Is File Replaced",
     xomuog_aferecordurl: "AFE Record URL",
     xomuog_afedocumentid: "AFE Document ID",
+    xomuog_specialinstructions: "Special Instructions",
   };
 
   // Define which fields are required
@@ -122,5 +123,54 @@ export const getTemplateSummaryRequiredFields = (
   if (!hasAttachments) {
     missingMessages.push("Attachment is required.");
   }
+  return missingMessages;
+};
+
+
+
+export const getTemplateSummaryWarnings = (
+  templateSummary: TemplateSummaryFormData): string[] => {
+  // Map fields to human-friendly labels
+  const fieldLabels: Record<keyof TemplateSummaryFormData, string> = {
+    xomuog_companycode: "Company Code",
+    xomuog_costcenter: "Cost Center",
+    xomuog_descriptionscopeofwork: "Description / Scope of Work",
+    xomuog_projectdescription: "Project Description",
+    xomuog_subprojecttype: "Subproject Type",
+    xomuog_engineerid: "Engineer",
+    xomuog_landmanid: "Landman",
+    xomuog_operator: "Operator",
+    xomuog_capexopex: "Capex/Opex",
+    xomuog_mainprojecttype: "Main Project Type",
+    xomuog_projectnumber: "Project Number",
+    xomuog_grandtotal: "Grand Total",
+    xomuog_wpnid: "WPN",
+    statuscode: "Status",
+    xomuog_templateid: "Template ID",
+    xomuog_templatesummaryid: "Template Summary ID",
+    xomuog_afeexecutebusinessunit: "Business Unit",
+    xomuog_projectteam: "Project Team",
+    xomuog_isfilereplaced: "Is File Replaced",
+    xomuog_aferecordurl: "AFE Record URL",
+    xomuog_afedocumentid: "AFE Document ID",
+    xomuog_specialinstructions: "Special Instructions",
+  };
+
+  // Define which fields are for warning
+  const warningFields: (keyof TemplateSummaryFormData)[] = [
+    "xomuog_specialinstructions",
+  ];
+
+  // Check which required fields are empty
+  const missingMessages = warningFields
+    .filter(field => {
+      const value = templateSummary[field];
+      return (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "")
+      );
+    })
+    .map(field => `${fieldLabels[field]} cannot be edited after AFE creation.`);
   return missingMessages;
 };

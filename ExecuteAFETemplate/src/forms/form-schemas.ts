@@ -41,6 +41,7 @@ export const templateSummarySchema = z.object({
   xomuog_isfilereplaced: z.boolean().optional(),
   xomuog_aferecordurl: z.string().optional(),
   xomuog_afedocumentid: z.string().optional(),
+  xomuog_specialinstructions: z.string().optional(),
 });
 
 export const attachmentSummarySchema = z
@@ -58,6 +59,7 @@ export const templateFormSchema = z.object({
   lineItemsDetails: z.array(lineItemSchema).optional(),
   isNew: z.boolean(),
   requiredFieldsMessages: z.array(z.string()).optional(),
+  warningMessages: z.array(z.string()).optional(),
   afeStatus: z.string().optional(),
 });
 

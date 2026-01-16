@@ -51,6 +51,7 @@ export const fromApiTemplateFormSummary = (
   xomuog_isfilereplaced: record.xomuog_isfilereplaced,
   xomuog_aferecordurl: record.xomuog_aferecordurl,
   xomuog_afedocumentid: record.xomuog_afedocumentid,
+  xomuog_specialinstructions: record.xomuog_specialinstructions,
 });
 
 export const fromTemplateToTemplateSummary = (
@@ -101,7 +102,7 @@ export const fromTemplateToTemplateSummaryOnSave = (
         ? CAPEX_OPEX.Capex
         : undefined,
   xomuog_companycode: "XTO ENERGY INC RU4331",
-  xomuog_costcenter: wpn?.xomuog_sap_costcenter ?? "",
+  xomuog_costcenter: wpn?.xomuog_sap_costcenter ? wpn?.xomuog_sap_costcenter : templateSummary?.xomuog_costcenter ? templateSummary?.xomuog_costcenter : "",
   xomuog_descriptionscopeofwork: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
   xomuog_mainprojecttype: record.xomuog_type,
   xomuog_projectdescription: `${wpn.xomuog_wellidname ?? ""} ${wpn.xomuog_primaryjobtypename ?? ""} ${wpn.xomuog_secondaryjobtypename ?? ""}`,
@@ -119,6 +120,7 @@ export const fromTemplateToTemplateSummaryOnSave = (
   xomuog_projectteam: templateSummary.xomuog_projectteam || "",
   xomuog_afeexecutebusinessunit:
     templateSummary.xomuog_afeexecutebusinessunit || undefined,
+  xomuog_specialinstructions: templateSummary.xomuog_specialinstructions || "",
 });
 
 export const toApiTemplateSummary = (
