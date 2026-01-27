@@ -171,6 +171,6 @@ export const getTemplateSummaryWarnings = (
         (typeof value === "string" && value.trim() === "")
       );
     })
-    .map(field => `${fieldLabels[field]} cannot be edited after AFE creation.`);
+    .map(field => `${fieldLabels[field]} are currently blank, if not intended, please cancel and save before sending the AFE.`);
   return missingMessages;
 };
