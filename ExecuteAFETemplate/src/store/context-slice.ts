@@ -10,6 +10,7 @@ export const contextSlice = createSlice({
     templateSummaryId: "",
     templateId: "",
     wpnId: "",
+    paAlignment: false,
   },
   reducers: {
     setWPNId: (state, { payload }: PayloadAction<string>) => {
@@ -24,9 +25,13 @@ export const contextSlice = createSlice({
     setBaseUrl: (state, { payload }: PayloadAction<string>) => {
       state.baseUrl = payload;
     },
+    setPAAlignment: (state, { payload }: PayloadAction<boolean>) => {
+      state.paAlignment = payload;
+    },
     resetTemplateContext: state => {
       state.wpnId = "";
       state.templateSummaryId = "";
+      state.paAlignment = false; 
       // optionally reset other related data slices if needed
     },
   },
@@ -37,6 +42,7 @@ export const selectTemplateSummaryId = (state: RootState) =>
 export const selectWPNId = (state: RootState) => state.context.wpnId;
 export const selectTemplateId = (state: RootState) => state.context.templateId;
 export const selectBaseUrl = (state: RootState) => state.context.baseUrl;
+export const selectPAAlignment = (state: RootState) => state.context.paAlignment;
 
 export const {
   setTemplateSummaryId,
@@ -44,4 +50,5 @@ export const {
   setBaseUrl,
   setWPNId,
   resetTemplateContext,
+  setPAAlignment,
 } = contextSlice.actions;

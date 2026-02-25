@@ -3,6 +3,7 @@ import TemplateCompletionContainer from "@/components/views/template-completion/
 import {
   createStore,
   setBaseUrl,
+  setPAAlignment,
   setTemplateId,
   setTemplateSummaryId,
   setWPNId,
@@ -23,6 +24,7 @@ import type { IInputs, IOutputs } from "./generated/ManifestTypes";
 export class ExecuteAFETemplateControl
   implements ComponentFramework.ReactControl<IInputs, IOutputs>
 {
+  private OPTION_SET_PA_ALIGNMENT = 723710000;
   private store: ReturnType<typeof createStore>;
   private isLocal =
     window.location.hostname === "localhost" ||
@@ -58,6 +60,7 @@ export class ExecuteAFETemplateControl
     const { page } = context as unknown as ContextPage;
     const templateLookup = context.parameters.templateId.raw;
     const templateSummaryLookup = context.parameters.templateSummaryId.raw;
+    const paAlignment = context.parameters.paAlignment.raw;
 
     const templateId = getLookupId(templateLookup);
     const templateSummaryId = getLookupId(templateSummaryLookup);
@@ -79,6 +82,10 @@ export class ExecuteAFETemplateControl
         ),
       );
     }
+
+    const isPaAlignment = paAlignment !== this.OPTION_SET_PA_ALIGNMENT && templateLookup[0]?.name?.startsWith("PA") === true;
+
+    this.store.dispatch(setPAAlignment(isPaAlignment));
 
     return createElement(
       Provider,

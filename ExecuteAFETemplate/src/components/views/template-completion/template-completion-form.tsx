@@ -60,6 +60,7 @@ type TemplateCompletionProps = {
   wasRevisionFileReplaced?: boolean;
   openSendingDialog: boolean;
   setOpenSendingDialog: (open: boolean) => void;
+  paAlignment: boolean;
 };
 export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   templateData,
@@ -92,6 +93,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
   setWasRevisionFileReplaced,
   openSendingDialog,
   setOpenSendingDialog,
+  paAlignment
 }) => {
   const styles = useFormStyles();
 
@@ -210,7 +212,7 @@ export const TemplateCompletionForm: FC<TemplateCompletionProps> = ({
                   appearance="primary"
                   icon={<SendColor />}
                   onClick={()=>setOpenSendingDialog(true)}
-                  disabled={isSending || requiredFieldsMessages.length > 0}
+                  disabled={isSending || requiredFieldsMessages.length > 0 || paAlignment}
                 >
                   {isSending ? "Sending..." : "Send"}
                 </Button>

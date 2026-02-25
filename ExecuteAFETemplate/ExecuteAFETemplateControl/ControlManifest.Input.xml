@@ -13,6 +13,9 @@
 		<property name="templateSummaryId" display-name-key="Template Summary Lookup"
 			description-key="Template Summary Lookup" of-type="Lookup.Simple" usage="bound"
 			required="true" />
+
+	    <property name="paAlignment" display-name-key="PA Alignment" description-key="PA and Alignment field" of-type="OptionSet" usage="bound" required="true" />
+
 		<resources>
 			<code path="index.ts" order="1" />
 			<platform-library name="React" version="16.14.0" />

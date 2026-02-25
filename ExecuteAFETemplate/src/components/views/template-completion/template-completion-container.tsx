@@ -19,6 +19,7 @@ import {
 } from "@/services/templateSummary";
 import { useLazyGetWPNQuery } from "@/services/wpn";
 import {
+  selectPAAlignment,
   selectTemplateId,
   selectTemplateSummaryId,
   selectWPNId,
@@ -49,6 +50,7 @@ export default function TemplateCompletionContainer() {
   const styles = useTemplateCompletionContainerStyles();
   const templateId = useAppSelector(selectTemplateId);
   const templateSummaryId = useAppSelector(selectTemplateSummaryId);
+  const paAlignment = useAppSelector(selectPAAlignment);
   const [hasChanges, setHasChanges] = useState<boolean>(
     () => !templateSummaryId,
   );
@@ -395,6 +397,7 @@ export default function TemplateCompletionContainer() {
         wasRevisionFileReplaced={wasRevisionFileReplaced}
         openSendingDialog={openSendingDialog}
         setOpenSendingDialog={setOpenSendingDialog}
+        paAlignment={paAlignment}
       />
 
       <InvalidUserDialog title="Invalid User" message={userInvalidMessage ?? ""} open={IsUserInvalid} onOpenChange={setIsUserInvalid} />
